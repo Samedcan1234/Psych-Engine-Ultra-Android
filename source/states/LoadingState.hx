@@ -11,6 +11,9 @@ import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets;
 import flixel.FlxState;
 
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
+
 import flash.media.Sound;
 
 import backend.Song;
@@ -30,6 +33,12 @@ import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
 #end
 
+#if cpp
+@:headerCode('
+#include <iostream>
+#include <thread>
+')
+#end
 class LoadingState extends MusicBeatState
 {
 	public static var loaded:Int = 0;
@@ -93,7 +102,8 @@ class LoadingState extends MusicBeatState
 		barBack.screenCenter(X);
 		barGroup.add(barBack);
 
-		bar = new FlxSprite(barBack.x + 5, barBack.y + 5).makeGraphic(1, 1, FlxColor.WHITE);
+		bar = new FlxSprite(barBack.x + 5, barBack.y + 5).makeGraphic(1, 1, 
+    ClientPrefs.data.petloadingscreen ? 0xFFff16d2 : FlxColor.WHITE);
 		bar.scale.set(0, 15);
 		bar.updateHitbox();
 		barGroup.add(bar);
@@ -144,7 +154,7 @@ class LoadingState extends MusicBeatState
 		bg.updateHitbox();
 		addBehindBar(bg);
 	
-		loadingText = new FlxText(520, 600, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
+		loadingText = new FlxText(520, 600, 400, Language.getPhrase('now_loading', 'Şimdi Yükleniyor', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
@@ -158,18 +168,50 @@ class LoadingState extends MusicBeatState
 		logo.y -= 40;
 		addBehindBar(logo);
 
-		#else // BASE GAME LOADING SCREEN
-		var bg = new FlxSprite().makeGraphic(1, 1, 0xFFCAFF4D);
-		bg.scale.set(FlxG.width, FlxG.height);
-		bg.updateHitbox();
-		bg.screenCenter();
-		addBehindBar(bg);
+		#else // PET LOADING SCREEN
+		var loadingImagePath:String = 'funkay';
+		if (ClientPrefs.data.petloadingscreen) {
+			var folderName:String = '';
+			switch (ClientPrefs.data.petloadingscreenimage.toUpperCase()) {
+				case 'V1':
+					folderName = 'V1';
+				case 'V2':
+					folderName = 'V2';
+				case 'V2U':
+					folderName = 'V2U';
+				default:
+					folderName = 'online';
+			}
+			var randomNum:Int = FlxG.random.int(1, 5);
+			loadingImagePath = 'pet/petscreens/' + folderName + '/loadingscreen' + randomNum;
+			trace('PET Loading Screen Path: ' + loadingImagePath);
+		}
 
-		funkay = new FlxSprite(0, 0).loadGraphic(Paths.image('funkay'));
-		funkay.antialiasing = ClientPrefs.data.antialiasing;
-		funkay.setGraphicSize(0, FlxG.height);
-		funkay.updateHitbox();
-		addBehindBar(funkay);
+		trace('Loading image: ' + loadingImagePath);
+		var funkayGraphic:BitmapData = Paths.image(loadingImagePath, null, false).bitmap;
+
+		if (funkayGraphic == null) {
+			trace('ERROR: funkayGraphic is null! Falling back to black background.');
+			var bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+			addBehindBar(bg);
+		} else {
+			trace('Image loaded successfully. Size: ' + funkayGraphic.width + 'x' + funkayGraphic.height);
+			
+			var scaledWidth:Int = Std.int(funkayGraphic.width * (FlxG.height / funkayGraphic.height));
+			var scaledHeight:Int = FlxG.height;
+			funkayGraphic.image.resize(scaledWidth, scaledHeight);
+
+			var funkay = new FlxSprite();
+			funkay.makeGraphic(FlxG.width, FlxG.height, funkayGraphic.getPixel32(0, 0), true, "_funkay_" + loadingImagePath);
+			funkay.graphic.bitmap.copyPixels(
+				funkayGraphic,
+				new Rectangle(0, 0, funkayGraphic.width, funkayGraphic.height),
+				new Point(FlxG.width / 2 - funkayGraphic.width / 2, 0)
+			);
+			funkay.antialiasing = ClientPrefs.data.antialiasing;
+			addBehindBar(funkay);
+			trace('Funkay sprite added.');
+		}
 		#end
 		super.create();
 
@@ -236,11 +278,11 @@ class LoadingState extends MusicBeatState
 			case 2:
 				dots = '...';
 		}
-		loadingText.text = Language.getPhrase('now_loading', 'Now Loading{1}', [dots]);
+		loadingText.text = Language.getPhrase('now_loading', 'Şimdi Yükleniyor{1}', [dots]);
 
 		if(!spawnedPessy)
 		{
-			if(!transitioning && (controls.ACCEPT || FlxG.touches.getFirst() != null && FlxG.touches.getFirst().justPressed))
+			if(!transitioning && controls.ACCEPT)
 			{
 				shakeMult = 1;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -406,7 +448,7 @@ class LoadingState extends MusicBeatState
 	{
 		#if MULTITHREADED_LOADING
 		// Due to the Main thread and Discord thread, we decrease it by 2.
-		var threadCount:Int = Std.int(Math.max(1, CoolUtil.getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
+		var threadCount:Int = Std.int(Math.max(1, getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
 		#else
 		var threadCount:Int = 1;
 		#end
@@ -618,7 +660,7 @@ class LoadingState extends MusicBeatState
 			{
 				for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam'))
 				{
-					for (file in Paths.readDirectory(subfolder))
+					for (file in FileSystem.readDirectory(subfolder))
 					{
 						if(file.endsWith(ext))
 						{
@@ -825,4 +867,15 @@ class LoadingState extends MusicBeatState
 
 		return null;
 	}
+	
+	#if cpp
+	@:functionCode('
+		return std::thread::hardware_concurrency();
+    	')
+	@:noCompletion
+    	public static function getCPUThreadsCount():Int
+    	{
+        	return -1;
+    	}
+    	#end
 }

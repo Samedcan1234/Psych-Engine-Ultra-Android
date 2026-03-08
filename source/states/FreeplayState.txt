@@ -203,6 +203,8 @@ class FreeplayState extends MusicBeatState
     // MÜZİK PLAYER & VİSUALİZER
     // ═══════════════════════════════════════════════════════════════
     var player:MusicPlayer;
+    var waveformBars:Array<FlxSprite> = [];
+    var waveformPanel:FlxSprite;
 
     // ═══════════════════════════════════════════════════════════════
     // MISSING TEXT
@@ -776,6 +778,29 @@ class FreeplayState extends MusicBeatState
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // WAVEFORM VİSUALİZER
+    // ═══════════════════════════════════════════════════════════════
+    function createWaveform()
+    {
+        var wfY = FlxG.height - 70;
+        waveformPanel = new FlxSprite(showcaseWidth + 10, wfY).makeGraphic(
+            FlxG.width - showcaseWidth - 20, 30, 0x33000000);
+        add(waveformPanel);
+
+        var barCount = 35;
+        var barW = Std.int((FlxG.width - showcaseWidth - 40) / barCount) - 1;
+
+        for (i in 0...barCount)
+        {
+            var bar = new FlxSprite(showcaseWidth + 15 + i * (barW + 1), wfY + 25).makeGraphic(
+                barW, 4, accentColor);
+            bar.alpha = 0.4;
+            add(bar);
+            waveformBars.push(bar);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // SEÇİM MENÜSÜ
     // ═══════════════════════════════════════════════════════════════
 	function createSelectionMenu()
@@ -800,14 +825,6 @@ class FreeplayState extends MusicBeatState
 		menuSongArtist = new FlxText(0, -500, 1, "", 1);
 		menuSongArtist.visible = false;
 		menuContainer.add(menuSongArtist);
-		
-		bottomBG = new FlxSprite(0, FlxG.height - 35).makeGraphic(FlxG.width, 35, FlxColor.BLACK);
-		bottomBG.alpha = 0.8;
-		add(bottomBG);
-
-		bottomText = new FlxText(50, FlxG.height - 28, FlxG.width - 100, "", 16);
-		bottomText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER);
-		add(bottomText);
 
 		menuScoreDisplay = new FlxText(0, -500, 1, "", 1);
 		menuScoreDisplay.visible = false;
@@ -1004,8 +1021,8 @@ class FreeplayState extends MusicBeatState
         ambientPulse += elapsed;
         breathingEffect += elapsed * 2;
 
-        if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
-			FlxG.sound.music.volume += 0.5 * elapsed;
+        if (FlxG.sound.music.volume < 0.7)
+            FlxG.sound.music.volume += 0.5 * elapsed;
 
         lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
         lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
@@ -1026,6 +1043,7 @@ class FreeplayState extends MusicBeatState
         // Ambient efektler
         updateAmbientEffects(elapsed);
 		updateBeatIcon(elapsed);
+        updateWaveform(elapsed);
 
         // Panel glow pulse
         if (showcasePanelGlow != null)
@@ -1376,7 +1394,15 @@ class FreeplayState extends MusicBeatState
 						FlxTween.tween(selIcon.scale, {x: 1, y: 1}, beatInterval * 0.5, {ease: FlxEase.quartOut});
 					}
 				}
-				
+
+				// Waveform panel flash
+				if (waveformPanel != null)
+				{
+					waveformPanel.alpha = 0.5;
+					FlxTween.cancelTweensOf(waveformPanel);
+					FlxTween.tween(waveformPanel, {alpha: 0.2}, beatInterval * 0.4);
+				}
+
 				// Skor paneli hafif pulse
 				if (scorePanelGlow != null)
 				{
@@ -1416,6 +1442,74 @@ class FreeplayState extends MusicBeatState
             if (orb.y > FlxG.height) orb.y = 5;
         }
     }
+
+	function updateWaveform(elapsed:Float)
+	{
+		var wfY = FlxG.height - 70;
+		var isPlaying = FlxG.sound.music != null && FlxG.sound.music.playing;
+		
+		// Gerçek ses seviyesini al
+		var masterVolume:Float = isPlaying ? FlxG.sound.music.volume : 0;
+		
+		// Vocal amplitude ekle (varsa)
+		var vocalAmp:Float = 0;
+		if (vocals != null && vocals.playing)
+			vocalAmp = vocals.volume * 0.5;
+
+		for (i in 0...waveformBars.length)
+		{
+			var bar = waveformBars[i];
+			var height = 4.0;
+
+			if (isPlaying)
+			{
+				var musicTime = FlxG.sound.music.time / 1000.0;
+				
+				// Her bar için farklı frekans bandı simüle et
+				var band:Float = i / waveformBars.length; // 0.0 → 1.0
+				
+				// Düşük frekans (bas) - sol taraf
+				var lowFreq  = Math.abs(Math.sin(musicTime * 3.5  + i * 0.25)) * (1.0 - band * 0.6);
+				// Orta frekans (vokal) - orta
+				var midFreq  = Math.abs(Math.sin(musicTime * 7.0  + i * 0.45 + 1.2)) * 0.8;
+				// Yüksek frekans (tiz) - sağ taraf
+				var highFreq = Math.abs(Math.sin(musicTime * 14.0 + i * 0.65 + 2.4)) * band * 0.7;
+				
+				// Vocal varsa orta frekansı artır
+				var vocalBoost = vocalAmp * Math.abs(Math.sin(musicTime * 9.0 + i * 0.35));
+				
+				var combined = (lowFreq + midFreq + highFreq + vocalBoost) / 3.0;
+				
+				// Gerçek ses seviyesiyle çarp — şarkı sessizse barlar küçülür
+				height = 4 + combined * 38 * masterVolume;
+
+				// BPM beat vurgusu (mevcut)
+				var bpm:Float = (PlayState.SONG != null && PlayState.SONG.bpm > 0) ? PlayState.SONG.bpm : 100;
+				var beatInterval = 60.0 / bpm;
+				var beatPhase = (musicTime % beatInterval) / beatInterval;
+
+				if (beatPhase < 0.12)
+				{
+					// Beat vurduğunda bas barları (sol) daha çok zıplasın
+					var beatBoost = (1.0 - beatPhase / 0.12) * 12.0 * (1.0 - band * 0.8);
+					height += beatBoost * masterVolume;
+				}
+
+				// Renk: ses seviyesine göre accent → beyaz
+				bar.color = (masterVolume > 0.7) ? FlxColor.WHITE : accentColor;
+			}
+			else
+			{
+				// Idle: çok küçük breathing
+				height = 4 + Math.abs(Math.sin(ambientPulse * 1.2 + i * 0.3)) * 5;
+				bar.color = accentColor;
+			}
+
+			bar.scale.y = height / 4;
+			bar.y = wfY + 25 - height;
+			bar.alpha = 0.25 + Math.abs(Math.sin(ambientPulse + i * 0.2)) * 0.2;
+		}
+	}
 
     function updateGrade()
     {
@@ -1933,14 +2027,9 @@ class FreeplayState extends MusicBeatState
         if (curSelected >= 0) _updateSongLastDifficulty();
         if (playSound) FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 		
-		var unknownImg = Paths.image('unknownMod');
-		if (unknownImg != null) {
-			showcaseIcon.loadGraphic(unknownImg);
-			
-			// HATALI KISIM BURASIYDI: unknownImg yerine showcaseIcon yazıyoruz
-			showcaseIcon.setGraphicSize(120, 120);
-			showcaseIcon.updateHitbox();
-		}
+		showcaseIcon.loadGraphic(Paths.image('unknownMod'));
+		showcaseIcon.setGraphicSize(120, 120);
+		showcaseIcon.updateHitbox();
 
         if (curSelected == -1)
         {
