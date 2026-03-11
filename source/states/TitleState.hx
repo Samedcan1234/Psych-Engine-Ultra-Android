@@ -12,6 +12,13 @@ import haxe.Json;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+// TWEEN
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+
+#if VIDEOS_ALLOWED
+import objects.VideoSprite;
+#end
 
 import shaders.ColorSwap;
 
@@ -40,6 +47,10 @@ class TitleState extends MusicBeatState
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
+	
+	// P.E.T INTRO
+	public static var inGame:Bool = false;
+	var skipVideoText:FlxText;
 
 	public static var initialized:Bool = false;
 
@@ -55,6 +66,9 @@ class TitleState extends MusicBeatState
 	var curWacky:Array<String> = [];
 
 	var wackyImage:FlxSprite;
+	
+	// LOGO ANİMASYONU İÇİN KONTROL
+	var logoTweenFinished:Bool = false;
 
 	#if TITLE_SCREEN_EASTER_EGG
 	final easterEggKeys:Array<String> = [
@@ -118,7 +132,50 @@ class TitleState extends MusicBeatState
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
+	
+	function startCutscenesIn()
+	{
+		trace("=== startCutscenesIn called ===");
+		trace("inGame: " + inGame);
+		trace("initialized: " + initialized);
+		#if VIDEOS_ALLOWED
+		trace("VIDEOS_ALLOWED is defined");
+		if (ClientPrefs.data.disableIntroVideo) {
+			trace("disableIntroVideo is TRUE, skipping video");
+			startIntro();
+			return;
+		}
+		trace("Starting video...");
+		startVideo('pet');
+		#else
+		trace("VIDEOS_ALLOWED is NOT defined");
+		startIntro();
+		#end
+	}
 
+	function startCutscenesOut()
+	{
+		inGame = true;
+		startIntro();
+	}
+	
+	#if VIDEOS_ALLOWED
+	var currentVideo:VideoSprite = null;
+	#end
+	
+	public function videoEnd()
+	{
+		trace("videoEnd() called!");
+
+		if(currentVideo != null) {
+			currentVideo.finishCallback = null;
+			currentVideo.destroy();
+			currentVideo = null;
+		}
+
+		startCutscenesOut();
+	}
+	
 	function startIntro()
 	{
 		persistentUpdate = true;
@@ -128,14 +185,14 @@ class TitleState extends MusicBeatState
 		loadJsonData();
 		#if TITLE_SCREEN_EASTER_EGG easterEggData(); #end
 		Conductor.bpm = musicBPM;
-
+		
 		logoBl = new FlxSprite(logoPosition.x, logoPosition.y);
-		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
+		logoBl.loadGraphic(Paths.image('logoBumpin')); 
 		logoBl.antialiasing = ClientPrefs.data.antialiasing;
-
-		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
-		logoBl.animation.play('bump');
 		logoBl.updateHitbox();
+		
+		logoBl.alpha = 0;
+		logoBl.scale.set(0.1, 0.1);
 
 		gfDance = new FlxSprite(gfPosition.x, gfPosition.y);
 		gfDance.antialiasing = ClientPrefs.data.antialiasing;
