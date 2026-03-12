@@ -977,6 +977,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		#end
 		return '';
 	}
+	#end
 
 	function openFileSelectorLinux(option:Option, initialDir:String, fileExtension:String)
 	{
