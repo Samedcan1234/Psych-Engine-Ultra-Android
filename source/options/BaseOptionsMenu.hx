@@ -925,59 +925,32 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	function openFileSelectorAndroid(option:Option, fileExtension:String)
 	{
 		#if android
-		try
+		var browser = new objects.AndroidFileBrowser(fileExtension);
+
+		browser.onFileSelected = function(path:String)
 		{
-			var downloadDir = '/storage/emulated/0/Download';
-			var documentsDir = '/storage/emulated/0/Documents';
-			var musicDir = '/storage/emulated/0/Music';
-			
-			var selectedFile = '';
-			
-			if(fileExtension == '.sol')
+			option.setValue(path);
+
+			// fileSelectorGroup'taki görseli güncelle
+			for (fs in fileSelectorGroup)
 			{
-				selectedFile = findFileInDirectory(downloadDir, fileExtension);
-				if(selectedFile == '')
-					selectedFile = findFileInDirectory(documentsDir, fileExtension);
-			}
-			
-			if(selectedFile != '')
-			{
-				option.setValue(selectedFile);
-				if(option.type == FILE)
+				if (fs.optionID == curSelected)
 				{
-					var fileSelector:FileSelector = null;
-					for(fs in fileSelectorGroup)
-					{
-						if(fs.optionID == curSelected)
-						{
-							fileSelector = fs;
-							break;
-						}
-					}
-					if(fileSelector != null)
-						fileSelector.selectedPath = selectedFile;
-				}
-				option.change();
-				FlxG.sound.play(Paths.sound('confirmMenu'));
-			}
-			else
-			{
-				try
-				{
-					launchAndroidFileIntent(option, fileExtension);
-				}
-				catch(e:Dynamic)
-				{
-					FlxG.sound.play(Paths.sound('cancelMenu'));
-					trace('Android Intent hatasi: $e');
+					fs.selectedPath = path;
+					break;
 				}
 			}
-		}
-		catch(e:Dynamic)
+
+			option.change();
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+		};
+
+		browser.onCancel = function()
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			trace('Android dosya secici hatasi: $e');
-		}
+		};
+
+		openSubState(browser);
 		#end
 	}
 
@@ -1004,13 +977,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		#end
 		return '';
 	}
-
-	function launchAndroidFileIntent(option:Option, fileExtension:String)
-	{
-		trace('Android dosya secici: sistem tarafindan otomatik klasorler taranıyor');
-		FlxG.sound.play(Paths.sound('cancelMenu'));
-	}
-	#end
 
 	function openFileSelectorLinux(option:Option, initialDir:String, fileExtension:String)
 	{

@@ -14,6 +14,7 @@ enum OptionType {
 	PERCENT;
 	STRING;
 	KEYBIND;
+	FILE;
 }
 
 class Option
@@ -76,6 +77,9 @@ class Option
 				defaultValue = '';
 				defaultKeys = {gamepad: 'NONE', keyboard: 'NONE'};
 				keys = {gamepad: 'NONE', keyboard: 'NONE'};
+			
+			case FILE:
+				if(defaultValue == null) defaultValue = '';
 		}
 
 		try

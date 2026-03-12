@@ -19,10 +19,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 	function getOptions()
 	{
-		var goption:GameplayOption = new GameplayOption('Scroll Type', 'scrolltype', STRING, 'multiplicative', ["multiplicative", "constant"]);
+		var goption:GameplayOption = new GameplayOption('Ok Türü', 'scrolltype', STRING, 'multiplicative', ["multiplicative", "constant"]);
 		optionsArray.push(goption);
 
-		var option:GameplayOption = new GameplayOption('Scroll Speed', 'scrollspeed', FLOAT, 1);
+		var option:GameplayOption = new GameplayOption('Ok Hizi', 'scrollspeed', FLOAT, 1);
 		option.scrollSpeed = 2.0;
 		option.minValue = 0.35;
 		option.changeValue = 0.05;
@@ -40,7 +40,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(option);
 
 		#if FLX_PITCH
-		var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', FLOAT, 1);
+		var option:GameplayOption = new GameplayOption('Sarki Hizi', 'songspeed', FLOAT, 1);
 		option.scrollSpeed = 1;
 		option.minValue = 0.5;
 		option.maxValue = 3.0;
@@ -66,9 +66,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		optionsArray.push(new GameplayOption('Instakill on Miss', 'instakill', BOOL, false));
-		optionsArray.push(new GameplayOption('Practice Mode', 'practice', BOOL, false));
+		optionsArray.push(new GameplayOption('Iskada ani ölüm', 'instakill', BOOL, false));
+		optionsArray.push(new GameplayOption('Alistirma Modu', 'practice', BOOL, false));
 		optionsArray.push(new GameplayOption('Botplay', 'botplay', BOOL, false));
+		optionsArray.push(new GameplayOption('Karsi Taraf', 'opponent', BOOL, false));
 	}
 
 	public function getOptionByName(name:String)
@@ -84,8 +85,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 	public function new()
 	{
-		controls.isInSubstate = true;
-
 		super();
 		
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -137,9 +136,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			updateTextFrom(optionsArray[i]);
 		}
 
-		addTouchPad('LEFT_FULL', 'A_B_C');
-		addTouchPadCamera();
-
 		changeSelection();
 		reloadCheckboxes();
 	}
@@ -159,7 +155,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		{
 			close();
 			ClientPrefs.saveSettings();
-			controls.isInSubstate = false;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
 
@@ -276,7 +271,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					clearHold();
 			}
 
-			if(controls.RESET || touchPad.buttonC.justPressed)
+			if(controls.RESET)
 			{
 				for (i in 0...optionsArray.length)
 				{
@@ -308,11 +303,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		if(nextAccept > 0) {
 			nextAccept -= 1;
-		}
-
-		if (touchPad == null) { //sometimes it dosent add the tpad, hopefully this fixes it
-			addTouchPad('LEFT_FULL', 'A_B_C');
-			addTouchPadCamera();
 		}
 		super.update(elapsed);
 	}

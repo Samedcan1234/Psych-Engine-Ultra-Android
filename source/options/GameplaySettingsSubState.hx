@@ -4,68 +4,73 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 {
 	public function new()
 	{
-		title = Language.getPhrase('gameplay_menu', 'Gameplay Settings');
+		title = Language.getPhrase('gameplay_menu', 'Oynanis Ayarlari');
 		rpcTitle = 'Gameplay Settings Menu'; //for Discord Rich Presence
 
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
-		var option:Option = new Option('Downscroll', //Name
-			'If checked, notes go Down instead of Up, simple enough.', //Description
+		var option:Option = new Option('Asagi Oklar', //Name
+			'Aktif Edilirse, oyun-içi oklarınız, yukarıdan aşağıya alınır.', //Description
 			'downScroll', //Save data variable name
 			BOOL); //Variable type
 		addOption(option);
 
-		var option:Option = new Option('Middlescroll',
-			'If checked, your notes get centered.',
+		var option:Option = new Option('Orta Oklar',
+			'Aktif Edilirse, oyun-içi oklarınız ortalanır.',
 			'middleScroll',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Opponent Notes',
-			'If unchecked, opponent notes get hidden.',
+		var option:Option = new Option('Rakip Oklari',
+			'Aktif Edilmezse, rakibin oyun-içi okları gizlenir.',
 			'opponentStrums',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Ghost Tapping',
-			"If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.",
+		var option:Option = new Option('Hayalet Dokunma',
+			"Aktif Edilirse, gelen ok olmadığı halde tuşlara basarsanız Iska sayılmaz.",
 			'ghostTapping',
 			BOOL);
 		addOption(option);
 		
-		var option:Option = new Option('Auto Pause',
-			"If checked, the game automatically pauses if the screen isn't on focus.",
+		var option:Option = new Option('Otomatik Durdurma',
+			"Aktif Edilirse, ekranınız odaklanmadığında oyun otomatik olarak duraklatılır.",
 			'autoPause',
 			BOOL);
 		addOption(option);
 		option.onChange = onChangeAutoPause;
 
-		var option:Option = new Option('Pop Up Score',
-			"If unchecked, hitting notes won't make \"sick\", \"good\".. and combo popups\n(Useful for low end " + Main.platform + ").",
-			'popUpRating',
-			BOOL);
-		addOption(option);
-
-		var option:Option = new Option('Disable Reset Button',
-			"If checked, pressing Reset won't do anything.",
+		var option:Option = new Option('Reset Butonunu Kapat',
+			"Aktif Edilirse, Sıfırla tuşuna basmak hiçbir şey yapmaz.",
 			'noReset',
 			BOOL);
 		addOption(option);
-
-		var option:Option = new Option('Game Over Vibration',
-			"If checked, your device will vibrate at game over.",
-			'gameOverVibration',
+		
+		var option:Option = new Option('Eski Mod Destegi',
+			"Aktif Edilirse, Psych 0.73 Modlarının Çoğunu Sorunsuz Bir Şekilde Oynayabilmenizi Sağlar. (BU AYAR BETA SÜRÜMÜNDE)",
+			'oldModSupport',
 			BOOL);
 		addOption(option);
-		option.onChange = onChangeVibration;
+		
+		var option:Option = new Option('Xq Bok Yesin',
+			"Xq'nun Bok Yemesini sağlar, oyun sırasında xq harflerine basarak açılıp / kapatılabilir.",
+			'oldModSupport',
+			BOOL);
+		addOption(option);
+		
+		var option:Option = new Option('Otomatik Ram Bosaltimi',
+			"Kullanılmayan Assetlar (PNG / SES DOSYALARI VB.) 10 saniye içinde Ram Önbelleğinden Kaldırılır. Ram'i Düşük Cihazlar için Önerilir. (BU AYAR BETADA!)",
+			'autoramopt',
+			BOOL);
+		addOption(option);
 
-		var option:Option = new Option('Sustains as One Note',
-			"If checked, Hold Notes can't be pressed if you miss,\nand count as a single Hit/Miss.\nUncheck this if you prefer the old Input System.",
+		var option:Option = new Option('Tek Nota Sürdürme',
+			"Aktif Edilirse, Uzun Notaları kaçırırsanız basamazsınız ve tek bir Vuruş/Iska olarak sayılır. Eski Giriş Sistemini tercih ediyorsanız bu seçeneğin işaretini kaldırın.",
 			'guitarHeroSustains',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Hitsound Volume',
-			'Funny notes does \"Tick!\" when you hit them.',
+		var option:Option = new Option('Nota Sesi',
+			'Notalara Bastığınızda "Tik!" sesi çıkarır.',
 			'hitsoundVolume',
 			PERCENT);
 		addOption(option);
@@ -76,8 +81,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 
-		var option:Option = new Option('Rating Offset',
-			'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.',
+		var option:Option = new Option('Derecelendirme Ofseti',
+			'"Müq!" için ne kadar geç/erken vurmanız gerektiğini değiştirir. Daha yüksek değerler, daha geç vurmanız gerektiği anlamına gelir.',
 			'ratingOffset',
 			INT);
 		option.displayFormat = '%vms';
@@ -86,8 +91,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.maxValue = 30;
 		addOption(option);
 
-		var option:Option = new Option('Sick! Hit Window',
-			'Changes the amount of time you have\nfor hitting a "Sick!" in milliseconds.',
+		var option:Option = new Option('Müq! Vurusu',
+			'"Müq!" için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.',
 			'sickWindow',
 			FLOAT);
 		option.displayFormat = '%vms';
@@ -97,8 +102,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
-		var option:Option = new Option('Good Hit Window',
-			'Changes the amount of time you have\nfor hitting a "Good" in milliseconds.',
+		var option:Option = new Option('Iyi Vurusu',
+			'"İyi" derecesini elde etmek için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.',
 			'goodWindow',
 			FLOAT);
 		option.displayFormat = '%vms';
@@ -108,8 +113,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
-		var option:Option = new Option('Bad Hit Window',
-			'Changes the amount of time you have\nfor hitting a "Bad" in milliseconds.',
+		var option:Option = new Option('Kötü Vurusu',
+			'"Kötü" notu almak için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.',
 			'badWindow',
 			FLOAT);
 		option.displayFormat = '%vms';
@@ -119,8 +124,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
-		var option:Option = new Option('Safe Frames',
-			'Changes how many frames you have for\nhitting a note earlier or late.',
+		var option:Option = new Option('Güvenli Kareler',
+			'Bir notayı erken veya geç çalmak için kaç kareye sahip olduğunuzu değiştirir.',
 			'safeFrames',
 			FLOAT);
 		option.scrollSpeed = 5;
@@ -129,7 +134,59 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
+		var option:Option = new Option('Ayarlari içe Aktar',
+			'Bir funkin.sol dosyasını seçerek oyunun kayıt dosyasını değiştirebilirsiniz.',
+			'importSaveFile',
+			FILE);
+		option.options = ['.sol'];
+		addOption(option);
+		option.onChange = onChangeImportSaveFile;
+
 		super();
+	}
+
+	function onChangeImportSaveFile()
+	{
+		var filePath:String = ClientPrefs.data.importSaveFile;
+		if(filePath == null || filePath == '') return;
+
+		// Seçilen dosyayı oyun kayıt dosyası olarak kullan
+		try
+		{
+			if(sys.FileSystem.exists(filePath) && filePath.endsWith('.sol'))
+			{
+				// Mevcut kayıt dosyasını yedekle
+				var appDataPath:String = '';
+				#if windows
+				appDataPath = Sys.getEnv('APPDATA');
+				#else
+				appDataPath = Sys.getEnv('HOME');
+				#end
+				
+				if(appDataPath != null && appDataPath != '')
+				{
+					var psychPath:String = appDataPath + '/Psych Engine';
+					if(!sys.FileSystem.exists(psychPath))
+						sys.FileSystem.createDirectory(psychPath);
+					
+					var targetPath:String = psychPath + '/funkin.sol';
+					
+					// Dosyayı kopyala
+					var fileContent:String = sys.io.File.getContent(filePath);
+					sys.io.File.saveContent(targetPath, fileContent);
+					
+					FlxG.sound.play(Paths.sound('confirmMenu'));
+				}
+			}
+		}
+		catch(e:Dynamic)
+		{
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			trace('İçe Aktar hatası: $e');
+		}
+
+		// Reset değeri (UI'de gösterilmez)
+		ClientPrefs.data.importSaveFile = '';
 	}
 
 	function onChangeHitsoundVolume()
@@ -137,10 +194,4 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 
 	function onChangeAutoPause()
 		FlxG.autoPause = ClientPrefs.data.autoPause;
-
-	function onChangeVibration()
-	{
-		if(ClientPrefs.data.gameOverVibration)
-			lime.ui.Haptic.vibrate(0, 500);
-	}
 }

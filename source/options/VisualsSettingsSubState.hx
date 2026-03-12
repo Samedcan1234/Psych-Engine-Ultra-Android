@@ -41,8 +41,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 				ClientPrefs.data.noteSkin = ClientPrefs.defaultData.noteSkin; //Reset to default if saved noteskin couldnt be found
 
 			noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); //Default skin always comes first
-			var option:Option = new Option('Note Skins:',
-				"Select your prefered Note skin.",
+			var option:Option = new Option('Nota Kostümleri:',
+				"Tercih ettiğiniz Nota Kostümü varyasyonunu seçin.",
 				'noteSkin',
 				STRING,
 				noteSkins);
@@ -58,8 +58,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 				ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; //Reset to default if saved splashskin couldnt be found
 
 			noteSplashes.insert(0, ClientPrefs.defaultData.splashSkin); //Default skin always comes first
-			var option:Option = new Option('Note Splashes:',
-				"Select your prefered Note Splash variation.",
+			var option:Option = new Option('Nota Efekti:',
+				"Tercih ettiğiniz Nota Efektini seçin veya kapatın.",
 				'splashSkin',
 				STRING,
 				noteSplashes);
@@ -67,8 +67,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			option.onChange = onChangeSplashSkin;
 		}
 
-		var option:Option = new Option('Note Splash Opacity',
-			'How much transparent should the Note Splashes be.',
+		var option:Option = new Option('Nota Efekt Seffafligi',
+			'Nota Sıçramaları Efektleri ne kadar şeffaf (saydam) olmalıdır?\n%0 ayarı bunu devre dışı bırakır.',
 			'splashAlpha',
 			PERCENT);
 		option.scrollSpeed = 1.6;
@@ -79,39 +79,39 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = playNoteSplashes;
 
-		var option:Option = new Option('Hide HUD',
-			'If checked, hides most HUD elements.',
+		var option:Option = new Option('Arayüzü Gizle',
+			'Aktif edilirse, ekran göstergelerinin (HUD) çoğunu gizler.',
 			'hideHud',
 			BOOL);
 		addOption(option);
 		
-		var option:Option = new Option('Time Bar:',
-			"What should the Time Bar display?",
+		var option:Option = new Option('Zaman Bari:',
+			"Zaman Çubuğu neyi göstermelidir?",
 			'timeBarType',
 			STRING,
-			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
+			['Kalan Süre', 'Geçen Süre', 'Sarki Adi', 'Kapali']);
 		addOption(option);
 
-		var option:Option = new Option('Flashing Lights',
-			"Uncheck this if you're sensitive to flashing lights!",
+		var option:Option = new Option('Yanip / Sönen Isiklar',
+			"Yanıp sönen ışıklara karşı hassassanız bu seçeneğin işaretini kaldırın!",
 			'flashing',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Camera Zooms',
-			"If unchecked, the camera won't zoom in on a beat hit.",
+		var option:Option = new Option('Kamera Zoomlari',
+			"Aktif Edilmezse, kamera vuruşta yakınlaştırma yapmaz.",
 			'camZooms',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Score Text Grow on Hit',
-			"If unchecked, disables the Score text growing\neverytime you hit a note.",
+		var option:Option = new Option('Skor Yakinlastirmasi',
+			"Aktif Edilmezse, her nota vuruşunda skor metninin\nyakınlaşmasını devre dışı bırakır.",
 			'scoreZoom',
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Health Bar Opacity',
-			'How much transparent should the health bar and icons be.',
+		var option:Option = new Option('Can Bar Opakligi',
+			'Can Çubuğu ve Simgeler Ne Kadar Şeffaf Olmalı.',
 			'healthBarAlpha',
 			PERCENT);
 		option.scrollSpeed = 1.6;
@@ -121,47 +121,40 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 		
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
+		#if !mobile
+		var option:Option = new Option('FPS Sayaci',
+			'Aktif edilmezse, FPS Sayacını gizler.',
 			'showFPS',
 			BOOL);
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
-
-		#if native
-		var option:Option = new Option('VSync',
-			'If checked, Enables VSync fixing any screen tearing at the cost of capping the FPS to screen refresh rate.\n(Must restart the game to have an effect)',
-			'vsync',
-			BOOL);
-		option.onChange = onChangeVSync;
-		addOption(option);
 		#end
 		
-		var option:Option = new Option('Pause Music:',
-			"What song do you prefer for the Pause Screen?",
+		var option:Option = new Option('Durdurma Ekrani Muzigi:',
+			"Durdurma Ekranı İçin Hangi Şarkıyı Tercih Edersin?",
 			'pauseMusic',
 			STRING,
-			['None', 'Tea Time', 'Breakfast', 'Breakfast (Pico)']);
+			['Hiçbiri', 'Tea Time', 'Breakfast', 'Breakfast (Pico)']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
 		
 		#if CHECK_FOR_UPDATES
-		var option:Option = new Option('Check for Updates',
-			'On Release builds, turn this on to check for updates when you start the game.',
+		var option:Option = new Option('Güncellemeleri Kontrol Et',
+			'Aktif edilirse, oyunu başlattığınızda güncellemeleri kontrol eder.',
 			'checkForUpdates',
 			BOOL);
 		addOption(option);
 		#end
 
 		#if DISCORD_ALLOWED
-		var option:Option = new Option('Discord Rich Presence',
-			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
+		var option:Option = new Option('Discord Durumu',
+			"Aktif edilmezse, kazara veri sızıntılarını önlemek için Discord'daki Oynuyor Durumundan Uygulamayı gizler.",
 			'discordRPC',
 			BOOL);
 		addOption(option);
 		#end
 
-		var option:Option = new Option('Combo Stacking',
+		var option:Option = new Option('Kombo Stoklama',
 			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
 			'comboStacking',
 			BOOL);
@@ -294,14 +287,11 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		super.destroy();
 	}
 
+	#if !mobile
 	function onChangeFPSCounter()
 	{
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
 	}
-
-	#if native
-	function onChangeVSync()
-		lime.app.Application.current.window.vsync = ClientPrefs.data.vsync;
 	#end
 }
