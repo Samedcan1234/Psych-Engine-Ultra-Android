@@ -1,16 +1,16 @@
-package objects;
+package objects; // This MUST be the first line
 
 #if android
-import flixel.group.FlxGroup;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import flixel.math.FlxMath;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import mobile.backend.StorageUtil;
 
-/**
- * Android için oyun içi dosya tarayıcısı.
- * StorageUtil üzerinden erişilebilen dizinleri tarar,
- * bulunan dosyaları liste olarak gösterir.
- */
 class AndroidFileBrowser extends MusicBeatSubstate
 {
 	public var onFileSelected:String->Void;
@@ -22,13 +22,14 @@ class AndroidFileBrowser extends MusicBeatSubstate
 	var topBar:FlxSprite;
 	var titleTxt:FlxText;
 	var infoTxt:FlxText;
-	var listGroup:FlxTypedGroup<FlxText>;
+	
+	// CHANGED: Changed from FlxText to FlxSprite to allow highlights
+	var listGroup:FlxTypedGroup<FlxSprite>; 
 	var scrollBg:FlxSprite;
 
 	var files:Array<String> = [];
 	var curSelected:Int = 0;
 
-	// Taranacak dizinler
 	var searchDirs:Array<String> = [];
 
 	public function new(fileExtension:String = '.sol')
@@ -36,10 +37,9 @@ class AndroidFileBrowser extends MusicBeatSubstate
 		super();
 		this.fileExtension = fileExtension;
 
-		// StorageUtil'den dizinleri al
 		searchDirs = [
-			StorageUtil.getExternalStorageDirectory(),           // /sdcard/.PsychEngine/
-			StorageUtil.getStorageDirectory(),                   // app-specific external
+			StorageUtil.getExternalStorageDirectory(),
+			StorageUtil.getStorageDirectory(),
 			'/sdcard/Download/',
 			'/sdcard/Documents/',
 			'/storage/emulated/0/Download/',
@@ -53,14 +53,12 @@ class AndroidFileBrowser extends MusicBeatSubstate
 
 	function buildUI()
 	{
-		// Karartma
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xCC000000);
 		bg.scrollFactor.set();
 		bg.alpha = 0;
 		add(bg);
 		FlxTween.tween(bg, {alpha: 1}, 0.3, {ease: FlxEase.quartOut});
 
-		// Üst bar
 		topBar = new FlxSprite(0, -80).makeGraphic(FlxG.width, 80, 0xFF111111);
 		topBar.scrollFactor.set();
 		add(topBar);
@@ -76,12 +74,12 @@ class AndroidFileBrowser extends MusicBeatSubstate
 		infoTxt.scrollFactor.set();
 		add(infoTxt);
 
-		// Liste alanı arka planı
 		scrollBg = new FlxSprite(30, 90).makeGraphic(FlxG.width - 60, FlxG.height - 150, 0x88000000);
 		scrollBg.scrollFactor.set();
 		add(scrollBg);
 
-		listGroup = new FlxTypedGroup<FlxText>();
+		// CHANGED: Match the new Sprite type here
+		listGroup = new FlxTypedGroup<FlxSprite>(); 
 		add(listGroup);
 	}
 
@@ -103,13 +101,12 @@ class AndroidFileBrowser extends MusicBeatSubstate
 			}
 		}
 		#end
-		trace('AndroidFileBrowser: ${files.length} dosya bulundu.');
 	}
 
 	#if sys
 	function scanDirectory(path:String, depth:Int)
 	{
-		if (depth > 2) return; // Çok derin tarama yapma
+		if (depth > 2) return; 
 		try
 		{
 			var entries = sys.FileSystem.readDirectory(path);
@@ -131,7 +128,6 @@ class AndroidFileBrowser extends MusicBeatSubstate
 
 	function refreshList()
 	{
-		// Eski metinleri temizle
 		listGroup.clear();
 
 		if (files.length == 0)
@@ -144,7 +140,7 @@ class AndroidFileBrowser extends MusicBeatSubstate
 			return;
 		}
 
-		var visibleCount:Int = 8; // Ekranda gösterilecek satır
+		var visibleCount:Int = 8; 
 		var startY:Float = 100;
 		var rowH:Float = 60;
 
@@ -155,21 +151,18 @@ class AndroidFileBrowser extends MusicBeatSubstate
 		{
 			var shortName = haxe.io.Path.withoutDirectory(files[i]);
 			var row = new FlxText(50, startY + (i - startIdx) * rowH, FlxG.width - 100, shortName, 26);
-			row.setFormat(Paths.font('vcr.ttf'), 26,
-				i == curSelected ? FlxColor.WHITE : 0xFF888888,
-				LEFT);
+			row.setFormat(Paths.font('vcr.ttf'), 26, i == curSelected ? FlxColor.WHITE : 0xFF888888, LEFT);
 			row.scrollFactor.set();
+
 			if (i == curSelected)
 			{
-				// Seçili satır vurgusu
 				var highlight = new FlxSprite(30, row.y - 5).makeGraphic(FlxG.width - 60, 50, 0x44FFFFFF);
 				highlight.scrollFactor.set();
-				listGroup.add(highlight);
+				listGroup.add(highlight); // This will now work!
 			}
 			listGroup.add(row);
 		}
 
-		// Sayaç
 		var counter = new FlxText(0, FlxG.height - 80, FlxG.width, '${curSelected + 1} / ${files.length}', 22);
 		counter.setFormat(Paths.font('vcr.ttf'), 22, 0xFFAAAAAA, CENTER);
 		counter.scrollFactor.set();
@@ -201,7 +194,6 @@ class AndroidFileBrowser extends MusicBeatSubstate
 				closeWithAnimation(function() {
 					if (onFileSelected != null) onFileSelected(selected);
 				});
-				return;
 			}
 		}
 
