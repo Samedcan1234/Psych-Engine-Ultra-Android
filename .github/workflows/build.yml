@@ -58,20 +58,20 @@ jobs:
           restore-keys: |
             lime-${{ inputs.name }}-
 
-      - name: Cache Android NDK
+       - name: Cache Android NDK
         if: inputs.name == 'Android'
         id: cache-ndk
         uses: actions/cache@v4
         with:
-          path: ${{ runner.tool_cache }}/ndk/r21e
-          key: ndk-r21e
+          path: ${{ runner.tool_cache }}/ndk/r22b
+          key: ndk-r22b
 
       - name: Setup Android NDK
         if: inputs.name == 'Android' && steps.cache-ndk.outputs.cache-hit != 'true'
         id: setup-ndk
         uses: nttld/setup-ndk@main
         with:
-          ndk-version: r21e
+          ndk-version: r22b
           add-to-path: false
 
       - name: Restore NDK Path
@@ -79,7 +79,7 @@ jobs:
         id: restore-ndk
         run: |
           if [ "${{ steps.cache-ndk.outputs.cache-hit }}" == "true" ]; then
-            echo "ndk-path=${{ runner.tool_cache }}/ndk/r21e" >> $GITHUB_OUTPUT
+            echo "ndk-path=${{ runner.tool_cache }}/ndk/r22b" >> $GITHUB_OUTPUT
           else
             echo "ndk-path=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_OUTPUT
           fi
