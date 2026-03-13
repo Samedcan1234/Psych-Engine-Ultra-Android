@@ -265,7 +265,6 @@ class OptionsState extends MusicBeatState
 		//   A        → ACCEPT (seç)
 		//   B        → BACK  (geri)
 		//   C        → Mobil Kontrol Menüsü (MobileControlSelectSubState)
-		
 		addTouchPad('LEFT_FULL', 'A_B_C');
 
 		super.create();
@@ -922,12 +921,8 @@ class OptionsState extends MusicBeatState
 		if (controls.UI_UP_P)    changeGridSelection( 0,-1);
 		if (controls.UI_DOWN_P)  changeGridSelection( 0, 1);
 
-		var cPressedState:Bool = false;
-		if (touchPad != null && touchPad.buttonC != null && touchPad.buttonC.justPressed) {
-			cPressedState = true;
-		}
-
-		if (cPressedState || (FlxG.keys.justPressed.CONTROL && controls.mobileC))
+		// ── C butonu / CTRL → Mobil Kontrol Menüsü ───────────────
+		if (touchPad.buttonC.justPressed || (FlxG.keys.justPressed.CONTROL && controls.mobileC))
 		{
 			persistentUpdate = false;
 			removeTouchPad();

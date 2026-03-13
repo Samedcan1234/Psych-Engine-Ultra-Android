@@ -46,8 +46,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	var glowEffect:FlxSprite;
 	var bgDarken:FlxSprite;
 	
-	var cPressed:Bool = false;
-	
 	// Animation
 	var animTimer:Float = 0;
 	var pulseTimer:Float = 0;
@@ -579,13 +577,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 						holdTime = 0;
 					}
 			}
-			
-			var cPressed:Bool = false;
-			if (touchPad != null && touchPad.buttonC != null && touchPad.buttonC.justPressed) {
-				cPressed = true;
-			}
 
-			if(controls.RESET || cPressed)
+			if(controls.RESET || touchPad.buttonC.justPressed)
 			{
 				var leOption:Option = optionsArray[curSelected];
 				if(leOption.type != KEYBIND)

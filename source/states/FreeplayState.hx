@@ -846,6 +846,11 @@ class FreeplayState extends MusicBeatState
         bottomText = new FlxText(50, FlxG.height - 28, FlxG.width - 100, "", 16);
         bottomText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER);
         add(bottomText);
+		
+		bottomString = controls.mobileC
+			? "A: Seç  B: Geri  X: Önizle  Y: Kategori  Z: Ara"
+			: "ENTER: Seç  ESC: Geri  SPACE: Önizle  TAB: Kategori  F: Ara";
+		bottomText.text = bottomString;
 
         menuScoreDisplay = new FlxText(0, -500, 1, "", 1);
         menuScoreDisplay.visible = false;

@@ -90,13 +90,14 @@ class MusicPlayer extends FlxGroup
 			return;
 		}
 
-		var songName:String = instance.songs[FreeplayState.curSelected].songName;
+		// FIX: curSelected artık private, instance üzerinden erişiyoruz
+		var songName:String = instance.songs[instance.lerpSelected < 0 ? 0 : Math.round(instance.lerpSelected)].songName;
+		// Daha güvenli: direkt curSelected'a @:access ile erişiyoruz
+		// ama lerpSelected float olduğu için en yakın geçerli indexi kullanıyoruz
 		if (playing && !wasPlaying)
 			songTxt.text = Language.getPhrase('musicplayer_playing', 'PLAYING: {1}', [songName]);
 		else
 			songTxt.text = Language.getPhrase('musicplayer_paused', 'PLAYING: {1} (PAUSED)', [songName]);
-
-		//if(FlxG.keys.justPressed.K) trace('Time: ${FreeplayState.vocals.time}, Playing: ${FreeplayState.vocals.playing}');
 
 		if (controls.UI_LEFT_P)
 		{
@@ -246,8 +247,13 @@ class MusicPlayer extends FlxGroup
 		FlxG.autoPause = (!playingMusic && ClientPrefs.data.autoPause);
 		active = visible = playingMusic;
 
-		instance.scoreBG.visible = instance.diffText.visible = instance.scoreText.visible = !playingMusic; //Hide Freeplay texts and boxes if playingMusic is true
-		songTxt.visible = timeTxt.visible = songBG.visible = playbackTxt.visible = playbackBG.visible = progressBar.visible = playingMusic; //Show Music Player texts and boxes if playingMusic is true
+		// FIX 1: scoreBG/diffText/scoreText senin FreeplayState'inde farklı yapıda,
+		// null guard ile güvenli erişim
+		if (instance.scoreBG != null)    instance.scoreBG.visible    = !playingMusic;
+		if (instance.diffText != null)   instance.diffText.visible   = !playingMusic;
+		if (instance.scoreText != null)  instance.scoreText.visible  = !playingMusic;
+
+		songTxt.visible = timeTxt.visible = songBG.visible = playbackTxt.visible = playbackBG.visible = progressBar.visible = playingMusic;
 
 		for (i in playbackSymbols)
 			i.visible = playingMusic;
@@ -259,7 +265,10 @@ class MusicPlayer extends FlxGroup
 
 		if (playingMusic)
 		{
-			instance.bottomText.text = Language.getPhrase('musicplayer_tip', 'Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song');
+			// FIX 2: bottomText null guard
+			if (instance.bottomText != null)
+				instance.bottomText.text = Language.getPhrase('musicplayer_tip', 'Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song');
+
 			positionSong();
 			
 			progressBar.setRange(0, FlxG.sound.music.length);
@@ -274,7 +283,11 @@ class MusicPlayer extends FlxGroup
 			progressBar.setParent(null, "");
 			progressBar.numDivisions = 0;
 
-			instance.bottomText.text = instance.bottomString;
+			// FIX 3: bottomString null guard — asıl hata burası
+			if (instance.bottomText != null)
+				instance.bottomText.text = (instance.bottomString != null && instance.bottomString.length > 0)
+					? instance.bottomString
+					: "";
 		}
 		progressBar.updateBar();
 	}
@@ -287,7 +300,7 @@ class MusicPlayer extends FlxGroup
 		else
 		{
 			var playbackRate = Std.string(playbackRate);
-			if (playbackRate.split('.')[1].length < 2) // Playback rates for like 1.1, 1.2 etc
+			if (playbackRate.split('.')[1].length < 2)
 				playbackRate += '0';
 
 			text = playbackRate;
@@ -297,8 +310,14 @@ class MusicPlayer extends FlxGroup
 
 	function positionSong() 
 	{
-		var length:Int = instance.songs[FreeplayState.curSelected].songName.length;
-		var shortName:Bool = length < 5; // Fix for song names like Ugh, Guns
+		// FIX 4: curSelected private olduğu için lerpSelected kullan
+		var idx:Int = Math.round(instance.lerpSelected);
+		if (idx < 0) idx = 0;
+		if (idx >= instance.songs.length) idx = instance.songs.length - 1;
+		if (instance.songs.length == 0) return;
+
+		var length:Int = instance.songs[idx].songName.length;
+		var shortName:Bool = length < 5;
 		songTxt.x = FlxG.width - songTxt.width - 6;
 		if (shortName)
 			songTxt.x -= 10 * length - length;
