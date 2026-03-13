@@ -131,7 +131,8 @@
 	<haxelib name="hxvlc" version="1.8.0" if="VIDEOS_ALLOWED"/>
 	
 	<section if="android">
-		<haxedef name="HXVLC_ANDROID_ABI" value="arm64-v8a armeabi-v7a"/>
+		<haxedef name="HXVLC_ANDROID_ABI" value="armeabi-v7a"/>
+		<!-- haxedef name="HXVLC_ANDROID_ABI" value="arm64-v8a armeabi-v7a"/ -->
 	</section>
 	
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
