@@ -36,7 +36,6 @@ jobs:
         with:
           haxe-version: ${{ env.HAXE_VERSION }}
 
-      # ── Cache 1: Haxelib ────────────────────────────────────────
       - name: Cache Haxelib
         id: cache-haxelib
         uses: actions/cache@v4
@@ -46,7 +45,6 @@ jobs:
           restore-keys: |
             haxelib-${{ inputs.name }}-${{ env.HAXE_VERSION }}-
 
-      # ── Cache 2: Lime build cache ───────────────────────────────
       - name: Cache Lime
         uses: actions/cache@v4
         with:
@@ -86,13 +84,10 @@ jobs:
             echo "ndk-path=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_OUTPUT
           fi
 
-      # ── libVLC: Linux ───────────────────────────────────────────
       - name: Install libVLC (Linux)
         if: contains(inputs.name, 'Linux')
         run: sudo apt install libvlc-dev libvlccore-dev
 
-      # ── libVLC: iOS — VLCKit xcframework ───────────────────────
-      # hxvlc iOS derlemesi için VLCKit framework gerekli
       - name: Cache VLCKit (iOS)
         if: inputs.name == 'iOS'
         id: cache-vlckit
@@ -104,11 +99,8 @@ jobs:
       - name: Download VLCKit (iOS)
         if: inputs.name == 'iOS' && steps.cache-vlckit.outputs.cache-hit != 'true'
         run: |
-          # brew'de 'libvlc' yok, 'vlc' cask'ı var ama framework için
-          # doğrudan MobileVLCKit'i indiriyoruz
           mkdir -p ~/vlc-ios
           cd ~/vlc-ios
-          # Önce 3.6.0b8'i dene, olmazsa 3.5.1'e düş
           curl -L --retry 3 -o MobileVLCKit.zip \
             "https://download.videolan.org/cocoapods/unstable/MobileVLCKit-3.6.0b8.zip" \
             || curl -L --retry 3 -o MobileVLCKit.zip \
@@ -124,16 +116,12 @@ jobs:
           echo "VLC_IOS_PATH=$HOME/vlc-ios" >> $GITHUB_ENV
           haxelib run lime config VLC_IOS_FRAMEWORK $HOME/vlc-ios || true
 
-      # ── libVLC: Android ─────────────────────────────────────────
-      # hxvlc Android için libVLC .so dosyalarını NDK üzerinden alır,
-      # brew'e gerek yok — hxvlc kendi içinde bundle ediyor
       - name: Verify hxvlc Android Support
         if: inputs.name == 'Android'
         run: |
           echo "hxvlc Android: NDK üzerinden native build yapılacak"
           haxelib list | grep hxvlc || echo "hxvlc henüz kurulmadı, setup'ta kurulacak"
 
-      # ── Haxelib kurulum ─────────────────────────────────────────
       - name: Install Libraries
         if: steps.cache-haxelib.outputs.cache-hit != 'true'
         run: ${{ inputs.setupCommand }}
@@ -142,7 +130,6 @@ jobs:
         if: steps.cache-haxelib.outputs.cache-hit == 'true'
         run: haxelib setup ~/haxelib
 
-      # ── Android config ──────────────────────────────────────────
       - name: Setup Java (Android)
         if: inputs.name == 'Android'
         uses: actions/setup-java@v4
@@ -150,32 +137,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      -  name: Fix hxcpp PCH (Android/Ubuntu)
+      - name: Fix hxcpp PCH (Android/Ubuntu)
         if: inputs.name == 'Android'
         run: |
-            echo "HXCPP_DISABLE_PCH=1" >> $GITHUB_ENV
-            echo "HXCPP_COMPILE_THREADS=4" >> $GITHUB_ENV
-
-          NDK_SYSROOT="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-          NDK_INCLUDE="$NDK_SYSROOT/usr/include"
-          HXCPP_INCLUDE="$HXCPP_DIR/include"
-
-          # NDK c++ headerlarini hxcpp/include altina symlink et
-          if [ -d "$NDK_INCLUDE/c++" ]; then
-            ln -sfn "$NDK_INCLUDE/c++" "$HXCPP_INCLUDE/c++" 2>/dev/null || true
-            echo "C++ headers symlinked"
-          fi
-
-          # typeinfo, exception, stdexcept kritik headerlarini kopyala
-          for header in typeinfo exception stdexcept; do
-            NDK_HEADER=$(find "$NDK_INCLUDE" -name "$header" 2>/dev/null | head -1)
-            if [ -n "$NDK_HEADER" ]; then
-              cp "$NDK_HEADER" "$HXCPP_INCLUDE/" 2>/dev/null || true
-              echo "Kopyalandi: $header"
-            fi
-          done
-
-          # HXCPP_DISABLE_PCH env olarak set et (en etkili yontem)
           echo "HXCPP_DISABLE_PCH=1" >> $GITHUB_ENV
           echo "HXCPP_COMPILE_THREADS=4" >> $GITHUB_ENV
 
@@ -187,11 +151,9 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
 
-      # ── Derleme ─────────────────────────────────────────────────
       - name: Compile
         run: haxelib run lime build ${{ inputs.buildArgs }}
 
-      # ── iOS IPA ─────────────────────────────────────────────────
       - name: Make IPA
         if: inputs.name == 'iOS'
         run: |
