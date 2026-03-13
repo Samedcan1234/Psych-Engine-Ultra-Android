@@ -87,13 +87,12 @@ jobs:
             echo "ndk-path=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_OUTPUT
           fi
 
-      # ── libVLC: Linux ───────────────────────────────────────────
+      # ── libVLC: For Linux ───────────────────────────────────────────
       - name: Install libVLC (Linux)
         if: contains(inputs.name, 'Linux')
         run: sudo apt install libvlc-dev libvlccore-dev
 
       # ── libVLC: iOS — VLCKit xcframework ───────────────────────
-      # hxvlc iOS derlemesi için VLCKit framework gerekli
       - name: Cache VLCKit (iOS)
         if: inputs.name == 'iOS'
         id: cache-vlckit
@@ -105,11 +104,8 @@ jobs:
       - name: Download VLCKit (iOS)
         if: inputs.name == 'iOS' && steps.cache-vlckit.outputs.cache-hit != 'true'
         run: |
-          # brew'de 'libvlc' yok, 'vlc' cask'ı var ama framework için
-          # doğrudan MobileVLCKit'i indiriyoruz
           mkdir -p ~/vlc-ios
           cd ~/vlc-ios
-          # Önce 3.6.0b8'i dene, olmazsa 3.5.1'e düş
           curl -L --retry 3 -o MobileVLCKit.zip \
             "https://download.videolan.org/cocoapods/unstable/MobileVLCKit-3.6.0b8.zip" \
             || curl -L --retry 3 -o MobileVLCKit.zip \
@@ -126,8 +122,6 @@ jobs:
           haxelib run lime config VLC_IOS_FRAMEWORK $HOME/vlc-ios || true
 
       # ── libVLC: Android ─────────────────────────────────────────
-      # hxvlc Android için libVLC .so dosyalarını NDK üzerinden alır,
-      # brew'e gerek yok — hxvlc kendi içinde bundle ediyor
       - name: Verify hxvlc Android Support
         if: inputs.name == 'Android'
         run: |
