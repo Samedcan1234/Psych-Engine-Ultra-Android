@@ -60,21 +60,20 @@ jobs:
           restore-keys: |
             lime-${{ inputs.name }}-
 
-      # ── Cache 3: Android NDK ────────────────────────────────────
       - name: Cache Android NDK
         if: inputs.name == 'Android'
         id: cache-ndk
         uses: actions/cache@v4
         with:
-          path: ${{ runner.tool_cache }}/ndk/r27c
-          key: ndk-r27c
+          path: ${{ runner.tool_cache }}/ndk/r21e
+          key: ndk-r21e
 
       - name: Setup Android NDK
         if: inputs.name == 'Android' && steps.cache-ndk.outputs.cache-hit != 'true'
         id: setup-ndk
         uses: nttld/setup-ndk@main
         with:
-          ndk-version: r27c
+          ndk-version: r21e
           add-to-path: false
 
       - name: Restore NDK Path
@@ -82,7 +81,7 @@ jobs:
         id: restore-ndk
         run: |
           if [ "${{ steps.cache-ndk.outputs.cache-hit }}" == "true" ]; then
-            echo "ndk-path=${{ runner.tool_cache }}/ndk/r27c" >> $GITHUB_OUTPUT
+            echo "ndk-path=${{ runner.tool_cache }}/ndk/r21e" >> $GITHUB_OUTPUT
           else
             echo "ndk-path=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_OUTPUT
           fi
@@ -154,9 +153,8 @@ jobs:
       - name: Fix hxcpp PCH (Android/Ubuntu)
         if: inputs.name == 'Android'
         run: |
-          NDK_ROOT="${{ steps.restore-ndk.outputs.ndk-path }}"
-          HXCPP_DIR="$(haxelib path hxcpp | head -1 | tr -d '\n')"
-          echo "hxcpp dizini: $HXCPP_DIR"
+          echo "HXCPP_DISABLE_PCH=1" >> $GITHUB_ENV
+          echo "HXCPP_COMPILE_THREADS=4" >> $GITHUB_ENV"
 
           NDK_SYSROOT="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
           NDK_INCLUDE="$NDK_SYSROOT/usr/include"
