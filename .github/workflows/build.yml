@@ -1,5 +1,4 @@
 name: Build
-
 on:
   workflow_call:
     inputs:
@@ -21,94 +20,194 @@ on:
       artifactPath:
         required: true
         type: string
-
 env:
   HAXE_VERSION: 4.3.6
   PROJECT_NAME: PsychEngine
-
 jobs:
   build:
+    name: Build
     runs-on: ${{ inputs.os }}
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@main
 
-      # Haxe
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
+        uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VERSION }}
 
-      # Cache haxelib
-      - name: Cache haxelib
+      # ── Cache 1: Haxelib ────────────────────────────────────────
+      - name: Cache Haxelib
+        id: cache-haxelib
         uses: actions/cache@v4
         with:
           path: ~/haxelib
-          key: haxelib-${{ runner.os }}-${{ env.HAXE_VERSION }}-${{ hashFiles('setup/unix.sh') }}
+          key: haxelib-${{ inputs.name }}-${{ env.HAXE_VERSION }}-${{ hashFiles('setup/unix.sh') }}
+          restore-keys: |
+            haxelib-${{ inputs.name }}-${{ env.HAXE_VERSION }}-
 
-      # Cache lime build
-      - name: Cache lime
+      # ── Cache 2: Lime build cache ───────────────────────────────
+      - name: Cache Lime
         uses: actions/cache@v4
         with:
           path: |
             ~/.lime
             export/release/android/haxe
             export/release/android/obj
-          key: lime-${{ runner.os }}-${{ hashFiles('source/**/*.hx','Project.xml') }}
+            export/release/ios/haxe
+            export/release/ios/obj
+          key: lime-${{ inputs.name }}-${{ hashFiles('source/**/*.hx', 'Project.xml') }}
+          restore-keys: |
+            lime-${{ inputs.name }}-
 
-      # Android NDK
-      - name: Setup Android NDK
+      # ── Cache 3: Android NDK ────────────────────────────────────
+      - name: Cache Android NDK
         if: inputs.name == 'Android'
-        uses: nttld/setup-ndk@v1
+        id: cache-ndk
+        uses: actions/cache@v4
         with:
-          ndk-version: r25b
+          path: ${{ runner.tool_cache }}/ndk/r27c
+          key: ndk-r27c
 
-      # Java
-      - name: Setup Java
+      - name: Setup Android NDK
+        if: inputs.name == 'Android' && steps.cache-ndk.outputs.cache-hit != 'true'
+        id: setup-ndk
+        uses: nttld/setup-ndk@main
+        with:
+          ndk-version: r27c
+          add-to-path: false
+
+      - name: Restore NDK Path
+        if: inputs.name == 'Android'
+        id: restore-ndk
+        run: |
+          if [ "${{ steps.cache-ndk.outputs.cache-hit }}" == "true" ]; then
+            echo "ndk-path=${{ runner.tool_cache }}/ndk/r27c" >> $GITHUB_OUTPUT
+          else
+            echo "ndk-path=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_OUTPUT
+          fi
+
+      # ── libVLC: Linux ───────────────────────────────────────────
+      - name: Install libVLC (Linux)
+        if: contains(inputs.name, 'Linux')
+        run: sudo apt install libvlc-dev libvlccore-dev
+
+      # ── libVLC: iOS — VLCKit xcframework ───────────────────────
+      # hxvlc iOS derlemesi için VLCKit framework gerekli
+      - name: Cache VLCKit (iOS)
+        if: inputs.name == 'iOS'
+        id: cache-vlckit
+        uses: actions/cache@v4
+        with:
+          path: ~/vlc-ios
+          key: vlckit-3.6.0
+
+      - name: Download VLCKit (iOS)
+        if: inputs.name == 'iOS' && steps.cache-vlckit.outputs.cache-hit != 'true'
+        run: |
+          # brew'de 'libvlc' yok, 'vlc' cask'ı var ama framework için
+          # doğrudan MobileVLCKit'i indiriyoruz
+          mkdir -p ~/vlc-ios
+          cd ~/vlc-ios
+          # Önce 3.6.0b8'i dene, olmazsa 3.5.1'e düş
+          curl -L --retry 3 -o MobileVLCKit.zip \
+            "https://download.videolan.org/cocoapods/unstable/MobileVLCKit-3.6.0b8.zip" \
+            || curl -L --retry 3 -o MobileVLCKit.zip \
+            "https://download.videolan.org/cocoapods/unstable/MobileVLCKit-3.5.1.zip" \
+            || curl -L --retry 3 -o MobileVLCKit.zip \
+            "https://download.videolan.org/pub/cocoapods/prod/MobileVLCKit-3.3.11a.zip"
+          unzip -q MobileVLCKit.zip || true
+          ls -la
+
+      - name: Configure VLCKit for iOS
+        if: inputs.name == 'iOS'
+        run: |
+          echo "VLC_IOS_PATH=$HOME/vlc-ios" >> $GITHUB_ENV
+          haxelib run lime config VLC_IOS_FRAMEWORK $HOME/vlc-ios || true
+
+      # ── libVLC: Android ─────────────────────────────────────────
+      # hxvlc Android için libVLC .so dosyalarını NDK üzerinden alır,
+      # brew'e gerek yok — hxvlc kendi içinde bundle ediyor
+      - name: Verify hxvlc Android Support
+        if: inputs.name == 'Android'
+        run: |
+          echo "hxvlc Android: NDK üzerinden native build yapılacak"
+          haxelib list | grep hxvlc || echo "hxvlc henüz kurulmadı, setup'ta kurulacak"
+
+      # ── Haxelib kurulum ─────────────────────────────────────────
+      - name: Install Libraries
+        if: steps.cache-haxelib.outputs.cache-hit != 'true'
+        run: ${{ inputs.setupCommand }}
+
+      - name: Setup Haxelib Path
+        if: steps.cache-haxelib.outputs.cache-hit == 'true'
+        run: haxelib setup ~/haxelib
+
+      # ── Android config ──────────────────────────────────────────
+      - name: Setup Java (Android)
         if: inputs.name == 'Android'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
 
-      # hxcpp config (PCH fix)
-      - name: Configure hxcpp
+      - name: Fix hxcpp PCH (Android/Ubuntu)
         if: inputs.name == 'Android'
         run: |
-          mkdir -p ~/.hxcpp
-          cat > ~/.hxcpp/config.json << EOF
-          {
-            "HXCPP_COMPILE_THREADS": "4",
-            "HXCPP_DISABLE_PCH": "1"
-          }
-          EOF
+          NDK_ROOT="${{ steps.restore-ndk.outputs.ndk-path }}"
+          HXCPP_DIR="$(haxelib path hxcpp | head -1 | tr -d '\n')"
+          echo "hxcpp dizini: $HXCPP_DIR"
 
-      # Install libs
-      - name: Install Libraries
-        run: ${{ inputs.setupCommand }}
+          NDK_SYSROOT="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+          NDK_INCLUDE="$NDK_SYSROOT/usr/include"
+          HXCPP_INCLUDE="$HXCPP_DIR/include"
 
-      # Android config
+          # NDK c++ headerlarini hxcpp/include altina symlink et
+          if [ -d "$NDK_INCLUDE/c++" ]; then
+            ln -sfn "$NDK_INCLUDE/c++" "$HXCPP_INCLUDE/c++" 2>/dev/null || true
+            echo "C++ headers symlinked"
+          fi
+
+          # typeinfo, exception, stdexcept kritik headerlarini kopyala
+          for header in typeinfo exception stdexcept; do
+            NDK_HEADER=$(find "$NDK_INCLUDE" -name "$header" 2>/dev/null | head -1)
+            if [ -n "$NDK_HEADER" ]; then
+              cp "$NDK_HEADER" "$HXCPP_INCLUDE/" 2>/dev/null || true
+              echo "Kopyalandi: $header"
+            fi
+          done
+
+          # HXCPP_DISABLE_PCH env olarak set et (en etkili yontem)
+          echo "HXCPP_DISABLE_PCH=1" >> $GITHUB_ENV
+          echo "HXCPP_COMPILE_THREADS=4" >> $GITHUB_ENV
+
       - name: Configure Android
         if: inputs.name == 'Android'
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
+          haxelib run lime config ANDROID_NDK_ROOT ${{ steps.restore-ndk.outputs.ndk-path }}
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
 
-      # hxcpp rebuild
-      - name: Rebuild hxcpp
-        run: |
-          haxelib run lime rebuild hxcpp
-
-      # Compile
+      # ── Derleme ─────────────────────────────────────────────────
       - name: Compile
-        run: |
-          haxelib run lime build ${{ inputs.buildArgs }}
+        run: haxelib run lime build ${{ inputs.buildArgs }}
 
-      # Upload artifact
+      # ── iOS IPA ─────────────────────────────────────────────────
+      - name: Make IPA
+        if: inputs.name == 'iOS'
+        run: |
+          brew install ldid
+          cd export/release/ios/build/Release-iphoneos/${{ env.PROJECT_NAME }}.app
+          ldid -S../../../${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.entitlements ${{ env.PROJECT_NAME }}
+          cd ..
+          mkdir Payload
+          mv ${{ env.PROJECT_NAME }}.app Payload
+          zip -r ${{ env.PROJECT_NAME }}.ipa Payload
+
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: ${{ inputs.artifactName }}
           path: ${{ inputs.artifactPath }}
+          if-no-files-found: error
