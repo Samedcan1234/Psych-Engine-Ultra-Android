@@ -137,7 +137,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-    - name: Fix hxcpp PCH (Android/Ubuntu)
+      - name: Fix hxcpp PCH (Android/Ubuntu)
         if: inputs.name == 'Android'
         run: |
           echo "HXCPP_DISABLE_PCH=1" >> $GITHUB_ENV
@@ -154,13 +154,11 @@ jobs:
       - name: Configure Android
         if: inputs.name == 'Android'
         run: |
-          echo "HXCPP_LINK_FLAGS=-lclang_rt.builtins-aarch64-android" >> $GITHUB_ENV
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT ${{ steps.restore-ndk.outputs.ndk-path }}
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
-          haxelib run lime config ANDROID_TARGET_SDK_VERSION 23
-          
+
       - name: Compile
         run: haxelib run lime build ${{ inputs.buildArgs }}
 
