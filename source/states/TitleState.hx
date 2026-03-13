@@ -12,9 +12,6 @@ import haxe.Json;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
-// TWEEN
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
 
 #if VIDEOS_ALLOWED
 import objects.VideoSprite;
@@ -24,6 +21,10 @@ import shaders.ColorSwap;
 
 import states.StoryMenuState;
 import states.MainMenuState;
+
+// TWEEN EKLENTİLERİ İÇİN GEREKLİ KÜTÜPHANELER
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 typedef TitleData =
 {
@@ -47,15 +48,17 @@ class TitleState extends MusicBeatState
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
-	
+
 	// P.E.T INTRO
 	public static var inGame:Bool = false;
 	var skipVideoText:FlxText;
-
+	
 	public static var initialized:Bool = false;
 
 	var credGroup:FlxGroup = new FlxGroup();
 	var textGroup:FlxGroup = new FlxGroup();
+	var extraSprites:Array<FlxSprite> = []; // Ekstra ikonları tutmak için
+
 	var blackScreen:FlxSprite;
 	var credTextShit:Alphabet;
 	var ngSpr:FlxSprite;
@@ -67,6 +70,10 @@ class TitleState extends MusicBeatState
 
 	var wackyImage:FlxSprite;
 	
+	#if VIDEOS_ALLOWED
+	var currentVideo:VideoSprite = null;
+	#end
+
 	// LOGO ANİMASYONU İÇİN KONTROL
 	var logoTweenFinished:Bool = false;
 
@@ -97,11 +104,9 @@ class TitleState extends MusicBeatState
 			if(FlxG.save.data != null && FlxG.save.data.fullscreen)
 			{
 				FlxG.fullscreen = FlxG.save.data.fullscreen;
-				//trace('LOADED FULLSCREEN SETTING!!');
 			}
 			persistentUpdate = true;
 			persistentDraw = true;
-			MobileData.init();
 		}
 
 		if (FlxG.save.data.weekCompleted != null)
@@ -117,7 +122,6 @@ class TitleState extends MusicBeatState
 		#else
 		if(FlxG.save.data.flashing == null && !FlashingState.leftState)
 		{
-			controls.isInSubstate = false; //idfk what's wrong
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new FlashingState());
@@ -126,7 +130,6 @@ class TitleState extends MusicBeatState
 			startCutscenesIn();
 		#end
 	}
-
 	var logoBl:FlxSprite;
 	var gfDance:FlxSprite;
 	var danceLeft:Bool = false;
@@ -158,10 +161,6 @@ class TitleState extends MusicBeatState
 		inGame = true;
 		startIntro();
 	}
-	
-	#if VIDEOS_ALLOWED
-	var currentVideo:VideoSprite = null;
-	#end
 	
 	public function startVideo(name:String)
 	{
@@ -207,22 +206,20 @@ class TitleState extends MusicBeatState
 		startIntro();
 		#end
 	}
-	
+
 	public function videoEnd()
 	{
 		trace("videoEnd() called!");
 
-		#if VIDEOS_ALLOWED
 		if(currentVideo != null) {
 			currentVideo.finishCallback = null;
 			currentVideo.destroy();
 			currentVideo = null;
 		}
-		#end
 
 		startCutscenesOut();
 	}
-	
+
 	function startIntro()
 	{
 		persistentUpdate = true;
@@ -232,12 +229,15 @@ class TitleState extends MusicBeatState
 		loadJsonData();
 		#if TITLE_SCREEN_EASTER_EGG easterEggData(); #end
 		Conductor.bpm = musicBPM;
-		
+
+		// --- LOGO DEĞİŞİKLİKLERİ ---
 		logoBl = new FlxSprite(logoPosition.x, logoPosition.y);
+		// XML YOK. Sadece PNG resmi olarak yüklüyoruz. Resminin adı farklıysa burayı değiştir (örn: 'logo')
 		logoBl.loadGraphic(Paths.image('logoBumpin')); 
 		logoBl.antialiasing = ClientPrefs.data.antialiasing;
 		logoBl.updateHitbox();
 		
+		// Intro geçilene kadar logoyu saklıyoruz ve küçültüyoruz
 		logoBl.alpha = 0;
 		logoBl.scale.set(0.1, 0.1);
 
@@ -263,7 +263,6 @@ class TitleState extends MusicBeatState
 			gfDance.animation.addByPrefix('idle', animationName, 24, false);
 			gfDance.animation.play('idle');
 		}
-
 
 		var animFrames:Array<FlxFrame> = [];
 		titleText = new FlxSprite(enterPosition.x, enterPosition.y);
@@ -304,8 +303,8 @@ class TitleState extends MusicBeatState
 		ngSpr.antialiasing = ClientPrefs.data.antialiasing;
 
 		add(gfDance);
-		add(logoBl); //FNF Logo
-		add(titleText); //"Press Enter to Begin" text
+		add(logoBl);
+		add(titleText);
 		add(credGroup);
 		add(ngSpr);
 
@@ -313,11 +312,8 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		else
 			initialized = true;
-
-		// credGroup.add(credTextShit);
 	}
 
-	// JSON data
 	var characterImage:String = 'gfDanceTitle';
 	var animationName:String = 'gfDance';
 
@@ -362,14 +358,12 @@ class TitleState extends MusicBeatState
 					trace('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
 				}
 			}
-			else trace('[WARN] No Title JSON detected, using default values.');
 		}
-		//else trace('[WARN] No Title JSON detected, using default values.');
 	}
 
 	function easterEggData()
 	{
-		if (FlxG.save.data.psychDevsEasterEgg == null) FlxG.save.data.psychDevsEasterEgg = ''; //Crash prevention
+		if (FlxG.save.data.psychDevsEasterEgg == null) FlxG.save.data.psychDevsEasterEgg = '';
 		var easterEgg:String = FlxG.save.data.psychDevsEasterEgg;
 		switch(easterEgg.toUpperCase())
 		{
@@ -428,11 +422,20 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+		
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
-		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
 
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT || TouchUtil.justPressed;
+		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
+
+		#if mobile
+		for (touch in FlxG.touches.list)
+		{
+			if (touch.justPressed)
+				pressedEnter = true;
+		}
+		#end
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
@@ -451,8 +454,6 @@ class TitleState extends MusicBeatState
 			titleTimer += FlxMath.bound(elapsed, 0, 1);
 			if (titleTimer > 2) titleTimer -= 2;
 		}
-
-		// EASTER EGG
 
 		if (initialized && !transitioning && skippedIntro)
 		{
@@ -479,14 +480,12 @@ class TitleState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
 				transitioning = true;
-				// FlxG.sound.music.stop();
 
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{
-					MusicBeatState.switchState(new MainMenuState());
+					ThemeManager.switchToMainMenu();
 					closedState = true;
 				});
-				// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 			}
 			#if TITLE_SCREEN_EASTER_EGG
 			else if (FlxG.keys.firstJustPressed() != FlxKey.NONE)
@@ -496,14 +495,12 @@ class TitleState extends MusicBeatState
 				if(allowedKeys.contains(keyName)) {
 					easterEggKeysBuffer += keyName;
 					if(easterEggKeysBuffer.length >= 32) easterEggKeysBuffer = easterEggKeysBuffer.substring(1);
-					//trace('Test! Allowed Key pressed!!! Buffer: ' + easterEggKeysBuffer);
 
 					for (wordRaw in easterEggKeys)
 					{
-						var word:String = wordRaw.toUpperCase(); //just for being sure you're doing it right
+						var word:String = wordRaw.toUpperCase();
 						if (easterEggKeysBuffer.contains(word))
 						{
-							//trace('YOOO! ' + word);
 							if (FlxG.save.data.psychDevsEasterEgg == word)
 								FlxG.save.data.psychDevsEasterEgg = '';
 							else
@@ -552,8 +549,6 @@ class TitleState extends MusicBeatState
 			if(controls.UI_LEFT) swagShader.hue -= elapsed * 0.1;
 			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
 		}
-
-		super.update(elapsed);
 	}
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0)
@@ -562,12 +557,18 @@ class TitleState extends MusicBeatState
 		{
 			var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
 			money.screenCenter(X);
-			money.y += (i * 60) + 200 + offset;
+			
+			var targetY = (i * 60) + 200 + offset;
+			money.y = targetY + 50; 
+			money.alpha = 0;        
+			
 			if(credGroup != null && textGroup != null)
 			{
 				credGroup.add(money);
 				textGroup.add(money);
 			}
+
+			FlxTween.tween(money, {y: targetY, alpha: 1}, 0.5, {ease: FlxEase.expoOut});
 		}
 	}
 
@@ -576,10 +577,45 @@ class TitleState extends MusicBeatState
 		if(textGroup != null && credGroup != null) {
 			var coolText:Alphabet = new Alphabet(0, 0, text, true);
 			coolText.screenCenter(X);
-			coolText.y += (textGroup.length * 60) + 200 + offset;
+			
+			var targetY = (textGroup.length * 60) + 200 + offset;
+			coolText.y = targetY + 50; 
+			coolText.alpha = 0;        
+			
 			credGroup.add(coolText);
 			textGroup.add(coolText);
+
+			FlxTween.tween(coolText, {y: targetY, alpha: 1}, 0.5, {ease: FlxEase.expoOut});
 		}
+	}
+
+	function addIconToText(imagePath:String, isOnLeft:Bool = true, ?offsetY:Float = 0)
+	{
+		if (textGroup.length == 0) return;
+		
+		var targetText:Alphabet = cast textGroup.members[textGroup.length - 1];
+		var icon:FlxSprite = new FlxSprite().loadGraphic(Paths.image(imagePath));
+		icon.antialiasing = ClientPrefs.data.antialiasing;
+		
+		icon.setGraphicSize(Std.int(icon.width * 0.8));
+		icon.updateHitbox();
+
+		var targetX:Float = 0;
+		if (isOnLeft)
+			targetX = targetText.x - icon.width - 20;
+		else
+			targetX = targetText.x + targetText.width + 20;
+
+		var targetY:Float = targetText.y + (targetText.height / 2) - (icon.height / 2) + offsetY; // offsetY eklendi
+
+		icon.x = targetX;
+		icon.y = targetY + 50;
+		icon.alpha = 0;
+
+		credGroup.add(icon);
+		extraSprites.push(icon);
+
+		FlxTween.tween(icon, {y: targetY, alpha: 1}, 0.5, {ease: FlxEase.expoOut});
 	}
 
 	function deleteCoolText()
@@ -589,16 +625,36 @@ class TitleState extends MusicBeatState
 			credGroup.remove(textGroup.members[0], true);
 			textGroup.remove(textGroup.members[0], true);
 		}
+
+		while(extraSprites.length > 0)
+		{
+			var spr:FlxSprite = extraSprites.shift();
+			FlxTween.cancelTweensOf(spr); 
+			credGroup.remove(spr, true);
+			spr.destroy();
+		}
 	}
 
-	private var sickBeats:Int = 0; //Basically curBeat but won't be skipped if you hold the tab or resize the screen
+	private var sickBeats:Int = 0;
 	public static var closedState:Bool = false;
+	
 	override function beatHit()
 	{
 		super.beatHit();
 
-		if(logoBl != null)
-			logoBl.animation.play('bump', true);
+		// --- YENİ LOGO BUMP EFEKTİ ---
+		// Eğer intro geçilmişse ve logonun büyüme animasyonu bitmişse ritme göre boyutunu esnet!
+		if(logoBl != null && skippedIntro && logoTweenFinished)
+		{
+			// Boyutu biraz büyüt (Bump etkisi)
+			logoBl.scale.set(1.05, 1.05); 
+			
+			// Önceki boyuta küçülme animasyonu varsa iptal et
+			FlxTween.cancelTweensOf(logoBl.scale);
+			
+			// Yavaşça tekrar normal haline (1.0) küçülsün
+			FlxTween.tween(logoBl.scale, {x: 1, y: 1}, 0.3, {ease: FlxEase.quadOut});
+		}
 
 		if(gfDance != null)
 		{
@@ -619,21 +675,31 @@ class TitleState extends MusicBeatState
 			switch (sickBeats)
 			{
 				case 1:
-					//FlxG.sound.music.stop();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
-					createCoolText(['Psych Engine by'], 40);
+					createCoolText(['Psych Engine'], 40);
 				case 4:
-					addMoreText('Shadow Mario', 40);
+					addMoreText('Shadow Mario Tarafından', 40);
+					addIconToText('credits/shadowmario', true); 
 					addMoreText('Riveren', 40);
 				case 5:
 					deleteCoolText();
 				case 6:
-					createCoolText(['Not associated', 'with'], -40);
-				case 8:
-					addMoreText('newgrounds', -40);
+					// Newgrounds logosu - üstte
 					ngSpr.visible = true;
+					ngSpr.screenCenter(X);
+					ngSpr.y = 20;
+					ngSpr.alpha = 0;
+					ngSpr.y += 80;
+					FlxTween.tween(ngSpr, {y: 20, alpha: 1}, 2.5, {ease: FlxEase.expoOut});
+
+				case 7:
+					createCoolText(['Newgrounds', 'ile'], 140);
+
+				case 8:
+					addMoreText('AlakasI Yoktur', 160);
+
 				case 9:
 					deleteCoolText();
 					ngSpr.visible = false;
@@ -644,13 +710,39 @@ class TitleState extends MusicBeatState
 				case 13:
 					deleteCoolText();
 				case 14:
-					addMoreText('Friday');
+					// PET Logo - üstte
+					var petLogo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('pet/petlogo'));
+					petLogo.antialiasing = ClientPrefs.data.antialiasing;
+					petLogo.setGraphicSize(Std.int(FlxG.width * 0.25));
+					petLogo.updateHitbox();
+					petLogo.screenCenter(X);
+					petLogo.y = 20;
+					petLogo.alpha = 0;
+					petLogo.y += 80;
+					credGroup.add(petLogo);
+					extraSprites.push(petLogo);
+					FlxTween.tween(petLogo, {y: petLogo.y - 10, alpha: 1}, 2.5, {ease: FlxEase.expoOut});
+
 				case 15:
-					addMoreText('Night');
+					// Psych Engine Turkiye yazısı - logonun altında boşluklu
+					createCoolText(['Psych Engine Türkiye'], 250); // 80px aşağıda başlasın
+
 				case 16:
-					addMoreText('Funkin'); // credTextShit.text += '\nFunkin';
+					// By SametGkTe yazısı
+					addMoreText('SametGkTe TarafIndan', 280);
+					addIconToText('credits/gkte', true, -40);
 
 				case 17:
+					deleteCoolText();
+
+				// Aşağıdaki case numaralarını öteliyoruz
+				case 18:
+					addMoreText('Friday');
+				case 19:
+					addMoreText('Night');
+				case 20:
+					addMoreText('Funkin');
+				case 21:
 					skipIntro();
 			}
 		}
@@ -658,12 +750,13 @@ class TitleState extends MusicBeatState
 
 	var skippedIntro:Bool = false;
 	var increaseVolume:Bool = false;
+	
 	function skipIntro():Void
 	{
 		if (!skippedIntro)
 		{
 			#if TITLE_SCREEN_EASTER_EGG
-			if (playJingle) //Ignore deez
+			if (playJingle)
 			{
 				playJingle = false;
 				var easteregg:String = FlxG.save.data.psychDevsEasterEgg;
@@ -682,14 +775,16 @@ class TitleState extends MusicBeatState
 					case 'PESSY':
 						sound = FlxG.sound.play(Paths.sound('JinglePessy'));
 
-					default: //Go back to normal ugly ass boring GF
+					default:
 						remove(ngSpr);
 						remove(credGroup);
 						FlxG.camera.flash(FlxColor.WHITE, 2);
 						skippedIntro = true;
+						
+						startLogoTween();
 
 						FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
-						FlxG.sound.music.fadeIn(4, 0, 0.7);
+						FlxG.sound.music.fadeIn(4, 0, 1.7);
 						return;
 				}
 
@@ -701,6 +796,7 @@ class TitleState extends MusicBeatState
 						remove(ngSpr);
 						remove(credGroup);
 						FlxG.camera.flash(FlxColor.WHITE, 0.6);
+						startLogoTween(); // LOGO GELSİN
 						transitioning = false;
 					});
 				}
@@ -709,6 +805,7 @@ class TitleState extends MusicBeatState
 					remove(ngSpr);
 					remove(credGroup);
 					FlxG.camera.flash(FlxColor.WHITE, 3);
+					startLogoTween(); // LOGO GELSİN
 					sound.onComplete = function() {
 						FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
@@ -719,11 +816,14 @@ class TitleState extends MusicBeatState
 					};
 				}
 			}
-			else #end //Default! Edit this one!!
+			else #end
 			{
 				remove(ngSpr);
 				remove(credGroup);
 				FlxG.camera.flash(FlxColor.WHITE, 4);
+
+				// --- LOGO GELİŞ ANİMASYONU ---
+				startLogoTween();
 
 				var easteregg:String = FlxG.save.data.psychDevsEasterEgg;
 				if (easteregg == null) easteregg = '';
@@ -741,5 +841,38 @@ class TitleState extends MusicBeatState
 			}
 			skippedIntro = true;
 		}
+	}
+
+	// Logo Intro Tween'i için küçük bir yardımcı fonksiyon
+	function startLogoTween()
+	{
+		if (logoBl != null)
+		{
+			// Başlangıç değerleri (emin olmak için tekrar sıfırlıyoruz)
+			logoBl.alpha = 0;
+			logoBl.scale.set(0.1, 0.1);
+			logoTweenFinished = false;
+
+			// Yavaşça saydamlığını (alpha) 1'e çıkart
+			FlxTween.tween(logoBl, {alpha: 1}, 1.2, {ease: FlxEase.quadOut});
+			
+			// Yaylanarak (elasticOut) normal boyutuna (1.0) büyüsün
+			FlxTween.tween(logoBl.scale, {x: 1, y: 1}, 1.5, {
+				ease: FlxEase.elasticOut,
+				onComplete: function(twn:FlxTween) {
+					// Büyüme bitince beatHit içindeki Bump efekti devreye girecek
+					logoTweenFinished = true; 
+				}
+			});
+		}
+	}
+
+	override function destroy()
+	{
+		#if TOUCH_CONTROLS_ALLOWED
+		removeTouchControls();
+		#end
+		
+		super.destroy();
 	}
 }
