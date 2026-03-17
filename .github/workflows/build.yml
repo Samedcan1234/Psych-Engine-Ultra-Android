@@ -119,7 +119,7 @@ jobs:
       - name: Configure VLCKit for iOS
         if: inputs.name == 'iOS'
         run: |
-          brew install --quiet libvlc || true
+          brew install --quiet liblc3 || true
           echo "VLC_IOS_PATH=$HOME/vlc-ios" >> $GITHUB_ENV
           haxelib run lime config VLC_IOS_FRAMEWORK $HOME/vlc-ios || true
 
