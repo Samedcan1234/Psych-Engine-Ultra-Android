@@ -19,7 +19,7 @@ class OptionsState extends MusicBeatState
 		'Kontroller',
 		'Gecikme Ve Kombo',
 		'Grafikler',
-		'Arayüz',
+		'Görünüş & Arayüz',
 		'Oynanış',
 		'P.E.T Ayarları'
 		#if TRANSLATIONS_ALLOWED , 'Dil' #end
@@ -42,27 +42,19 @@ class OptionsState extends MusicBeatState
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 
-	// ═══════════════════════════════════════════════════════
-	// 🔐 SECRET CODE SYSTEM
-	// ═══════════════════════════════════════════════════════
-	
 	var secretCode:Array<FlxKey> = [FlxKey.X, FlxKey.Q, FlxKey.B, FlxKey.O, FlxKey.K, FlxKey.Y, FlxKey.E];
 	var secretIndex:Int = 0;
 	var secretUnlocked:Bool = false;
 
-	// ═══════════════════════════════════════════════════════
-	// 🎨 MODERN UI COMPONENTS
-	// ═══════════════════════════════════════════════════════
+	// UI
 	
-	// Background Layers
+	// BG Katman
 	var bg:FlxSprite;
 	var bgPattern:FlxBackdrop;
 	var bgGradient:FlxSprite;
 	var bgDarken:FlxSprite;
 	var bgVignette:FlxSprite;
 	var bgOrbs:FlxTypedGroup<FlxSprite>;
-	
-	// Header
 	var headerPanel:FlxSprite;
 	var headerGlow:FlxSprite;
 	var titleText:FlxText;
@@ -70,13 +62,13 @@ class OptionsState extends MusicBeatState
 	var breadcrumbText:FlxText;
 	var versionText:FlxText;
 	
-	// Profile (Sağ üst)
+	// Profil
 	var profilePanel:FlxSprite;
 	var profileIcon:FlxSprite;
 	var profileName:FlxText;
 	var profileStats:FlxText;
 	
-	// Description Panel
+	// Açıklama
 	var descPanel:FlxSprite;
 	var descPanelGlow:FlxSprite;
 	var descIcon:FlxSprite;
@@ -84,7 +76,7 @@ class OptionsState extends MusicBeatState
 	var descText:FlxText;
 	var descStats:FlxText;
 	
-	// Visual Effects
+	// Efektler
 	var particleEmitter:FlxEmitter;
 	var secondaryParticles:FlxEmitter;
 	var glowEffect:FlxSprite;
@@ -92,16 +84,16 @@ class OptionsState extends MusicBeatState
 	var scanlines:FlxSprite;
 	var floatingShapes:FlxTypedGroup<FlxSprite>;
 	
-	// Control Hints (Alt)
+	// Kontrol İpucuları
 	var controlHintsPanel:FlxSprite;
 	var controlHintsText:FlxText;
 	
-	// Camera
+	// Kamera
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	var bgColorTween:FlxTween;
 	
-	// Animation Timers
+	// Animasyon
 	var animTimer:Float = 0;
 	var pulseTimer:Float = 0;
 	var waveTimer:Float = 0;
@@ -109,7 +101,7 @@ class OptionsState extends MusicBeatState
 	var glowTimer:Float = 0;
 	var orbTimer:Float = 0;
 	
-	// Grid Layout
+	// Kart Holder
 	var cardWidth:Int = 340;
 	var cardHeight:Int = 140;
 	var cardSpacingX:Int = 20;
@@ -117,7 +109,7 @@ class OptionsState extends MusicBeatState
 	var gridStartX:Float = 70;
 	var gridStartY:Float = 135;
 
-	// Category colors
+	// Kategori Renkleri
 	var optionsColor:Map<String, Array<Int>> = [
 		'Nota Renkleri'    => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
 		'Kontroller'       => [0xFFE67E22, 0xFFD35400, 0xFFA04000],
@@ -129,7 +121,7 @@ class OptionsState extends MusicBeatState
 		'P.E.T Ayarları'   => [0xFFE91E63, 0xFFC2185B, 0xFF880E4F]
 	];
 	
-	// Category icon paths
+	// Kategori Path
 	var optionsIconPaths:Map<String, String> = [
 		'Nota Renkleri'    => 'nota_renkleri',
 		'Kontroller'       => 'kontroller',
@@ -141,7 +133,7 @@ class OptionsState extends MusicBeatState
 		'P.E.T Ayarları'   => 'pet'
 	];
 	
-	// Category descriptions
+	// Kategori Açıklaması
 	var optionsDesc:Map<String, String> = [
 		'Nota Renkleri'    => 'Notalarin renklerini ve gorunumunu dilediginiz gibi ozellestirin.',
 		'Kontroller'       => 'Klavye ve gamepad tus atamalarini yapilandirin.',
@@ -153,7 +145,7 @@ class OptionsState extends MusicBeatState
 		'P.E.T Ayarları'   => 'Psych Engine Turkiye\'ye ozel gelismis ayarlari yonetin.'
 	];
 	
-	// Category stats
+	// Katergori Açıklama 2
 	var optionsStats:Map<String, String> = [
 		'Nota Renkleri'    => 'Nota Renklerini Ayarlar',
 		'Kontroller'       => 'Varsayılan: W-A-S-D',
@@ -165,15 +157,8 @@ class OptionsState extends MusicBeatState
 		'P.E.T Ayarları'   => 'çokzorladı'
 	];
 
-	// ═══════════════════════════════════════════════════════
-	// SUBSTATE AÇMA
-	// ═══════════════════════════════════════════════════════
-
 	function openSelectedSubstate(label:String)
 	{
-		// Mobil Kontrol Menüsüne geçişte removeTouchPad gerekmez
-		// (MobileControlSelectSubState kendi pad'ini yönetir),
-		// diğer tüm substate'lerde touchpad'i kaldır.
 		if (label != 'Gecikme Ve Kombo')
 		{
 			removeTouchPad();
@@ -212,10 +197,6 @@ class OptionsState extends MusicBeatState
 		});
 	}
 
-	// ═══════════════════════════════════════════════════════
-	// CREATE
-	// ═══════════════════════════════════════════════════════
-
 	override function create()
 	{
 		#if DISCORD_ALLOWED
@@ -246,7 +227,6 @@ class OptionsState extends MusicBeatState
 		changeSelection();
 		ClientPrefs.saveSettings();
 
-		// ── Mobil ipucu (orijinal OptionsState'den) ──────────────
 		if (controls.mobileC)
 		{
 			var tipText:FlxText = new FlxText(150, FlxG.height - 24, 0,
@@ -258,22 +238,13 @@ class OptionsState extends MusicBeatState
 			tipText.antialiasing = ClientPrefs.data.antialiasing;
 			add(tipText);
 		}
-
-		// ── TouchPad ─────────────────────────────────────────────
-		// Layout:
-		//   UP_DOWN  → D-Pad dikey (ama aynı zamanda LEFT/RIGHT grid nav için)
-		//   A        → ACCEPT (seç)
-		//   B        → BACK  (geri)
-		//   C        → Mobil Kontrol Menüsü (MobileControlSelectSubState)
 		
 		addTouchPad('LEFT_FULL', 'A_B_C');
 
 		super.create();
 	}
-	
-	// ═══════════════════════════════════════════════════════
-	// 🌌 BACKGROUND SYSTEM
-	// ═══════════════════════════════════════════════════════
+
+	// BG System
 	
 	function createBackgroundSystem()
 	{
@@ -372,9 +343,7 @@ class OptionsState extends MusicBeatState
 			g.fillRect(new flash.geom.Rectangle(0, i * 3, FlxG.width, 1), 0x08000000);
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// ✨ PARTICLE SYSTEMS
-	// ═══════════════════════════════════════════════════════
+	// Efekt Sistemi
 	
 	function createParticleSystems()
 	{
@@ -431,9 +400,7 @@ class OptionsState extends MusicBeatState
 		}
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 🔝 HEADER
-	// ═══════════════════════════════════════════════════════
+	// Holder
 	
 	function createHeader()
 	{
@@ -468,9 +435,7 @@ class OptionsState extends MusicBeatState
 		add(breadcrumbText);
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 👤 PROFILE PANEL
-	// ═══════════════════════════════════════════════════════
+	// Profil Paneli
 	
 	function createProfilePanel()
 	{
@@ -508,9 +473,7 @@ class OptionsState extends MusicBeatState
 		add(profileStats);
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 🃏 GRID CARD SYSTEM
-	// ═══════════════════════════════════════════════════════
+	// Kart Sistemi
 	
 	function createCardGrid()
 	{
@@ -530,8 +493,6 @@ class OptionsState extends MusicBeatState
 			var cardY = gridStartY + (row * (cardHeight + cardSpacingY));
 			
 			var colors = optionsColor.exists(option) ? optionsColor.get(option) : [0xFF444444, 0xFF333333, 0xFF222222];
-			
-			// Card glow
 			var glow:FlxSprite = FlxGradient.createGradientFlxSprite(
 				cardWidth + 20, cardHeight + 20, [colors[0], 0x00000000], 1, 0, true);
 			glow.x = cardX - 10; glow.y = cardY - 10;
@@ -539,18 +500,17 @@ class OptionsState extends MusicBeatState
 			glow.scrollFactor.set(1, 1); glow.ID = num;
 			cardGlows.add(glow);
 			
-			// Main card
+			// Ana Kart
 			var card:FlxSprite = FlxGradient.createGradientFlxSprite(cardWidth, cardHeight, colors, 1, 135);
 			card.x = cardX; card.y = cardY;
 			card.alpha = 0; card.scrollFactor.set(1, 1); card.ID = num;
 			categoryCards.add(card);
 			
-			// Card border
 			var border:FlxSprite = new FlxSprite(cardX, cardY + cardHeight - 4).makeGraphic(cardWidth, 4, FlxColor.WHITE);
 			border.alpha = 0; border.scrollFactor.set(1, 1); border.ID = num;
 			cardBorders.add(border);
 			
-			// Icon
+			// Ikon
 			var iconPath = optionsIconPaths.exists(option) ? optionsIconPaths.get(option) : 'pet';
 			var icon:FlxSprite = new FlxSprite(cardX + 12, cardY + 12);
 			if (Paths.image('ultra/settings/images/' + iconPath) != null)
@@ -563,7 +523,6 @@ class OptionsState extends MusicBeatState
 			icon.antialiasing = ClientPrefs.data.antialiasing;
 			cardIcons.add(icon);
 			
-			// Title
 			var titleTxt:FlxText = new FlxText(cardX + 95, cardY + 20, cardWidth - 110, option, 22);
 			titleTxt.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, LEFT,
 				FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -571,14 +530,12 @@ class OptionsState extends MusicBeatState
 			titleTxt.scrollFactor.set(1, 1); titleTxt.ID = num;
 			cardTitleTexts.add(titleTxt);
 			
-			// Desc
 			var stats = optionsStats.exists(option) ? optionsStats.get(option) : 'Ayarlar';
 			var cardDesc:FlxText = new FlxText(cardX + 95, cardY + 52, cardWidth - 110, stats, 12);
 			cardDesc.setFormat(Paths.font("vcr.ttf"), 12, 0xFFCCCCCC, LEFT);
 			cardDesc.alpha = 0; cardDesc.scrollFactor.set(1, 1); cardDesc.ID = num;
 			cardDescTexts.add(cardDesc);
 			
-			// P.E.T badge
 			if (option == 'P.E.T Ayarları')
 			{
 				var badge:FlxSprite = new FlxSprite(cardX + cardWidth - 55, cardY + 10).makeGraphic(50, 20, 0xFFE91E63);
@@ -593,9 +550,7 @@ class OptionsState extends MusicBeatState
 		}
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 📝 DESCRIPTION PANEL
-	// ═══════════════════════════════════════════════════════
+	// Açıklama Paneli
 	
 	function createDescriptionPanel()
 	{
@@ -626,16 +581,13 @@ class OptionsState extends MusicBeatState
 		descStats.scrollFactor.set(0, 0); add(descStats);
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 🎮 CONTROL HINTS
-	// ═══════════════════════════════════════════════════════
+	// Kontrol İpucusu
 	
 	function createControlHints()
 	{
 		controlHintsPanel = new FlxSprite(0, FlxG.height).makeGraphic(FlxG.width, 28, 0xAA000000);
 		controlHintsPanel.scrollFactor.set(0, 0); add(controlHintsPanel);
 
-		// Mobilde farklı ipucu göster
 		var hintStr:String = controls.mobileC
 			? "D-PAD: Gezin  |  A: Seç  |  B: Geri  |  C: Mobil Kontroller"
 			: "YUKARI/ASAGI/SOL/SAG: Gezin   |   ENTER: Sec   |   ESC: Geri";
@@ -646,10 +598,6 @@ class OptionsState extends MusicBeatState
 		controlHintsText.alpha = 0;
 		add(controlHintsText);
 	}
-	
-	// ═══════════════════════════════════════════════════════
-	// 🎬 ENTRANCE ANIMATION
-	// ═══════════════════════════════════════════════════════
 	
 	function playEntranceAnimation()
 	{
@@ -705,10 +653,6 @@ class OptionsState extends MusicBeatState
 			FlxTween.tween(badge, {alpha: 1}, 0.5, {ease: FlxEase.elasticOut, startDelay: 1.0});
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 🚪 EXIT ANIMATION
-	// ═══════════════════════════════════════════════════════
-	
 	function playExitAnimation(callback:Void->Void)
 	{
 		FlxTween.tween(bgGradient, {alpha: 0}, 0.4, {ease: FlxEase.quartIn});
@@ -741,10 +685,6 @@ class OptionsState extends MusicBeatState
 		new FlxTimer().start(0.45, function(tmr:FlxTimer) { callback(); });
 	}
 
-	// ═══════════════════════════════════════════════════════
-	// CLOSE SUBSTATE
-	// ═══════════════════════════════════════════════════════
-
 	override function closeSubState()
 	{
 		super.closeSubState();
@@ -757,7 +697,6 @@ class OptionsState extends MusicBeatState
 
 		controls.isInSubstate = false;
 
-		// TouchPad'i yenile
 		removeTouchPad();
 		addTouchPad('LEFT_FULL', 'A_B_C');
 		persistentUpdate = true;
@@ -765,15 +704,10 @@ class OptionsState extends MusicBeatState
 		playEntranceAnimation();
 	}
 
-	// ═══════════════════════════════════════════════════════
-	// UPDATE
-	// ═══════════════════════════════════════════════════════
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		
-		// ── 🔐 SECRET CODE CHECK ──────────────────────────────────
 		if (FlxG.keys.justPressed.ANY)
 		{
 			var pressedKey:FlxKey = FlxG.keys.firstJustPressed();
@@ -800,7 +734,6 @@ class OptionsState extends MusicBeatState
 			}
 		}
 		
-		// ── 🎨 CONTINUOUS ANIMATIONS ──────────────────────────────
 		animTimer  += elapsed;
 		pulseTimer += elapsed;
 		waveTimer  += elapsed * 2;
@@ -853,14 +786,12 @@ class OptionsState extends MusicBeatState
 		if (headerGlow != null)
 			headerGlow.alpha = 0.5 + Math.sin(waveTimer) * 0.2;
 		
-		// ── 📷 SMOOTH CAMERA ──────────────────────────────────────
 		var lerpVal:Float = Math.max(0, Math.min(1, elapsed * 6));
 		camFollowPos.setPosition(
 			FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal),
 			FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal)
 		);
 
-		// ── 🃏 CARD ANIMATIONS ────────────────────────────────────
 		for (num in 0...categoryCards.length)
 		{
 			var row  = Std.int(num / gridCols);
@@ -914,9 +845,6 @@ class OptionsState extends MusicBeatState
 			}
 		}
 
-		// ── 🎮 INPUT HANDLING ─────────────────────────────────────
-		// Grid navigasyonu — klavye VE D-Pad aynı anda çalışır
-		// (controls.UI_LEFT_P/RIGHT_P/UP_P/DOWN_P zaten touchPad D-Pad'i kapsar)
 		if (controls.UI_LEFT_P)  changeGridSelection(-1, 0);
 		if (controls.UI_RIGHT_P) changeGridSelection( 1, 0);
 		if (controls.UI_UP_P)    changeGridSelection( 0,-1);
@@ -934,7 +862,6 @@ class OptionsState extends MusicBeatState
 			openSubState(new mobile.substates.MobileControlSelectSubState());
 		}
 
-		// ── BACK ──────────────────────────────────────────────────
 		if (controls.BACK)
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -948,7 +875,6 @@ class OptionsState extends MusicBeatState
 				else MusicBeatState.switchState(new MainMenuState());
 			});
 		}
-		// ── ACCEPT ────────────────────────────────────────────────
 		else if (controls.ACCEPT)
 		{
 			FlxG.sound.play(Paths.sound('confirmMenu'));
@@ -964,10 +890,6 @@ class OptionsState extends MusicBeatState
 			openSelectedSubstate(options[curSelected]);
 		}
 	}
-	
-	// ═══════════════════════════════════════════════════════
-	// 🔀 GRID NAVIGATION
-	// ═══════════════════════════════════════════════════════
 	
 	function changeGridSelection(dx:Int, dy:Int)
 	{
@@ -1003,10 +925,6 @@ class OptionsState extends MusicBeatState
 		curCol = curSelected % gridCols;
 	}
 	
-	// ═══════════════════════════════════════════════════════
-	// 🔄 CHANGE SELECTION
-	// ═══════════════════════════════════════════════════════
-	
 	function changeSelection(change:Int = 0)
 	{
 		FlxG.sound.play(Paths.sound('scrollMenu'));
@@ -1030,7 +948,6 @@ class OptionsState extends MusicBeatState
 		FlxTween.tween(descTitle, {alpha: 1}, 0.3, {ease: FlxEase.quartOut});
 		FlxTween.tween(descText,  {alpha: 1}, 0.3, {ease: FlxEase.quartOut, startDelay: 0.1});
 		
-		// Camera scroll
 		var col = curSelected % gridCols;
 		var row = Std.int(curSelected / gridCols);
 		var targetCamX:Float = FlxG.width / 2;
@@ -1043,7 +960,6 @@ class OptionsState extends MusicBeatState
 		else if (row >= 2) targetCamY = FlxG.height / 2 + 80;
 		camFollow.setPosition(targetCamX, targetCamY);
 		
-		// Background gradient rengi
 		if (optionsColor.exists(selectedOption))
 		{
 			var colors = optionsColor.get(selectedOption);
