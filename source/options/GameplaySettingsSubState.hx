@@ -51,12 +51,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 		
-		var option:Option = new Option('Xq Bok Yesin',
-			"Xq'nun Bok Yemesini sağlar, oyun sırasında xq harflerine basarak açılıp / kapatılabilir.",
-			'oldModSupport',
-			BOOL);
-		addOption(option);
-		
 		var option:Option = new Option('Otomatik Ram Bosaltimi',
 			"Kullanılmayan Assetlar (PNG / SES DOSYALARI VB.) 10 saniye içinde Ram Önbelleğinden Kaldırılır. Ram'i Düşük Cihazlar için Önerilir. (BU AYAR BETADA!)",
 			'autoramopt',

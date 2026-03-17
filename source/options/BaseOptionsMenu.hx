@@ -63,6 +63,10 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		'Dil' => [0xFFFFD700, 0xFFFFEE00]
 	];
 	
+	// Kilitli option için gri renk sabiti
+	static inline var LOCKED_COLOR:Int   = 0xFF888888;
+	static inline var UNLOCKED_COLOR:Int = 0xFFFFFFFF;
+
 	public function new()
 	{
 		super();
@@ -150,9 +154,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		
 		FlxTween.tween(subtitleText, {alpha: 0.7}, 0.6, {ease: FlxEase.quartOut, startDelay: 0.5});
 
-		// ═══════════════════════════════════════
-		// 3. SIDE PANEL
-		// ═══════════════════════════════════════
+		// Yan Panel
 		
 		sidePanel = FlxGradient.createGradientFlxSprite(
 			350,
@@ -233,8 +235,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		
 		for (i in 0...optionsArray.length)
 		{
-			// Option card background (DÜZELTİLDİ: Daha geniş kart)
-			var card:FlxSprite = new FlxSprite(0, 0).makeGraphic(800, 90, 0x66000000); // 700->800, 75->90
+			// Option card background
+			var card:FlxSprite = new FlxSprite(0, 0).makeGraphic(800, 90, 0x66000000);
 			card.ID = i;
 			card.alpha = 0;
 			card.scrollFactor.set();
@@ -244,7 +246,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			optionText.isMenuItem = true;
 			optionText.targetY = i;
 			optionText.alpha = 0;
-			optionText.scrollFactor.set(); // BUGFIX: Scroll factor eklendi
+			optionText.scrollFactor.set();
 			grpOptions.add(optionText);
 
 			// Type-specific elements
@@ -254,7 +256,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				checkbox.sprTracker = optionText;
 				checkbox.ID = i;
 				checkbox.alpha = 0;
-				checkbox.scrollFactor.set(); // BUGFIX
+				checkbox.scrollFactor.set();
 				checkboxGroup.add(checkbox);
 			}
 			else if(optionsArray[i].type == FILE)
@@ -263,7 +265,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				fileSelector.sprTracker = optionText;
 				fileSelector.optionID = i;
 				fileSelector.alpha = 0;
-				fileSelector.scrollFactor.set(); // BUGFIX
+				fileSelector.scrollFactor.set();
 				fileSelectorGroup.add(fileSelector);
 			}
 			else
@@ -275,7 +277,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				valueText.copyAlpha = true;
 				valueText.ID = i;
 				valueText.alpha = 0;
-				valueText.scrollFactor.set(); // BUGFIX
+				valueText.scrollFactor.set();
 				grpTexts.add(valueText);
 				optionsArray[i].child = valueText;
 			}
@@ -369,29 +371,26 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		}
 
 		// ═══════════════════════════════════════
-		// CARD POSITIONING (DÜZELTİLDİ)
+		// CARD POSITIONING
 		// ═══════════════════════════════════════
 		
 		var startY:Float = 200;
-		var spacing:Float = 105; // 85->105 (Daha geniş aralık)
-		var centerX:Float = (FlxG.width - 800) / 2; // 800 genişliğe göre ortala
+		var spacing:Float = 105;
+		var centerX:Float = (FlxG.width - 800) / 2;
 
 		for (num => item in grpOptions.members)
 		{
 			var targetY:Float = startY + ((num - curSelected) * spacing);
 			item.y = FlxMath.lerp(item.y, targetY, elapsed * 10);
 		
-			// Update card position (DÜZELTİLDİ: Text'e tam oturması için)
 			var card = optionCards.members[num];
 			if (card != null)
 			{
 				card.x = FlxMath.lerp(card.x, centerX, elapsed * 10);
-				card.y = FlxMath.lerp(card.y, item.y - 15, elapsed * 10); // -8 -> -15 (Daha yukarı)
+				card.y = FlxMath.lerp(card.y, item.y - 15, elapsed * 10);
 			
-				// Text'i kart içine yerleştir
-				item.x = FlxMath.lerp(item.x, centerX + 110, elapsed * 10); // 100 -> 110
+				item.x = FlxMath.lerp(item.x, centerX + 110, elapsed * 10);
 			
-				// Scale effect
 				if (num == curSelected)
 				{
 					card.alpha = FlxMath.lerp(card.alpha, 1, elapsed * 10);
@@ -501,83 +500,97 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 
 				default:
-					if(controls.UI_LEFT || controls.UI_RIGHT)
+					// ── Bağımlılık kilidi kontrolü ──────────────────────────────
+					// Eğer bu option başka bir BOOL'a bağlıysa ve o BOOL false ise,
+					// sol/sağ tuşlara basılınca uyarı sesi çal ve işlem yapma.
+					if (curOption.dependsOn != null && isOptionLocked(curOption))
 					{
-						var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
-						if(holdTime > 0.5 || pressed)
+						if (controls.UI_LEFT_P || controls.UI_RIGHT_P)
+							FlxG.sound.play(Paths.sound('cancelMenu'));
+						// Kilidi geç, başka hiçbir şey yapma
+					}
+					else
+					{
+						// ── Normal sol/sağ değişim mantığı ─────────────────────
+						if(controls.UI_LEFT || controls.UI_RIGHT)
 						{
-							if(pressed)
+							var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
+							if(holdTime > 0.5 || pressed)
 							{
-								var add:Dynamic = null;
-								if(curOption.type != STRING)
-									add = controls.UI_LEFT ? -curOption.changeValue : curOption.changeValue;
-
-								switch(curOption.type)
+								if(pressed)
 								{
-									case INT, FLOAT, PERCENT:
-										holdValue = curOption.getValue() + add;
-										if(holdValue < curOption.minValue) holdValue = curOption.minValue;
-										else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
-		
-										if(curOption.type == INT)
-										{
-											holdValue = Math.round(holdValue);
-											curOption.setValue(holdValue);
-										}
-										else
-										{
-											holdValue = FlxMath.roundDecimal(holdValue, curOption.decimals);
-											curOption.setValue(holdValue);
-										}
-		
-									case STRING:
-										var num:Int = curOption.curOption;
-										if(controls.UI_LEFT_P) --num;
-										else num++;
-		
-										if(num < 0)
-											num = curOption.options.length - 1;
-										else if(num >= curOption.options.length)
-											num = 0;
-		
-										curOption.curOption = num;
-										curOption.setValue(curOption.options[num]);
+									var add:Dynamic = null;
+									if(curOption.type != STRING)
+										add = controls.UI_LEFT ? -curOption.changeValue : curOption.changeValue;
 
-									default:
+									switch(curOption.type)
+									{
+										case INT, FLOAT, PERCENT:
+											holdValue = curOption.getValue() + add;
+											if(holdValue < curOption.minValue) holdValue = curOption.minValue;
+											else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
+					
+											if(curOption.type == INT)
+											{
+												holdValue = Math.round(holdValue);
+												curOption.setValue(holdValue);
+											}
+											else
+											{
+												holdValue = FlxMath.roundDecimal(holdValue, curOption.decimals);
+												curOption.setValue(holdValue);
+											}
+					
+										case STRING:
+											var num:Int = curOption.curOption;
+											if(controls.UI_LEFT_P) --num;
+											else num++;
+					
+											if(num < 0)
+												num = curOption.options.length - 1;
+											else if(num >= curOption.options.length)
+												num = 0;
+					
+											curOption.curOption = num;
+											curOption.setValue(curOption.options[num]);
+
+										default:
+									}
+									updateTextFrom(curOption);
+									curOption.change();
+									FlxG.sound.play(Paths.sound('scrollMenu'));
 								}
-								updateTextFrom(curOption);
-								curOption.change();
-								FlxG.sound.play(Paths.sound('scrollMenu'));
-							}
-							else if(curOption.type != STRING)
-							{
-								holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
-								if(holdValue < curOption.minValue) holdValue = curOption.minValue;
-								else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
-		
-								switch(curOption.type)
+								else if(curOption.type != STRING)
 								{
-									case INT:
-										curOption.setValue(Math.round(holdValue));
-									
-									case PERCENT:
-										curOption.setValue(FlxMath.roundDecimal(holdValue, curOption.decimals));
+									holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
+									if(holdValue < curOption.minValue) holdValue = curOption.minValue;
+									else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
+					
+									switch(curOption.type)
+									{
+										case INT:
+											curOption.setValue(Math.round(holdValue));
+										
+										case PERCENT:
+											curOption.setValue(FlxMath.roundDecimal(holdValue, curOption.decimals));
 
-									default:
+										default:
+									}
+									updateTextFrom(curOption);
+									curOption.change();
 								}
-								updateTextFrom(curOption);
-								curOption.change();
 							}
+			
+							if(curOption.type != STRING)
+								holdTime += elapsed;
 						}
-		
-						if(curOption.type != STRING)
-							holdTime += elapsed;
+						else if(controls.UI_LEFT_R || controls.UI_RIGHT_R)
+						{
+							if(holdTime > 0.5) FlxG.sound.play(Paths.sound('scrollMenu'));
+							holdTime = 0;
+						}
 					}
-					else if(controls.UI_LEFT_R || controls.UI_RIGHT_R)
-					{
-						if(holdTime > 0.5) FlxG.sound.play(Paths.sound('scrollMenu'));
-						holdTime = 0;
-					}
+					// ────────────────────────────────────────────────────────────
 			}
 			
 			var cPressed:Bool = false;
@@ -615,6 +628,77 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			nextAccept -= 1;
 		}
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// BAĞIMLILIK SİSTEMİ
+	// ═══════════════════════════════════════════════════════════════
+
+	/**
+	 * Verilen option'ın kilitli olup olmadığını döndürür.
+	 * dependsOn null ise her zaman false (kilitli değil) döner.
+	 * dependsOn dolu ise, ilgili BOOL option'ın değeri false ise true (kilitli) döner.
+	 */
+	function isOptionLocked(option:Option):Bool
+	{
+		if (option.dependsOn == null) return false;
+		for (parentOpt in optionsArray)
+		{
+			if (parentOpt.variable == option.dependsOn)
+				return Std.string(parentOpt.getValue()) != 'true';
+		}
+		// Parent bulunamazsa kilitleme (güvenli taraf)
+		return false;
+	}
+
+	/**
+	 * Tüm option'ların bağımlılık durumuna göre renklerini günceller.
+	 * Kilitli olanlar gri, serbest olanlar beyaz görünür.
+	 * BOOL option'lar için checkbox rengini değiştirir.
+	 * STRING/INT/FLOAT/vb. için hem label hem value text'i renklendirir.
+	 */
+	function updateDependencyVisuals()
+	{
+		for (i in 0...optionsArray.length)
+		{
+			var opt = optionsArray[i];
+			if (opt.dependsOn == null) continue; // Bağımlılık yoksa atla
+
+			var locked:Bool = isOptionLocked(opt);
+			var targetColor:Int = locked ? LOCKED_COLOR : UNLOCKED_COLOR;
+
+			// Alphabet label rengini güncelle
+			var optText = grpOptions.members[i];
+			if (optText != null)
+				optText.color = targetColor;
+
+			if (opt.type == BOOL)
+			{
+				// Checkbox'ın rengini güncelle
+				for (checkbox in checkboxGroup)
+				{
+					if (checkbox.ID == i)
+					{
+						checkbox.color = targetColor;
+						break;
+					}
+				}
+			}
+			else
+			{
+				// Değer text'inin rengini güncelle (AttachedText)
+				for (txt in grpTexts)
+				{
+					if (txt.ID == i)
+					{
+						txt.color = targetColor;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════
 
 	function bindingKeyUpdate(elapsed:Float)
 	{
@@ -737,7 +821,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		attach.sprTracker = bind.sprTracker;
 		attach.copyAlpha = true;
 		attach.ID = bind.ID;
-		attach.scrollFactor.set(); // BUGFIX: Scroll factor eklendi
+		attach.scrollFactor.set();
 		playstationCheck(attach);
 		attach.scaleX = Math.min(1, MAX_KEYBIND_WIDTH / attach.width);
 		attach.x = bind.x;
@@ -756,7 +840,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		var gamepad:FlxGamepad = FlxG.gamepads.firstActive;
 		var model:FlxGamepadModel = gamepad != null ? gamepad.detectedModel : UNKNOWN;
 		
-		// BUGFIX: Emoji kontrolü düzeltildi
 		if(model == PS4 && alpha.letters != null && alpha.letters.length > 0)
 		{
 			var letter = alpha.letters[0];
@@ -832,15 +915,11 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		{
 			item.targetY = num - curSelected;
 			item.alpha = 0.6;
-			
-			// Scale effect
 			item.scale.set(0.85, 0.85);
 			
 			if (item.targetY == 0)
 			{
 				item.alpha = 1;
-				
-				// Bounce animation
 				FlxTween.cancelTweensOf(item.scale);
 				item.scale.set(1, 1);
 				FlxTween.tween(item.scale, {x: 1.05, y: 1.05}, 0.2, {ease: FlxEase.backOut});
@@ -855,11 +934,19 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		curOption = optionsArray[curSelected];
 		FlxG.sound.play(Paths.sound('scrollMenu'));
+
+		// Seçim değişince bağımlılık görsellerini tazele
+		updateDependencyVisuals();
 	}
 
 	function reloadCheckboxes()
+	{
 		for (checkbox in checkboxGroup)
 			checkbox.daValue = Std.string(optionsArray[checkbox.ID].getValue()) == 'true';
+
+		// Checkbox durumu değişince bağımlı option'ların görünümünü güncelle
+		updateDependencyVisuals();
+	}
 
 	function openFileSelector(option:Option)
 	{
@@ -938,7 +1025,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		{
 			option.setValue(path);
 
-			// fileSelectorGroup'taki görseli güncelle
 			for (fs in fileSelectorGroup)
 			{
 				if (fs.optionID == curSelected)

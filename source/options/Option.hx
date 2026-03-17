@@ -42,6 +42,14 @@ class Option
 	public var defaultKeys:Keybind = null; //Only used in keybind type
 	public var keys:Keybind = null; //Only used in keybind type
 
+	/**
+	 * Bağımlılık sistemi: Bu option'ın düzenlenebilir olması için
+	 * hangi BOOL option'ın (variable adıyla) true olması gerektiğini belirtir.
+	 * Örnek: option.dependsOn = 'petloadingscreen';
+	 * null ise bağımlılık yoktur, option her zaman aktiftir.
+	 */
+	public var dependsOn:String = null;
+
 	public function new(name:String, description:String = '', variable:String, type:OptionType = BOOL, ?options:Array<String> = null, ?translation:String = null)
 	{
 		_name = name;

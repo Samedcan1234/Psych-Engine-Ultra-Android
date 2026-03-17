@@ -1,10 +1,10 @@
 package options;
 
-class PETSettingsState extends BaseOptionsMenu
+class PEUSettingsState extends BaseOptionsMenu
 {
 	public function new()
 	{
-		title = 'P.E.T Ayarlari';
+		title = 'P.E.U Ayarları';
 		rpcTitle = 'P.E.T Ayarları Menüsünde';
 
 		var option:Option = new Option(
@@ -16,8 +16,8 @@ class PETSettingsState extends BaseOptionsMenu
 		addOption(option);
 
 		option = new Option(
-			'P.E.T Yükleme Ekrani',
-			'Aktif edildiğinde, P.E.T yükleme ekranlarını etkinleştirir.',
+			'P.E.U Yükleme Ekrani',
+			'Aktif edildiğinde, P.E.U yükleme ekranlarını etkinleştirir, orjinal yükleme ekranı yerine P.E.U nun yükleme resimlerini kullanır.',
 			'petloadingscreen',
 			'BOOL'
 		);
@@ -30,6 +30,7 @@ class PETSettingsState extends BaseOptionsMenu
 			STRING,
 			['V1', 'V2', 'V2U', 'V2UP', 'V3', 'ONLINE', 'UNL']
 		);
+		option.dependsOn = 'petwatermark';
 		addOption(option);
 
 		option = new Option(
@@ -39,6 +40,7 @@ class PETSettingsState extends BaseOptionsMenu
 			STRING,
 			['V1', 'V2', 'V2U', 'ONLINE']
 		);
+		option.dependsOn = 'petloadingscreen';
 		addOption(option);
 		
 		option = new Option(

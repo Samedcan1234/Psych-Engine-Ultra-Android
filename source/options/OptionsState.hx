@@ -21,7 +21,7 @@ class OptionsState extends MusicBeatState
 		'Grafikler',
 		'Görünüş & Arayüz',
 		'Oynanış',
-		'P.E.T Ayarları'
+		'P.E.U Ayarları'
 		#if TRANSLATIONS_ALLOWED , 'Dil' #end
 		,'Mobil Ayarlar'
 	];
@@ -118,7 +118,7 @@ class OptionsState extends MusicBeatState
 		'Arayüz'           => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
 		'Oynanış'          => [0xFF2ECC71, 0xFF27AE60, 0xFF1E8449],
 		'Dil'              => [0xFFF39C12, 0xFFE67E22, 0xFFCA6F1E],
-		'P.E.T Ayarları'   => [0xFFE91E63, 0xFFC2185B, 0xFF880E4F]
+		'P.E.U Ayarları'   => [0xFFE91E63, 0xFFC2185B, 0xFF880E4F]
 	];
 	
 	// Kategori Path
@@ -130,7 +130,7 @@ class OptionsState extends MusicBeatState
 		'Arayüz'           => 'arayuz',
 		'Oynanış'          => 'oynanis',
 		'Dil'              => 'dil',
-		'P.E.T Ayarları'   => 'pet'
+		'P.E.U Ayarları'   => 'peu'
 	];
 	
 	// Kategori Açıklaması
@@ -142,7 +142,7 @@ class OptionsState extends MusicBeatState
 		'Arayüz'           => 'Menu tasarimi ve oyun ici gorsel ogeleri kisisellestirin.',
 		'Oynanış'          => 'Oynanış Ayarlarınızı Düzenleyin, Tam kendi tarzınıza Göre!.',
 		'Dil'              => 'Oyun dilini degistirin ve yerellestirme seceneklerini goruntuleyin.',
-		'P.E.T Ayarları'   => 'Psych Engine Turkiye\'ye ozel gelismis ayarlari yonetin.'
+		'P.E.U Ayarları'   => 'Psych Engine Ultra\'yı kişileştirin.'
 	];
 	
 	// Katergori Açıklama 2
@@ -154,7 +154,7 @@ class OptionsState extends MusicBeatState
 		'Arayüz'           => 'Ekran Kartın yanacak xq',
 		'Oynanış'          => 'Okların nerede olacağını belirle',
 		'Dil'              => 'NE MUTLU TÜRKÜM DİYENE',
-		'P.E.T Ayarları'   => 'çokzorladı'
+		'P.E.U Ayarları'   => 'çokzorladı'
 	];
 
 	function openSelectedSubstate(label:String)
@@ -184,8 +184,8 @@ class OptionsState extends MusicBeatState
 					openSubState(new options.LanguageSubState());
 				case 'Mobil Ayarlar':
 					openSubState(new mobile.options.MobileOptionsSubState());
-				case 'P.E.T Ayarları':
-					openSubState(new options.PETSettingsState());
+				case 'P.E.U Ayarları':
+					openSubState(new options.PEUSettingsState());
 			}
 		});
 	}
@@ -422,7 +422,7 @@ class OptionsState extends MusicBeatState
 		titleText.alpha = 0;
 		add(titleText);
 		
-		subtitleText = new FlxText(40, 62, FlxG.width - 280, "Oyun deneyiminizi kişileştirin! XQZ64.", 18);
+		subtitleText = new FlxText(40, 62, FlxG.width - 280, "Oyun deneyiminizi kişileştirin!", 18);
 		subtitleText.setFormat(Paths.font("vcr.ttf"), 18, 0xFFBBBBBB, LEFT);
 		subtitleText.scrollFactor.set(0, 0);
 		subtitleText.alpha = 0;
