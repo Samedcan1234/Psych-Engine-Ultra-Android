@@ -7,7 +7,7 @@ permissions:
 
 env:
   PROJECT_NAME: PsychEngine
-  REPO_PATH: Samedcan1234/Psych-Engine-1.0.4-Android
+  REPO_PATH: Samedcan1234/Psych-Engine-Ultra-Android
 
 jobs:
   get-commit-hash:
