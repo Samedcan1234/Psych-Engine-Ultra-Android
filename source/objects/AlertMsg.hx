@@ -12,85 +12,60 @@ import openfl.events.MouseEvent;
 import openfl.events.Event;
 import openfl.geom.ColorTransform;
 
-/**
- * AlertMsg — Merkez-üst köşeden düşen, sayaçlı alert sistemi.
- *
- * KULLANIM:
- *   AlertMsg.show("Başlık");
- *   AlertMsg.show("Başlık", "İçerik mesajı");
- *   AlertMsg.show("Başlık", "İçerik", 8);           // 8 saniyelik
- *   AlertMsg.show("Başlık", "İçerik", 5, 0xFF00FF); // Özel renk
- *   AlertMsg.show("Başlık", "İçerik", 5, 0xFF00FF, () -> trace("Tıklandı!"));
- *
- * RENK TİPLERİ (hazır):
- *   AlertMsg.COLOR_INFO    = 0xFF4FC3F7  (mavi)
- *   AlertMsg.COLOR_SUCCESS = 0xFF69F0AE  (yeşil)
- *   AlertMsg.COLOR_WARNING = 0xFFFFD740  (sarı)
- *   AlertMsg.COLOR_ERROR   = 0xFFFF5252  (kırmızı)
- */
-class AlertMsg extends Sprite
+class AlertMessage extends Sprite
 {
-    // ── Hazır renkler ───────────────────────────────────────────────────────
     public static inline var COLOR_INFO:Int    = 0xFF4FC3F7;
     public static inline var COLOR_SUCCESS:Int = 0xFF69F0AE;
     public static inline var COLOR_WARNING:Int = 0xFFFFD740;
     public static inline var COLOR_ERROR:Int   = 0xFFFF5252;
 
-    // ── Layout sabitleri ────────────────────────────────────────────────────
-    static inline var PADDING:Float      = 16;
-    static inline var COUNTER_W:Float    = 52;
+    static inline var PADDING:Float       = 16;
+    static inline var COUNTER_W:Float     = 52;
     static inline var MIN_CONTENT_W:Float = 220;
     static inline var MAX_CONTENT_W:Float = 380;
-    static inline var CORNER:Float       = 6;
-    static inline var BAR_H:Float        = 4;
-    static inline var SLIDE_DURATION:Float = 0.38; // saniye (slide-in)
-    static inline var FADE_DURATION:Float  = 0.28; // saniye (fade-out)
+    static inline var CORNER:Float        = 6;
+    static inline var BAR_H:Float         = 4;
+    static inline var SLIDE_DURATION:Float = 0.38;
+    static inline var FADE_DURATION:Float  = 0.28;
 
-    // ── Instance değişkenler ────────────────────────────────────────────────
     var _bg:Shape;
-    var _accentBar:Shape;       // Sol dikey renkli çizgi
-    var _timerBar:Shape;        // Alt sayaç barı
-    var _counterBg:Shape;       // Sol sayaç kutusu
+    var _accentBar:Shape;
+    var _timerBar:Shape;
+    var _counterBg:Shape;
     var _counterField:TextField;
     var _titleField:TextField;
     var _contentField:TextField;
 
     var _accentColor:Int;
     var _totalTime:Float;
-    var _elapsed:Float   = 0;
-    var _state:AlertState = SLIDING_IN;
-    var _slideProgress:Float = 0; // 0→1 slide animasyonu
-
-    var _targetY:Float   = 0;   // AlertMgr tarafından set edilir
-    var _currentY:Float  = 0;
-    var _onYChanged:Float->Void; // AlertMgr callback
-
+    var _elapsed:Float       = 0;
+    var _state:AlertState    = SLIDING_IN;
+    var _slideProgress:Float = 0;
+    var _targetY:Float       = 0;
+    var _currentY:Float      = 0;
+    var _onYChanged:Float->Void;
     var _onClick:Null<Void->Void>;
-    var _isDead:Bool = false;
+    var _isDead:Bool         = false;
 
-    // Boyutlar (AlertMgr'ın layout hesabı için public)
     public var totalW:Float = 0;
     public var totalH:Float = 0;
 
     public function new() { super(); }
 
-    // ── Oluştur / Yeniden kullan ─────────────────────────────────────────
     public function setup(titleText:String, ?messageText:String, duration:Float = 5,
-                          accentColor:Int = COLOR_INFO, ?onClick:Void->Void):AlertMsg
+                          accentColor:Int = 0xFF4FC3F7, ?onClick:Void->Void):AlertMessage
     {
-        // Önceki çocukları temizle
         while (numChildren > 0) removeChildAt(0);
 
-        _accentColor = accentColor;
-        _totalTime   = Math.max(1, duration);
-        _elapsed     = 0;
-        _state       = SLIDING_IN;
+        _accentColor   = accentColor;
+        _totalTime     = Math.max(1, duration);
+        _elapsed       = 0;
+        _state         = SLIDING_IN;
         _slideProgress = 0;
-        _isDead      = false;
-        _onClick     = onClick;
-        alpha        = 1;
+        _isDead        = false;
+        _onClick       = onClick;
+        alpha          = 1;
 
-        // ── İçerik TextField'ları ─────────────────────────────────────────
         var fontName:String = Assets.getFont('assets/fonts/vcr.ttf').fontName;
 
         _titleField = _makeField(fontName, 20, 0xFFFFFFFF, true);
@@ -101,43 +76,36 @@ class AlertMsg extends Sprite
 
         var hasContent:Bool = (messageText ?? '').trim().length > 0;
 
-        // İçerik genişliğini hesapla
-        var rawTW:Float = _measureTextWidth(_titleField);
-        var rawCW:Float = hasContent ? _measureTextWidth(_contentField) : 0;
+        var rawTW:Float    = _measureTextWidth(_titleField);
+        var rawCW:Float    = hasContent ? _measureTextWidth(_contentField) : 0;
         var contentW:Float = Math.min(Math.max(Math.max(rawTW, rawCW), MIN_CONTENT_W), MAX_CONTENT_W);
 
-        // TextField genişliklerini ayarla (wrap için)
         _titleField.width   = contentW;
         _contentField.width = contentW;
 
-        var titleH:Float   = _titleField.textHeight   + 4;
+        var titleH:Float   = _titleField.textHeight + 4;
         var contentH:Float = hasContent ? (_contentField.textHeight + 4) : 0;
-
-        var innerH:Float = PADDING + titleH + (hasContent ? (6 + contentH) : 0) + PADDING + BAR_H;
+        var innerH:Float   = PADDING + titleH + (hasContent ? (6 + contentH) : 0) + PADDING + BAR_H;
 
         totalW = COUNTER_W + contentW + PADDING * 2;
         totalH = innerH;
 
-        // ── Arka plan ─────────────────────────────────────────────────────
         _bg = new Shape();
         _drawRoundRect(_bg, totalW, totalH, CORNER, 0xEE111318);
         addChild(_bg);
 
-        // ── Sol renkli accent şeridi ──────────────────────────────────────
         _accentBar = new Shape();
         _drawRoundRect(_accentBar, 4, totalH - BAR_H, CORNER, _accentColor);
         _accentBar.x = 0;
         _accentBar.y = 0;
         addChild(_accentBar);
 
-        // ── Sayaç kutu arka planı ─────────────────────────────────────────
         _counterBg = new Shape();
         _drawRoundRect(_counterBg, COUNTER_W, totalH - BAR_H, 0, _dimColor(_accentColor, 0.18));
         _counterBg.x = 4;
         _counterBg.y = 0;
         addChild(_counterBg);
 
-        // ── Sayaç TextField ───────────────────────────────────────────────
         _counterField = _makeField(fontName, 22, _accentColor, true);
         _counterField.width  = COUNTER_W;
         _counterField.height = totalH - BAR_H;
@@ -146,7 +114,6 @@ class AlertMsg extends Sprite
         _updateCounter();
         addChild(_counterField);
 
-        // ── Başlık ve içerik ──────────────────────────────────────────────
         var textX:Float = COUNTER_W + 4 + PADDING;
         _titleField.x = textX;
         _titleField.y = PADDING;
@@ -159,14 +126,12 @@ class AlertMsg extends Sprite
             addChild(_contentField);
         }
 
-        // ── Alt sayaç barı ────────────────────────────────────────────────
         _timerBar = new Shape();
         _timerBar.y = totalH - BAR_H;
         addChild(_timerBar);
         _updateTimerBar(1.0);
 
-        // ── Tıklama alanı için hit area ───────────────────────────────────
-        var hit:Shape = new Shape();
+        var hit:Sprite = new Sprite();
         hit.graphics.beginFill(0x000000, 0);
         hit.graphics.drawRect(0, 0, totalW, totalH);
         hit.graphics.endFill();
@@ -181,13 +146,12 @@ class AlertMsg extends Sprite
         return this;
     }
 
-    // ── Her kare güncelleme ───────────────────────────────────────────────
-    override function __enterFrame(delta:Float)
+    override function __enterFrame(deltaTime:Int)
     {
-        super.__enterFrame(delta);
-        if (_isDead || delta > 500) return;
+        super.__enterFrame(deltaTime);
+        if (_isDead || deltaTime > 500) return;
 
-        var dt:Float = delta * 0.001; // ms → saniye
+        var dt:Float = deltaTime * 0.001;
 
         switch (_state)
         {
@@ -198,14 +162,13 @@ class AlertMsg extends Sprite
                     _slideProgress = 1;
                     _state = COUNTING;
                 }
-                // Ease out cubic
                 var t:Float = 1 - Math.pow(1 - _slideProgress, 3);
                 y = _currentY + (-totalH - 10) * (1 - t);
                 alpha = t;
 
             case COUNTING:
                 _elapsed += dt;
-                y = _currentY; // Smooth Y tracking
+                y = _currentY;
                 var ratio:Float = 1 - (_elapsed / _totalTime);
                 if (ratio < 0) ratio = 0;
                 _updateTimerBar(ratio);
@@ -221,11 +184,10 @@ class AlertMsg extends Sprite
                 if (fadeRatio <= 0)
                     _die();
 
-            case DEAD: // hiç bir şey yapma
+            case DEAD:
         }
     }
 
-    // ── Y pozisyonu (AlertMgr layout) ─────────────────────────────────────
     public function setTargetY(ty:Float)
     {
         _targetY  = ty;
@@ -233,7 +195,6 @@ class AlertMsg extends Sprite
         if (_state == COUNTING) y = ty;
     }
 
-    // ── İç yardımcılar ───────────────────────────────────────────────────
     function _beginFadeOut()
     {
         _elapsed = 0;
@@ -258,8 +219,8 @@ class AlertMsg extends Sprite
         _beginFadeOut();
     }
 
-    function _onOver(_:MouseEvent)  { _state == COUNTING ? alpha = 0.92 : null; }
-    function _onOut(_:MouseEvent)   { alpha = 1.0; }
+    function _onOver(_:MouseEvent) { _state == COUNTING ? alpha = 0.92 : null; }
+    function _onOut(_:MouseEvent)  { alpha = 1.0; }
 
     function _updateTimerBar(ratio:Float)
     {
@@ -274,7 +235,6 @@ class AlertMsg extends Sprite
         var remaining:Int = Math.ceil(_totalTime - _elapsed);
         if (remaining < 0) remaining = 0;
         _counterField.text = Std.string(remaining);
-        // Renk geçişi: tam → soluk
         var ratio:Float = 1 - (_elapsed / _totalTime);
         _counterField.textColor = _blendColor(_dimColor(_accentColor, 0.4), _accentColor, ratio);
     }
@@ -328,32 +288,22 @@ class AlertMsg extends Sprite
     }
 }
 
-// ── Durum makinesi ──────────────────────────────────────────────────────────
 enum AlertState { SLIDING_IN; COUNTING; FADING_OUT; DEAD; }
 
-
-/**
- * AlertMgr — Stage'e eklenen tek container.
- * AlertMsg.show() çağrılarını yönetir.
- *
- * Kurulum (Main.hx veya benzeri init kodunda, stage hazır olduktan sonra):
- *   stage.addChild(new AlertMgr());
- */
 class AlertMgr extends Sprite
 {
     public static var instance:AlertMgr;
 
-    static inline var MARGIN_TOP:Float  = 12;
-    static inline var GAP:Float         = 8;
+    static inline var MARGIN_TOP:Float = 12;
+    static inline var GAP:Float        = 8;
 
-    var _pool:Array<AlertMsg>  = [];
-    var _active:Array<AlertMsg> = [];
+    var _pool:Array<AlertMessage>   = [];
+    var _active:Array<AlertMessage> = [];
 
     public function new()
     {
         super();
         instance = this;
-
         if (stage != null) _init();
         else addEventListener(Event.ADDED_TO_STAGE, _init);
     }
@@ -363,32 +313,25 @@ class AlertMgr extends Sprite
         removeEventListener(Event.ADDED_TO_STAGE, _init);
     }
 
-    /** Yeni alert oluştur ve göster */
     public function _spawn(title:String, ?message:String, duration:Float,
                            color:Int, ?onClick:Void->Void)
     {
-        var msg:AlertMsg = _pool.length > 0 ? _pool.pop() : new AlertMsg();
+        var msg:AlertMessage = _pool.length > 0 ? _pool.pop() : new AlertMessage();
         msg.setup(title, message, duration, color, onClick);
-
-        // Başlangıç X: ekran ortası
-        msg.x = (Lib.application.window.width  - msg.totalW) / 2;
-        // Başlangıç Y: ekranın üstü (görünmez)
+        msg.x = (Lib.application.window.width - msg.totalW) / 2;
         msg.y = -(msg.totalH + 10);
-
         addChild(msg);
         _active.push(msg);
         _relayout();
     }
 
-    /** Ölü alert'i geri al */
-    public function _recycle(msg:AlertMsg)
+    public function _recycle(msg:AlertMessage)
     {
         _active.remove(msg);
         _pool.push(msg);
         _relayout();
     }
 
-    /** Tüm aktif alert'lerin Y pozisyonlarını yukarıdan aşağıya diz */
     function _relayout()
     {
         var curY:Float = MARGIN_TOP;
@@ -399,51 +342,43 @@ class AlertMgr extends Sprite
         }
     }
 
-    /** Her kare X'i güncelle (pencere boyutu değişebilir) */
-    override function __enterFrame(delta:Float)
+    override function __enterFrame(deltaTime:Int)
     {
-        super.__enterFrame(delta);
+        super.__enterFrame(deltaTime);
         var winW:Float = Lib.application.window.width;
         for (msg in _active)
             msg.x = (winW - msg.totalW) / 2;
     }
 }
 
-
 /**
- * AlertMsg — Kullanıcı arayüzü (static kısayollar)
+ * KULLANIM:
+ *   AlertMsg.show("Başlık");
+ *   AlertMsg.show("Başlık", "Mesaj");
+ *   AlertMsg.show("Başlık", "Mesaj", 8);
+ *   AlertMsg.show("Başlık", "Mesaj", 5, AlertMsg.COLOR_ERROR);
+ *   AlertMsg.show("Başlık", "Mesaj", 5, AlertMsg.COLOR_SUCCESS, () -> trace("Tıklandı!"));
  *
- * AlertMsg.show("Başlık");
- * AlertMsg.show("Başlık", "Mesaj", 5, AlertMsg.COLOR_ERROR);
- * AlertMsg.show("Başlık", "Mesaj", 5, AlertMsg.COLOR_SUCCESS, () -> trace("ok"));
+ * KURULUM (Main.hx'te bir kez):
+ *   stage.addChild(new AlertMgr());
  */
 class AlertMsg
-{
-    public static inline var COLOR_INFO:Int    = AlertMsg_Impl.COLOR_INFO;
-    public static inline var COLOR_SUCCESS:Int = AlertMsg_Impl.COLOR_SUCCESS;
-    public static inline var COLOR_WARNING:Int = AlertMsg_Impl.COLOR_WARNING;
-    public static inline var COLOR_ERROR:Int   = AlertMsg_Impl.COLOR_ERROR;
-
-    public static function show(title:String, ?message:String,
-                                duration:Float = 5,
-                                color:Int = 0xFF4FC3F7,
-                                ?onClick:Void->Void)
-    {
-        if (AlertMgr.instance == null)
-        {
-            trace('[AlertMsg] AlertMgr henüz stage\'e eklenmedi!');
-            return;
-        }
-        AlertMgr.instance._spawn(title, message, duration, color, onClick);
-    }
-}
-
-// Renk sabitlerini AlertMsg_Impl üzerinden expose et (inline const döngüsünü kırar)
-@:noCompletion
-class AlertMsg_Impl
 {
     public static inline var COLOR_INFO:Int    = 0xFF4FC3F7;
     public static inline var COLOR_SUCCESS:Int = 0xFF69F0AE;
     public static inline var COLOR_WARNING:Int = 0xFFFFD740;
     public static inline var COLOR_ERROR:Int   = 0xFFFF5252;
+
+    public static function show(title:String, ?message:String,
+                                duration:Float = 5,
+                                color:Int = 0xFF4FC3F7,
+                                ?onClick:Void->Void):Void
+    {
+        if (AlertMgr.instance == null)
+        {
+            trace('[AlertMsg] AlertMgr stage\'e eklenmedi! Önce stage.addChild(new AlertMgr()) çağır.');
+            return;
+        }
+        AlertMgr.instance._spawn(title, message, duration, color, onClick);
+    }
 }
