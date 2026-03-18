@@ -25,6 +25,8 @@ import mobile.backend.MobileData;
 import mobile.input.MobileInputManager;
 import mobile.backend.TouchUtil;
 
+import objects.AlertMsg;
+
 // Android
 #if android
 import android.content.Context as AndroidContext;

@@ -43,10 +43,6 @@ class OptionsState extends MusicBeatState
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 
-	var secretCode:Array<FlxKey> = [FlxKey.X, FlxKey.Q, FlxKey.B, FlxKey.O, FlxKey.K, FlxKey.Y, FlxKey.E];
-	var secretIndex:Int = 0;
-	var secretUnlocked:Bool = false;
-
 	// UI
 	
 	// BG Katman
@@ -190,13 +186,6 @@ class OptionsState extends MusicBeatState
 				case 'Menü Ayarları':
 					openSubState(new options.MainMenuSettingsState());
 			}
-		});
-	}
-	
-	function openSecretMenu()
-	{
-		playExitAnimation(function() {
-			openSubState(new options.XqOptionsState());
 		});
 	}
 
@@ -692,7 +681,6 @@ class OptionsState extends MusicBeatState
 	{
 		super.closeSubState();
 		ClientPrefs.saveSettings();
-		secretIndex = 0;
 		
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Ayarlar Menusu", null);
@@ -719,21 +707,6 @@ class OptionsState extends MusicBeatState
 				pressedKey != FlxKey.ENTER && pressedKey != FlxKey.ESCAPE &&
 				pressedKey != FlxKey.W     && pressedKey != FlxKey.A     &&
 				pressedKey != FlxKey.S     && pressedKey != FlxKey.D)
-			{
-				if (pressedKey == secretCode[secretIndex])
-				{
-					secretIndex++;
-					if (secretIndex >= secretCode.length)
-					{
-						secretIndex = 0;
-						secretUnlocked = true;
-						FlxG.sound.play(Paths.sound('confirmMenu'));
-						FlxG.camera.flash(0x66FF00FF, 0.5);
-						FlxG.camera.shake(0.01, 0.3);
-						new FlxTimer().start(0.3, function(tmr:FlxTimer) { openSecretMenu(); });
-					}
-				}
-				else secretIndex = 0;
 			}
 		}
 		
