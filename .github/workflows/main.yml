@@ -1,10 +1,13 @@
 name: Main
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*' # v1.0, v2.0.1-beta gibi tag pushlandığında tetiklenir
 
 jobs:
   Build:
-    name: ${{ matrix.name }}
     strategy:
       matrix:
         include:
@@ -46,9 +49,35 @@ jobs:
             artifactPath: "export/release/ios/build/Release-iphoneos/*.ipa"
     uses: ./.github/workflows/build.yml
     with:
-        name: ${{ matrix.name }}
-        os: ${{ matrix.os }}
-        buildArgs: ${{ matrix.buildArgs }}
-        setupCommand: ${{ matrix.setupCommand }}
-        artifactName: ${{ matrix.artifactName }}
-        artifactPath: ${{ matrix.artifactPath }}
+      name: ${{ matrix.name }}
+      os: ${{ matrix.os }}
+      buildArgs: ${{ matrix.buildArgs }}
+      setupCommand: ${{ matrix.setupCommand }}
+      artifactName: ${{ matrix.artifactName }}
+      artifactPath: ${{ matrix.artifactPath }}
+
+  # --- YENİ EKLENEN RELEASE BÖLÜMÜ ---
+  Releaser:
+    needs: Build
+    if: startsWith(github.ref, 'refs/tags/') # Sadece bir tag pushlandığında çalışır
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Release oluşturabilmek için yazma izni şart
+    steps:
+      - name: 📥 Tüm Buildleri İndir
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: 🚀 GitHub Release Oluştur ve Dosyaları Ekle
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          # Artifact'lar alt klasörlere indiği için wildcards kullanıyoruz
+          files: |
+            ./artifacts/windowsBuild-x86_64/**/*
+            ./artifacts/linuxBuild-x86_64/**/*
+            ./artifacts/macOSBuild-x86_64/**/*
+            ./artifacts/macOSBuild-arm64/**/*
+            ./artifacts/androidBuild/**/*
+            ./artifacts/iOSBuild/**/*
