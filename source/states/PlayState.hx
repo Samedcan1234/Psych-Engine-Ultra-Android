@@ -125,8 +125,8 @@ class PlayState extends MusicBeatState
 	public static var isPixelStage(get, never):Bool;
 	
 	// P.E.U Variables
-	var petLogo:FlxSprite;
-	var petText:FlxText;
+	var peuLogo:FlxSprite;
+	var peuText:FlxText;
 
 	@:noCompletion
 	static function set_stageUI(value:String):String
