@@ -138,6 +138,48 @@ class StorageUtil
 		#end
 	}
 	#end
+	
+	#if mac
+	private static function _openMacFilePicker(extension:String, onSelected:String->Void):Void
+	{
+		#if sys
+		sys.thread.Thread.create(function()
+		{
+			try
+			{
+				var filterStr:String = extension != ''
+					? 'of type {"' + extension.replace('.', '') + '"}'
+					: '';
+
+				var script:String = 'choose file ' + filterStr + ' with prompt "Dosya Seç:"';
+
+				var process = new sys.io.Process('osascript', ['-e', script]);
+				var result:String = process.stdout.readAll().toString().trim();
+				process.close();
+
+				if (result == null || result.length == 0) return;
+
+				// alias -> POSIX path dönüşümü
+				var posixProcess = new sys.io.Process('osascript', [
+					'-e', 'POSIX path of ("' + result + '" as alias)'
+				]);
+				var posixPath:String = posixProcess.stdout.readAll().toString().trim();
+				posixProcess.close();
+
+				if (posixPath != null && posixPath.length > 0)
+				{
+					lime.app.Application.current.onUpdate.add(function(_)
+					{
+						lime.app.Application.current.onUpdate.remove(null);
+						onSelected(posixPath);
+					});
+				}
+			}
+			catch (e:Dynamic) {}
+		});
+		#end
+	}
+	#end
 
     #if windows
     private static function _openWindowsFolderPicker():Void
