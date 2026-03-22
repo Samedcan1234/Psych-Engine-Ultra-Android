@@ -180,6 +180,55 @@ class StorageUtil
 		#end
 	}
 	#end
+	
+	#if linux
+	private static function _openLinuxFilePicker(extension:String, onSelected:String->Void):Void
+	{
+		#if sys
+		sys.thread.Thread.create(function()
+		{
+			try
+			{
+				var cmd:String = _linuxPickerCommand();
+				if (cmd == null)
+				{
+					trace('[StorageUtil] Dosya seçici için zenity veya kdialog yüklü olmalı!');
+					return;
+				}
+
+				var args:Array<String>;
+				if (cmd == 'zenity')
+				{
+					args = ['--file-selection', '--title=Dosya Seç'];
+					if (extension != '')
+						args.push('--file-filter=Dosya (*' + extension + ')|*' + extension);
+				}
+				else
+				{
+					// kdialog
+					args = ['--getopenfilename', Sys.getCwd()];
+					if (extension != '')
+						args.push('*' + extension);
+				}
+
+				var process = new sys.io.Process(cmd, args);
+				var result:String = process.stdout.readAll().toString().trim();
+				process.close();
+
+				if (result != null && result.length > 0)
+				{
+					lime.app.Application.current.onUpdate.add(function(_)
+					{
+						lime.app.Application.current.onUpdate.remove(null);
+						onSelected(result);
+					});
+				}
+			}
+			catch (e:Dynamic) {}
+		});
+		#end
+	}
+	#end
 
     #if windows
     private static function _openWindowsFolderPicker():Void
