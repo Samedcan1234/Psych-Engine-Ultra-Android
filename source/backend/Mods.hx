@@ -36,7 +36,7 @@ class Mods
 	inline public static function getGlobalMods()
 		return globalMods;
 
-	inline public static function pushGlobalMods() // prob a better way to do this but idc
+	inline public static function pushGlobalMods()
 	{
 		globalMods = [];
 		for(mod in parseList().enabled)
@@ -94,11 +94,9 @@ class Mods
 	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
 	{
 		var foldersToCheck:Array<String> = [];
-		//Main folder
 		if(FileSystem.exists(path + fileToFind))
 			foldersToCheck.push(path + fileToFind);
 
-		// Week folder
 		if(Paths.currentLevel != null && Paths.currentLevel != path)
 		{
 			var pth:String = Paths.getFolderPath(fileToFind, Paths.currentLevel);
@@ -109,18 +107,15 @@ class Mods
 		#if MODS_ALLOWED
 		if(mods)
 		{
-			// Global mods first
 			for(mod in Mods.getGlobalMods())
 			{
 				var folder:String = Paths.mods(mod + '/' + fileToFind);
 				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 
-			// Then "PsychEngine/mods/" main folder
 			var folder:String = Paths.mods(fileToFind);
 			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
 
-			// And lastly, the loaded mod's folder
 			if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
 			{
 				var folder:String = Paths.mods(Mods.currentModDirectory + '/' + fileToFind);
@@ -153,18 +148,50 @@ class Mods
 		return null;
 	}
 
+	// ── Yardımcı: modsList.txt yolu ─────────────────────────────────────────
+	// PC'de: Sys.getCwd() + 'modsList.txt'
+	// Mobilde: özel mod yolu varsa oraya, yoksa varsayılan harici dizine
+	private static function getModsListPath():String
+	{
+		var customPath:String = ClientPrefs.data.modsPath;
+		trace('[Mods] getModsListPath — modsPath: "' + customPath + '"');
+		if (customPath != null && customPath.trim().length > 0)
+			return haxe.io.Path.addTrailingSlash(customPath) + 'modsList.txt';
+
+		#if android
+		return StorageUtil.getExternalStorageDirectory() + 'modsList.txt';
+		#else
+		return Sys.getCwd() + 'modsList.txt';
+		#end
+	}
+
+	// ── Yardımcı: Paths.mods() yerine özel dizini destekleyen versiyon ──────
+	// Paths.mods() zaten doğru dizini döndürüyorsa buna gerek yok.
+	// Ama Paths.mods() hâlâ hardcoded ise burayı kullan.
+	public static function getModsFolder(?subfolder:String = null):String
+	{
+		#if (android || ios)
+		var base:String = StorageUtil.getModsDirectory();
+		#else
+		var base:String = 'mods/';
+		#end
+		if (subfolder != null && subfolder.length > 0)
+			return base + subfolder;
+		return base;
+	}
+
 	public static var updatedOnState:Bool = false;
-	inline public static function parseList():ModsList {
+
+	inline public static function parseList():ModsList
+	{
 		if(!updatedOnState) updateModList();
 		var list:ModsList = {enabled: [], disabled: [], all: []};
 
 		#if MODS_ALLOWED
 		try {
-			for (mod in CoolUtil.coolTextFile(#if android StorageUtil.getExternalStorageDirectory() + #else Sys.getCwd() + #end 'modsList.txt'))
+			for (mod in CoolUtil.coolTextFile(getModsListPath()))
 			{
-				//trace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
-
 				var dat = mod.split("|");
 				list.all.push(dat[0]);
 				if (dat[1] == "1")
@@ -182,11 +209,12 @@ class Mods
 	private static function updateModList()
 	{
 		#if MODS_ALLOWED
-		// Find all that are already ordered
+		var modsListPath:String = getModsListPath();
 		var list:Array<Array<Dynamic>> = [];
 		var added:Array<String> = [];
+
 		try {
-			for (mod in CoolUtil.coolTextFile(#if android StorageUtil.getExternalStorageDirectory() + #else Sys.getCwd() + #end 'modsList.txt'))
+			for (mod in CoolUtil.coolTextFile(modsListPath))
 			{
 				var dat:Array<String> = mod.split("|");
 				var folder:String = dat[0];
@@ -200,19 +228,16 @@ class Mods
 			trace(e);
 		}
 		
-		// Scan for folders that aren't on modsList.txt yet
 		for (folder in getModDirectories())
 		{
 			if(folder.trim().length > 0 && FileSystem.exists(Paths.mods(folder)) && FileSystem.isDirectory(Paths.mods(folder)) &&
 			!ignoreModFolders.contains(folder.toLowerCase()) && !added.contains(folder))
 			{
 				added.push(folder);
-				list.push([folder, true]); //i like it false by default. -bb //Well, i like it True! -Shadow Mario (2022)
-				//Shadow Mario (2023): What the fuck was bb thinking
+				list.push([folder, true]);
 			}
 		}
 
-		// Now save file
 		var fileStr:String = '';
 		for (values in list)
 		{
@@ -220,9 +245,23 @@ class Mods
 			fileStr += values[0] + '|' + (values[1] ? '1' : '0');
 		}
 
-		File.saveContent(#if android StorageUtil.getExternalStorageDirectory() + #else Sys.getCwd() + #end 'modsList.txt', fileStr);
+		// modsList.txt'nin bulunacağı dizin yoksa oluştur
+		var modsListDir:String = haxe.io.Path.directory(modsListPath);
+		if (modsListDir.length > 0 && !FileSystem.exists(modsListDir))
+		{
+			try { FileSystem.createDirectory(modsListDir); }
+			catch (e:Dynamic) { trace('[Mods] Dizin oluşturulamadı: $modsListDir | $e'); }
+		}
+
+		try
+		{
+			File.saveContent(modsListPath, fileStr);
+		}
+		catch (e:Dynamic)
+		{
+			trace('[Mods] modsList.txt yazılamadı: $modsListPath | $e');
+		}
 		updatedOnState = true;
-		//trace('Saved modsList.txt');
 		#end
 	}
 

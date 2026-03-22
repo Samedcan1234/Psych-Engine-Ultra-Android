@@ -36,6 +36,9 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.util.FlxTimer;
 import flixel.ui.FlxBar;
 import objects.Alphabet;
+import objects.EmojiText;
+import objects.EmojiAtlas;
+
 
 class FreeplayState extends MusicBeatState
 {
@@ -50,7 +53,7 @@ class FreeplayState extends MusicBeatState
     var curDifficulty:Int = -1;
     private static var lastDifficultyName:String = Difficulty.getDefault();
 
-    // ARKA PLAN SİSTEMİ
+    // BG
     var bg:FlxSprite;
     var bgOverlay:FlxSprite;
     var songBG:FlxSprite;
@@ -65,7 +68,7 @@ class FreeplayState extends MusicBeatState
     var breathingEffect:Float = 0;
     var customSongBGs:Map<String, String> = new Map();
 
-    // ÜSTBAR
+    // Top Bar
     var topBar:FlxSprite;
     var topBarLine:FlxSprite;
     var topBarGlow:FlxSprite;
@@ -81,9 +84,9 @@ class FreeplayState extends MusicBeatState
     var tabTexts:Array<FlxText> = [];
     var tabIndicator:FlxSprite;
     var tabGlows:Array<FlxSprite> = [];
-    var categories:Array<String> = ['Tümü', 'Favoriler', 'Son Çalınan', 'Gizli'];
+    var categories:Array<String> = ['All', 'Favorites', 'Last Played', 'Hidden'];
     var curCategoryIndex:Int = 0;
-    var curCategory:String = 'Tümü';
+    var curCategory:String = 'All';
 	// Beat animasyonu
 	var lastBeatTime:Float = 0;
 	var beatBPM:Float = 100;
@@ -115,7 +118,7 @@ class FreeplayState extends MusicBeatState
     var accuracyText:FlxText;
     var accuracyBar:FlxBar;
     var gradeText:FlxText;
-    var gradeIcon:FlxText;
+    var gradeIcon:EmojiText;
 
     // Zorluk paneli
     var diffPanel:FlxSprite;
@@ -210,12 +213,12 @@ class FreeplayState extends MusicBeatState
     var _lastVisibles:Array<Int> = [];
     var _drawDistance:Int = 4;
 
-    // Kategori ikonları
+    // İcons
     var categoryIcons:Map<String, String> = [
-        'Tümü' => '📂',
-        'Favoriler' => '⭐',
-        'Son Çalınan' => '🕐',
-        'Gizli' => '👁️'
+        'All' => '📂',
+        'Favorites' => '⭐',
+        'Last Played' => '🕐',
+        'Hiddens' => '👁️'
     ];
 
     // Showcase icon tween
@@ -250,18 +253,20 @@ class FreeplayState extends MusicBeatState
     override function create()
     {
         super.create();
-
+		
+		if (!EmojiAtlas.instance.isLoaded())
+			EmojiAtlas.instance.load("emoji_atlas", 72);
         instance = this;
+		
 
         persistentUpdate = true;
         PlayState.isStoryMode = false;
         WeekData.reloadWeekFiles(false);
 
         #if DISCORD_ALLOWED
-        DiscordClient.changePresence("Freeplay - XQ Edition", null);
+        DiscordClient.changePresence("Freeplay", null);
         #end
-
-        // Mobil uyumlu buton isimleri
+		
         final accept:String = (controls.mobileC) ? "A" : "ACCEPT";
         final reject:String  = (controls.mobileC) ? "B" : "BACK";
 
@@ -299,10 +304,7 @@ class FreeplayState extends MusicBeatState
         Mods.loadTopMod();
         allSongs = songs.copy();
         songs = [];
-
-        // ═══════════════════════════════════════════════════════════
-        // ARKA PLAN
-        // ═══════════════════════════════════════════════════════════
+		
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
         bg.antialiasing = ClientPrefs.data.antialiasing;
         bg.screenCenter();
@@ -422,7 +424,7 @@ class FreeplayState extends MusicBeatState
         grpSongs = new FlxTypedGroup<Alphabet>();
         add(grpSongs);
 
-        randomText = new Alphabet(showcaseWidth + 30, 320, "RASTGELE", true);
+        randomText = new Alphabet(showcaseWidth + 30, 320, "RANDOM", true);
         randomText.targetY = -1;
         randomText.snapToPosition();
         add(randomText);
@@ -533,26 +535,24 @@ class FreeplayState extends MusicBeatState
         tabIndicator = new FlxSprite(tabStartX, tabY + tabH - 3).makeGraphic(tabW, 3, accentColor);
         tabIndicator.alpha = 0.8;
 
-        for (i in 0...categories.length)
-        {
-            var tx = tabStartX + i * (tabW + tabGap);
+		for (i in 0...categories.length)
+		{
+			var tx = tabStartX + i * (tabW + tabGap);
 
-            var glow = new FlxSprite(tx - 1, tabY - 1).makeGraphic(tabW + 2, tabH + 2, accentColor);
-            glow.alpha = 0;
-            add(glow);
-            tabGlows.push(glow);
+			var glow = new FlxSprite(tx - 1, tabY - 1).makeGraphic(tabW + 2, tabH + 2, accentColor);
+			glow.alpha = 0;
+			add(glow);
+			tabGlows.push(glow);
 
-            var btn = new FlxSprite(tx, tabY).makeGraphic(tabW, tabH, 0x44000000);
-            add(btn);
-            tabButtons.push(btn);
+			var btn = new FlxSprite(tx, tabY).makeGraphic(tabW, tabH, 0x44000000);
+			add(btn);
+			tabButtons.push(btn);
 
-            var iconStr = categoryIcons.exists(categories[i]) ? categoryIcons.get(categories[i]) : "📁";
-            var txt = new FlxText(tx, tabY + 5, tabW, iconStr + " " + categories[i], 12);
-            txt.setFormat(Paths.font("vcr.ttf"), 12,
-                i == 0 ? FlxColor.WHITE : 0xFF888888, CENTER);
-            add(txt);
-            tabTexts.push(txt);
-        }
+			var iconStr = categoryIcons.exists(categories[i]) ? categoryIcons.get(categories[i]) : "📁";
+			var tabEmoji = new EmojiText(tx + 6, tabY + 6, 24, iconStr, 0);
+			tabEmoji.emojiScale = 0.28;
+			add(tabEmoji);
+		}
 
         add(tabIndicator);
         updateTabVisuals();
@@ -669,10 +669,10 @@ class FreeplayState extends MusicBeatState
         accuracyText.setFormat(Paths.font("vcr.ttf"), 16, 0xFF00FFFF, LEFT);
         add(accuracyText);
 
-        // Grade
-        gradeIcon = new FlxText(showcaseWidth - 70, scoreY + 20, 40, "🎵", 28);
-        add(gradeIcon);
-
+		gradeIcon = new EmojiText(showcaseWidth - 70, scoreY + 20, 48, "🎵", 0);
+		gradeIcon.emojiScale = 0.9;  // 72 * 0.9 ≈ 64px
+		add(gradeIcon);
+		
         gradeText = new FlxText(showcaseWidth - 80, scoreY + 52, 60, "N/A", 14);
         gradeText.setFormat(Paths.font("vcr.ttf"), 14, 0xFFFFD700, CENTER);
         add(gradeText);
@@ -711,17 +711,28 @@ class FreeplayState extends MusicBeatState
         statLabel.setFormat(Paths.font("vcr.ttf"), 12, 0xFF00FF87, LEFT);
         add(statLabel);
 
-        totalSongsText = new FlxText(25, statY + 22, showcaseWidth - 60, "📊 Toplam: 0", 14);
-        totalSongsText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT);
-        add(totalSongsText);
+		// Stat ikon emojileri (sabit, güncellenmez)
+		var statsEmoji1 = new EmojiText(25, statY + 22, 28, "📊", 0);
+		statsEmoji1.emojiScale = 0.45;
+		add(statsEmoji1);
+		var statsEmoji2 = new EmojiText(25, statY + 40, 28, "⭐", 0);
+		statsEmoji2.emojiScale = 0.45;
+		add(statsEmoji2);
+		var statsEmoji3 = new EmojiText(25, statY + 58, 28, "✓", 0);  // ✓ BMP'de, doğrudan çalışır
+		add(statsEmoji3);
 
-        favCountText = new FlxText(25, statY + 40, showcaseWidth - 60, "⭐ Favori: 0", 14);
-        favCountText.setFormat(Paths.font("vcr.ttf"), 14, 0xFFFFD700, LEFT);
-        add(favCountText);
+		// Stat metinleri (22px sola kaydı — emoji genişliği kadar)
+		totalSongsText = new FlxText(50, statY + 22, showcaseWidth - 75, "Toplam: 0", 14);
+		totalSongsText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT);
+		add(totalSongsText);
 
-        completionText = new FlxText(25, statY + 58, showcaseWidth - 60, "✓ Tamamlanan: 0%", 14);
-        completionText.setFormat(Paths.font("vcr.ttf"), 14, 0xFF00FF87, LEFT);
-        add(completionText);
+		favCountText = new FlxText(50, statY + 40, showcaseWidth - 75, "Favori: 0", 14);
+		favCountText.setFormat(Paths.font("vcr.ttf"), 14, 0xFFFFD700, LEFT);
+		add(favCountText);
+
+		completionText = new FlxText(50, statY + 58, showcaseWidth - 75, "Tamamlanan: 0%", 14);
+		completionText.setFormat(Paths.font("vcr.ttf"), 14, 0xFF00FF87, LEFT);
+		add(completionText);
 
         // Uyumluluk için eski değişkenlere referans
         scoreBG = new FlxSprite().makeGraphic(1, 1, 0x00000000);
@@ -750,7 +761,6 @@ class FreeplayState extends MusicBeatState
     {
         searchContainer = new FlxSpriteGroup();
 
-        // Compact search (navbar'da)
         var sBG = new FlxSprite(showcaseWidth + 10, 15).makeGraphic(150, 30, 0x44000000);
         searchContainer.add(sBG);
 
@@ -758,8 +768,9 @@ class FreeplayState extends MusicBeatState
         sBorder.alpha = 0.2;
         searchContainer.add(sBorder);
 
-        searchIcon = new FlxText(showcaseWidth + 16, 19, 22, "🔍", 16);
-        searchContainer.add(searchIcon);
+		var searchEmojiIcon = new EmojiText(showcaseWidth + 14, 17, 28, "🔍", 0);
+		searchEmojiIcon.emojiScale = 0.28;
+		searchContainer.add(searchEmojiIcon);
 
         searchBox = new PsychUIInputText(Std.int(showcaseWidth + 38), 20, 115, "", 14);
         searchBox.onChange = function(old:String, newText:String)
@@ -824,8 +835,8 @@ class FreeplayState extends MusicBeatState
         add(bottomText);
 		
 		bottomString = controls.mobileC
-			? "A: Seç  B: Geri  X: Önizle  Y: Kategori  Z: Ara"
-			: "ENTER: Seç  ESC: Geri  SPACE: Önizle  TAB: Kategori  F: Ara";
+			? "A: Select  B: Back  X: Play Song  Y: Category  Z: Search"
+			: "ENTER: Select  ESC: Back  SPACE: Play Song  TAB: Category  F: Search";
 		bottomText.text = bottomString;
 
         menuScoreDisplay = new FlxText(0, -500, 1, "", 1);
@@ -849,15 +860,15 @@ class FreeplayState extends MusicBeatState
         diffSelect.setScale(0.7);
         menuContainer.add(diffSelect);
 
-        modifiersSelect = new Alphabet(0, 0, "OYNANIş MODIFIKASYONLARI", true);
+        modifiersSelect = new Alphabet(0, 0, "GAMEPLAY MODIFIERS", true);
         modifiersSelect.setScale(0.6);
         menuContainer.add(modifiersSelect);
 
-        resetSelect = new Alphabet(0, 0, "SKOR SIFIRLA", true);
+        resetSelect = new Alphabet(0, 0, "RESET SCORE", true);
         resetSelect.setScale(0.6);
         menuContainer.add(resetSelect);
 
-        backSelect = new Alphabet(0, 0, "GERI", true);
+        backSelect = new Alphabet(0, 0, "BACK", true);
         backSelect.setScale(0.6);
         menuContainer.add(backSelect);
 
@@ -893,34 +904,32 @@ class FreeplayState extends MusicBeatState
         FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // YARDIMCI FONKSİYONLAR
-    // ═══════════════════════════════════════════════════════════════
-    function updateQuickStats()
-    {
-        totalSongsText.text = "📊 Toplam: " + allSongs.length;
-        favCountText.text = "⭐ Favori: " + favorites.length;
+	function updateQuickStats()
+	{
+		// Emoji artık ayrı EmojiText'te, buraya sadece sayılar gelir
+		totalSongsText.text = "Total: " + allSongs.length;
+		favCountText.text   = "Favorites: " + favorites.length;
 
-        var completed = 0;
-        for (song in allSongs)
-            if (Highscore.getScore(song.songName, 0) > 0) completed++;
+		var completed = 0;
+		for (song in allSongs)
+			if (Highscore.getScore(song.songName, 0) > 0) completed++;
 
-        var percent = allSongs.length > 0 ? Math.floor((completed / allSongs.length) * 100) : 0;
-        completionText.text = "✓ Tamamlanan: " + percent + "%";
-    }
+		var percent = allSongs.length > 0 ? Math.floor((completed / allSongs.length) * 100) : 0;
+		completionText.text = "Completed: " + percent + "%";
+	}
 
     function updateSearchResults()
     {
         if (searchBox.text.length > 0)
         {
-            searchResultText.text = songs.length + " sonuç";
+            searchResultText.text = songs.length + " result";
             searchResultText.alpha = 1;
             searchResultText.color = songs.length == 0 ? 0xFFFF4444 : 0xFF00FFFF;
         }
         else
             FlxTween.tween(searchResultText, {alpha: 0}, 0.3);
 
-        songCountText.text = songs.length + " Şarkı";
+        songCountText.text = songs.length + " Song";
     }
 
     function updateList()
@@ -944,10 +953,10 @@ class FreeplayState extends MusicBeatState
                 || meta.songCharacter.toLowerCase().indexOf(query) != -1);
 
             var matchCat = false;
-            if (curCategory == 'Tümü') matchCat = !hiddenSongs.contains(name);
-            else if (curCategory == 'Favoriler') matchCat = favorites.contains(name);
-            else if (curCategory == 'Son Çalınan') matchCat = recentPlays.contains(name);
-            else if (curCategory == 'Gizli') matchCat = hiddenSongs.contains(name);
+            if (curCategory == 'All') matchCat = !hiddenSongs.contains(name);
+            else if (curCategory == 'Favorites') matchCat = favorites.contains(name);
+            else if (curCategory == 'Last Played') matchCat = recentPlays.contains(name);
+            else if (curCategory == 'Hidden') matchCat = hiddenSongs.contains(name);
 
             if (matchSearch && matchCat) songs.push(meta);
         }
@@ -1012,9 +1021,6 @@ class FreeplayState extends MusicBeatState
         opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // MOBİL İPUCU GÖSTER
-    // ═══════════════════════════════════════════════════════════════
     function showMobileTip(msg:String)
     {
         mobileTipText.text = msg;
@@ -1026,9 +1032,6 @@ class FreeplayState extends MusicBeatState
         FlxTween.tween(mobileTipText, {alpha: 0}, 2.5, {startDelay: 1.0});
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // ANA UPDATE
-    // ═══════════════════════════════════════════════════════════════
     override function update(elapsed:Float)
     {
         if (WeekData.weeksList.length < 1) return;
@@ -1069,14 +1072,11 @@ class FreeplayState extends MusicBeatState
         if (topBarGlow != null)
             topBarGlow.alpha = 0.03 + Math.sin(ambientPulse) * 0.02;
 
-        // ─────────────────────────────────────────────────────────
-        // ARAMA MODU (F veya mobil Z long-press ile açılır)
-        // ─────────────────────────────────────────────────────────
         if (searchInputWait)
         {
             searchInputText.visible = true;
             searchInputBG.visible = true;
-            searchInputText.text = "🔍 ARAMA: '" + searchString + "'_";
+            searchInputText.text = "🔍 SEARCH: '" + searchString + "'_";
 
             // Mobil: A = onayla, B = iptal
             if (touchPad.buttonA.justPressed)
@@ -1101,9 +1101,6 @@ class FreeplayState extends MusicBeatState
             searchInputBG.visible = false;
         }
 
-        // ─────────────────────────────────────────────────────────
-        // SEÇİM MENÜSÜ AÇIKSA
-        // ─────────────────────────────────────────────────────────
         if (selected && PsychUIInputText.focusOn != searchBox)
         {
             handleSelectedMenu(elapsed);
@@ -1112,9 +1109,6 @@ class FreeplayState extends MusicBeatState
             return;
         }
 
-        // ─────────────────────────────────────────────────────────
-        // NORMAL INPUT
-        // ─────────────────────────────────────────────────────────
         if (PsychUIInputText.focusOn == searchBox)
         {
             // Mobilde arama kutusunu kapat: A = onayla, B = iptal
@@ -1127,8 +1121,6 @@ class FreeplayState extends MusicBeatState
         }
         else if (!player.playingMusic)
         {
-            // ── F TUŞU VEYA MOBİL Z TUŞU → Spotlight Arama ────────
-            // Mobilde Z tek basış = arama aç + Android klavye tetikle
             if (FlxG.keys.justPressed.F || touchPad.buttonZ.justPressed)
             {
                 searchInputWait = true;
@@ -1136,15 +1128,13 @@ class FreeplayState extends MusicBeatState
                 FlxG.sound.play(Paths.sound('scrollMenu'));
 
                 #if android
-                // Android sanal klavyeyi aç
                 lime.system.System.openURL("intent:#Intent;action=android.intent.action.INPUT_METHOD_PICKER;end");
                 FlxG.stage.focus = cast(searchBox, openfl.display.InteractiveObject);
                 #end
 
-                if (controls.mobileC) showMobileTip("🔍 Arama aktif — A: Onayla  B: İptal");
+                if (controls.mobileC) showMobileTip("🔍 Search — A: Enter  B: Cancel");
             }
 
-            // ── C TUŞU → Compact arama kutusuna odaklan ────────────
             if (FlxG.keys.justPressed.C || touchPad.buttonC.justPressed)
             {
                 PsychUIInputText.focusOn = searchBox;
@@ -1157,7 +1147,6 @@ class FreeplayState extends MusicBeatState
                 if (controls.mobileC) showMobileTip("⌨ Arama kutusu aktif — A/B: Kapat");
             }
 
-            // ── ESC ile arama temizle ──────────────────────────────
             if (FlxG.keys.justPressed.ESCAPE && searchBox.text.length > 0)
             {
                 searchBox.text = "";
@@ -1166,7 +1155,6 @@ class FreeplayState extends MusicBeatState
                 FlxG.sound.play(Paths.sound('cancelMenu'));
             }
 
-            // ── TAB / MOBİL Y → Kategori değiştir ─────────────────
             if (FlxG.keys.justPressed.TAB || touchPad.buttonY.justPressed)
             {
                 curCategoryIndex = (curCategoryIndex + 1) % categories.length;
@@ -1179,34 +1167,23 @@ class FreeplayState extends MusicBeatState
                 if (controls.mobileC)
                     showMobileTip("📂 Kategori: " + curCategory);
             }
-
-            // ── G / MOBİL C (LONG) → Favori ekle/çıkar ─────────────
-            // NOT: Mobilde C butonu normalde Arama'ya gidiyor.
-            // Favori için Z (çift basış) yerine ayrı bir buton şeması
-            // kullanmak yerine, mevcut butonları context'e göre işletiyoruz:
-            // Eğer arama modu KAPALI ve Z çift basış veya G tuşu → Favori
+			
             if (FlxG.keys.justPressed.G && songs.length > 0 && curSelected >= 0)
             {
                 toggleFavorite();
             }
 
-            // ── H / MOBİL C+Y (CTRL+Y eşdeğeri) → Şarkıyı gizle ───
-            // Mobilde uzun süre B basılı tutunca tetiklenir (holdTime > 1s)
             if (FlxG.keys.justPressed.H && songs.length > 0 && curSelected >= 0)
             {
                 toggleHidden();
             }
-
-            // ── Mobil özel: C butonu basılı tutarken Y = Gizle ──────
-            // C (compact search) butonu + Y (kategori) aynı anda = Gizle
+			
             if (touchPad.buttonC.pressed && touchPad.buttonY.justPressed
                 && songs.length > 0 && curSelected >= 0)
             {
                 toggleHidden();
             }
 
-            // ── Mobil özel: X butonu basılı tutarken Y = Favori ─────
-            // X (space/preview) + Y aynı anda = Favori toggle
             if (touchPad.buttonX.pressed && touchPad.buttonY.justPressed
                 && songs.length > 0 && curSelected >= 0)
             {
@@ -1215,7 +1192,7 @@ class FreeplayState extends MusicBeatState
 
             // Skor gösterimi
             if (curSelected == -1)
-                scoreText.text = "🎲 RASTGELE";
+                scoreText.text = "🎲 RANDOM";
             else
                 scoreText.text = "" + lerpScore;
             accuracyText.text = ratingSplit.join('.') + "%";
@@ -1254,7 +1231,6 @@ class FreeplayState extends MusicBeatState
                 }
             }
 
-            // ── Zorluk değiştir ────────────────────────────────────
             if (curSelected >= 0)
             {
                 if (controls.UI_LEFT_P) { changeDiff(-1); _updateSongLastDifficulty(); }
@@ -1262,7 +1238,6 @@ class FreeplayState extends MusicBeatState
             }
         }
 
-        // ── BACK ───────────────────────────────────────────────────
         if (controls.BACK && PsychUIInputText.focusOn != searchBox)
         {
             if (player.playingMusic)
@@ -1286,7 +1261,6 @@ class FreeplayState extends MusicBeatState
             }
         }
 
-        // ── SPACE / MOBİL X → Müzik önizle ───────────────────────
         if ((FlxG.keys.justPressed.SPACE || touchPad.buttonX.justPressed)
             && PsychUIInputText.focusOn != searchBox && !player.playingMusic)
         {
@@ -1365,7 +1339,7 @@ class FreeplayState extends MusicBeatState
             else if (instPlaying == curSelected && player.playingMusic)
                 player.pauseOrResume(!player.playing);
         }
-        // ── ENTER / MOBİL A → Seçim menüsü ───────────────────────
+		
         else if (controls.ACCEPT && !player.playingMusic && PsychUIInputText.focusOn != searchBox)
         {
             if (songs.length == 0) return;
@@ -1381,7 +1355,6 @@ class FreeplayState extends MusicBeatState
             openSelectionMenu();
         }
 
-        // ── CONTROL / MOBİL C → Gameplay Modifiers ────────────────
         if ((FlxG.keys.justPressed.CONTROL || touchPad.buttonC.justPressed)
             && !player.playingMusic && PsychUIInputText.focusOn != searchBox
             && !searchInputWait)
@@ -1391,9 +1364,6 @@ class FreeplayState extends MusicBeatState
             removeTouchPad();
         }
 
-        // ── RESET / MOBİL (C basılı + A) → Skor sıfırla ──────────
-        // Klavyede: RESET tuşu (psych engine controls)
-        // Mobilde: C basılı tutarken A = Reset
         var mobileReset:Bool = touchPad.buttonC.pressed && touchPad.buttonA.justPressed;
         if ((controls.RESET || mobileReset) && !player.playingMusic
             && PsychUIInputText.focusOn != searchBox
@@ -1405,16 +1375,13 @@ class FreeplayState extends MusicBeatState
             removeTouchPad();
             FlxG.sound.play(Paths.sound('scrollMenu'));
 
-            if (controls.mobileC) showMobileTip("🗑 Skor sıfırlanıyor...");
+            if (controls.mobileC) showMobileTip("🗑 Resetting SCORE...");
         }
 
         updateTexts(elapsed);
         super.update(elapsed);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // FAVORİ TOGGLE (ayrı fonksiyon — hem G hem mobil kullanır)
-    // ═══════════════════════════════════════════════════════════════
     function toggleFavorite()
     {
         if (songs.length == 0 || curSelected < 0) return;
@@ -1427,14 +1394,14 @@ class FreeplayState extends MusicBeatState
             favorites.remove(song);
             FlxTween.color(item, 0.3, item.color, FlxColor.WHITE);
             FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-            if (controls.mobileC) showMobileTip("💔 Favorilerden çıkarıldı: " + song);
+            if (controls.mobileC) showMobileTip("Removed from favorites: " + song);
         }
         else
         {
             favorites.push(song);
             FlxTween.color(item, 0.3, item.color, 0xFFFFD700);
             FlxG.sound.play(Paths.sound('fav'), 0.8);
-            if (controls.mobileC) showMobileTip("⭐ Favorilere eklendi: " + song);
+            if (controls.mobileC) showMobileTip("Added to Favorites: " + song);
 
             for (i in 0...5)
             {
@@ -1452,12 +1419,9 @@ class FreeplayState extends MusicBeatState
         FlxG.save.data.favorites = favorites;
         FlxG.save.flush();
         updateQuickStats();
-        if (curCategory == 'Favoriler') updateList();
+        if (curCategory == 'Favorites') updateList();
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // GİZLE TOGGLE (ayrı fonksiyon — hem H hem mobil kullanır)
-    // ═══════════════════════════════════════════════════════════════
+	
     function toggleHidden()
     {
         if (songs.length == 0 || curSelected < 0) return;
@@ -1467,12 +1431,12 @@ class FreeplayState extends MusicBeatState
         if (hiddenSongs.contains(song))
         {
             hiddenSongs.remove(song);
-            if (controls.mobileC) showMobileTip("👁 Gizleme kaldırıldı: " + song);
+            if (controls.mobileC) showMobileTip("👁 Removed from Hiddens: " + song);
         }
         else
         {
             hiddenSongs.push(song);
-            if (controls.mobileC) showMobileTip("🙈 Gizlendi: " + song);
+            if (controls.mobileC) showMobileTip("🙈 Added Hiddens: " + song);
         }
 
         FlxG.save.data.hiddenSongs = hiddenSongs;
@@ -1482,9 +1446,6 @@ class FreeplayState extends MusicBeatState
         updateQuickStats();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // BEAT ICON
-    // ═══════════════════════════════════════════════════════════════
     function updateBeatIcon(elapsed:Float)
     {
         if (selected && PlayState.SONG != null && PlayState.SONG.bpm > 0)
@@ -1538,9 +1499,6 @@ class FreeplayState extends MusicBeatState
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // AMBİENT EFEKTLER
-    // ═══════════════════════════════════════════════════════════════
     function updateAmbientEffects(elapsed:Float)
     {
         for (i in 0...floatingOrbs.length)
@@ -1556,22 +1514,22 @@ class FreeplayState extends MusicBeatState
         }
     }
 
-    function updateGrade()
-    {
-        var rating = lerpRating * 100;
-        if (curSelected == -1 || intendedScore == 0)
-        {
-            gradeText.text = "N/A";
-            gradeIcon.text = "🎵";
-            gradeText.color = 0xFF888888;
-        }
-        else if (rating >= 100) { gradeText.text = "S+"; gradeIcon.text = "👑"; gradeText.color = 0xFFFFD700; }
-        else if (rating >= 95)  { gradeText.text = "S";  gradeIcon.text = "⭐"; gradeText.color = 0xFFFFD700; }
-        else if (rating >= 90)  { gradeText.text = "A";  gradeIcon.text = "🏆"; gradeText.color = 0xFF00FF87; }
-        else if (rating >= 80)  { gradeText.text = "B";  gradeIcon.text = "✨"; gradeText.color = 0xFF00FFFF; }
-        else if (rating >= 70)  { gradeText.text = "C";  gradeIcon.text = "📊"; gradeText.color = 0xFFFFD700; }
-        else                    { gradeText.text = "D";  gradeIcon.text = "📉"; gradeText.color = 0xFFFF5555; }
-    }
+	function updateGrade()
+	{
+		var rating = lerpRating * 100;
+		if (curSelected == -1 || intendedScore == 0)
+		{
+			gradeText.text = "N/A";
+			gradeIcon.setText("🎵");
+			gradeText.color = 0xFF888888;
+		}
+		else if (rating >= 100) { gradeText.text = "S+"; gradeIcon.setText("👑"); gradeText.color = 0xFFFFD700; }
+		else if (rating >= 95)  { gradeText.text = "S";  gradeIcon.setText("⭐"); gradeText.color = 0xFFFFD700; }
+		else if (rating >= 90)  { gradeText.text = "A";  gradeIcon.setText("🏆"); gradeText.color = 0xFF00FF87; }
+		else if (rating >= 80)  { gradeText.text = "B";  gradeIcon.setText("✨"); gradeText.color = 0xFF00FFFF; }
+		else if (rating >= 70)  { gradeText.text = "C";  gradeIcon.setText("📊"); gradeText.color = 0xFFFFD700; }
+		else                    { gradeText.text = "D";  gradeIcon.setText("📉"); gradeText.color = 0xFFFF5555; }
+	}
 
     // ═══════════════════════════════════════════════════════════════
     // SEÇİM MENÜSÜ İŞLEMLERİ
@@ -2044,7 +2002,7 @@ class FreeplayState extends MusicBeatState
             intendedScore = 0;
             intendedRating = 0;
 
-            showcaseTitle.text = "🎲 RASTGELE";
+            showcaseTitle.text = "RANDOM";
             showcaseSubtitle.text = "Rastgele bir şarkı seç!";
 
             for (num => item in grpSongs.members)

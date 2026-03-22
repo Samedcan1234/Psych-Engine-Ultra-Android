@@ -1,0 +1,582 @@
+{
+  "_info": "OpenMoji activities-00 | 72px per emoji | 1152x432px sheet",
+  "emojiSize": 72,
+  "frames": {
+    "jackolantern": {
+      "x": 0,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "christmas_tree": {
+      "x": 72,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "fireworks": {
+      "x": 144,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "sparkler": {
+      "x": 216,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "firecracker": {
+      "x": 288,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "sparkles": {
+      "x": 360,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "balloon": {
+      "x": 432,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "party_popper": {
+      "x": 504,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "confetti_ball": {
+      "x": 576,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "tanabata_tree": {
+      "x": 648,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "pine_decoration": {
+      "x": 720,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "japanese_dolls": {
+      "x": 792,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "carp_streamer": {
+      "x": 864,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "wind_chime": {
+      "x": 936,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "moon_viewing_ceremony": {
+      "x": 1008,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "red_envelope": {
+      "x": 1080,
+      "y": 0,
+      "w": 72,
+      "h": 72
+    },
+    "ribbon": {
+      "x": 0,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "wrapped_gift": {
+      "x": 72,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "reminder_ribbon": {
+      "x": 144,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "admission_tickets": {
+      "x": 216,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "ticket": {
+      "x": 288,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "military_medal": {
+      "x": 360,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "trophy": {
+      "x": 432,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "sports_medal": {
+      "x": 504,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "1st_place_medal": {
+      "x": 576,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "2nd_place_medal": {
+      "x": 648,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "3rd_place_medal": {
+      "x": 720,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "soccer_ball": {
+      "x": 792,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "baseball": {
+      "x": 864,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "softball": {
+      "x": 936,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "basketball": {
+      "x": 1008,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "volleyball": {
+      "x": 1080,
+      "y": 72,
+      "w": 72,
+      "h": 72
+    },
+    "american_football": {
+      "x": 0,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "rugby_football": {
+      "x": 72,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "tennis": {
+      "x": 144,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "flying_disc": {
+      "x": 216,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "bowling": {
+      "x": 288,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "cricket_game": {
+      "x": 360,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "field_hockey": {
+      "x": 432,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "ice_hockey": {
+      "x": 504,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "lacrosse": {
+      "x": 576,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "ping_pong": {
+      "x": 648,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "badminton": {
+      "x": 720,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "boxing_glove": {
+      "x": 792,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "martial_arts_uniform": {
+      "x": 864,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "goal_net": {
+      "x": 936,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "flag_in_hole": {
+      "x": 1008,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "ice_skate": {
+      "x": 1080,
+      "y": 144,
+      "w": 72,
+      "h": 72
+    },
+    "fishing_pole": {
+      "x": 0,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "diving_mask": {
+      "x": 72,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "running_shirt": {
+      "x": 144,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "skis": {
+      "x": 216,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "sled": {
+      "x": 288,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "curling_stone": {
+      "x": 360,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "direct_hit": {
+      "x": 432,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "yoyo": {
+      "x": 504,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "kite": {
+      "x": 576,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "pool_8_ball": {
+      "x": 648,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "crystal_ball": {
+      "x": 720,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "magic_wand": {
+      "x": 792,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "nazar_amulet": {
+      "x": 864,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "video_game": {
+      "x": 936,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "joystick": {
+      "x": 1008,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "slot_machine": {
+      "x": 1080,
+      "y": 216,
+      "w": 72,
+      "h": 72
+    },
+    "game_die": {
+      "x": 0,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "puzzle_piece": {
+      "x": 72,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "teddy_bear": {
+      "x": 144,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "pinata": {
+      "x": 216,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "nesting_dolls": {
+      "x": 288,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "spade_suit": {
+      "x": 360,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "heart_suit": {
+      "x": 432,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "diamond_suit": {
+      "x": 504,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "club_suit": {
+      "x": 576,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "chess_pawn": {
+      "x": 648,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "joker": {
+      "x": 720,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "mahjong_red_dragon": {
+      "x": 792,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "flower_playing_cards": {
+      "x": 864,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "performing_arts": {
+      "x": 936,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "framed_picture": {
+      "x": 1008,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "artist_palette": {
+      "x": 1080,
+      "y": 288,
+      "w": 72,
+      "h": 72
+    },
+    "thread": {
+      "x": 0,
+      "y": 360,
+      "w": 72,
+      "h": 72
+    },
+    "yarn": {
+      "x": 72,
+      "y": 360,
+      "w": 72,
+      "h": 72
+    }
+  },
+  "unicode_map": {
+    "1F383": "jackolantern",
+    "1F384": "christmas_tree",
+    "1F386": "fireworks",
+    "1F387": "sparkler",
+    "1F9E8": "firecracker",
+    "2728": "sparkles",
+    "1F388": "balloon",
+    "1F389": "party_popper",
+    "1F38A": "confetti_ball",
+    "1F38B": "tanabata_tree",
+    "1F38D": "pine_decoration",
+    "1F38E": "japanese_dolls",
+    "1F38F": "carp_streamer",
+    "1F390": "wind_chime",
+    "1F391": "moon_viewing_ceremony",
+    "1F9E7": "red_envelope",
+    "1F380": "ribbon",
+    "1F381": "wrapped_gift",
+    "1F397": "reminder_ribbon",
+    "1F39F": "admission_tickets",
+    "1F3AB": "ticket",
+    "1F396": "military_medal",
+    "1F3C6": "trophy",
+    "1F3C5": "sports_medal",
+    "1F947": "1st_place_medal",
+    "1F948": "2nd_place_medal",
+    "1F949": "3rd_place_medal",
+    "26BD": "soccer_ball",
+    "26BE": "baseball",
+    "1F94E": "softball",
+    "1F3C0": "basketball",
+    "1F3D0": "volleyball",
+    "1F3C8": "american_football",
+    "1F3C9": "rugby_football",
+    "1F3BE": "tennis",
+    "1F94F": "flying_disc",
+    "1F3B3": "bowling",
+    "1F3CF": "cricket_game",
+    "1F3D1": "field_hockey",
+    "1F3D2": "ice_hockey",
+    "1F94D": "lacrosse",
+    "1F3D3": "ping_pong",
+    "1F3F8": "badminton",
+    "1F94A": "boxing_glove",
+    "1F94B": "martial_arts_uniform",
+    "1F945": "goal_net",
+    "26F3": "flag_in_hole",
+    "26F8": "ice_skate",
+    "1F3A3": "fishing_pole",
+    "1F93F": "diving_mask",
+    "1F3BD": "running_shirt",
+    "1F3BF": "skis",
+    "1F6F7": "sled",
+    "1F94C": "curling_stone",
+    "1F3AF": "direct_hit",
+    "1FA80": "yoyo",
+    "1FA81": "kite",
+    "1F3B1": "pool_8_ball",
+    "1F52E": "crystal_ball",
+    "1FA84": "magic_wand",
+    "1F9FF": "nazar_amulet",
+    "1F3AE": "video_game",
+    "1F579": "joystick",
+    "1F3B0": "slot_machine",
+    "1F3B2": "game_die",
+    "1F9E9": "puzzle_piece",
+    "1F9F8": "teddy_bear",
+    "1FA85": "pinata",
+    "1FA86": "nesting_dolls",
+    "2660": "spade_suit",
+    "2665": "heart_suit",
+    "2666": "diamond_suit",
+    "2663": "club_suit",
+    "265F": "chess_pawn",
+    "1F0CF": "joker",
+    "1F004": "mahjong_red_dragon",
+    "1F3B4": "flower_playing_cards",
+    "1F3AD": "performing_arts",
+    "1F5BC": "framed_picture",
+    "1F3A8": "artist_palette",
+    "1F9F5": "thread",
+    "1F9F6": "yarn"
+  }
+}

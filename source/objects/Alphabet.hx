@@ -281,6 +281,8 @@ class AlphaCharacter extends FlxSprite
 
 	public static function loadAlphabetData(request:String = 'alphabet')
 	{
+		request = backend.Language.getAlphabetPath().split('/').pop();
+		
 		var path:String = Paths.getPath('images/$request.json');
 		#if MODS_ALLOWED
 		if(!FileSystem.exists(path))
@@ -401,11 +403,11 @@ class AlphaCharacter extends FlxSprite
 	public static function isTypeAlphabet(c:String) // thanks kade
 	{
 		var ascii = StringTools.fastCodeAt(c, 0);
+		var turkishChars:Array<String> = ['ç', 'ğ', 'ı', 'i', 'ö', 'ş', 'ü'];
 		return (ascii >= 65 && ascii <= 90)
-			|| (ascii >= 97 && ascii <= 122)
-			|| (ascii >= 192 && ascii <= 214)
-			|| (ascii >= 216 && ascii <= 246)
-			|| (ascii >= 248 && ascii <= 255);
+				|| (ascii >= 97 && ascii <= 122)
+				|| (ascii >= 192 && ascii <= 255) // Genişletilmiş Latin (Birçok Türkçe karakteri kapsar)
+				|| turkishChars.contains(c.toLowerCase());
 	}
 
 	private function set_image(name:String)

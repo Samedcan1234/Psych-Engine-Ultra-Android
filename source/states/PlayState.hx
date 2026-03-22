@@ -78,16 +78,16 @@ class PlayState extends MusicBeatState
 	public static var STRUM_X_MIDDLESCROLL = -278;
 
 	public static var ratingStuff:Array<Dynamic> = [
-		['Çok Kötü!', 0.2], //From 0% to 19%
-		['Berbat!', 0.4], //From 20% to 39%
-		['Kötü', 0.5], //From 40% to 49%
-		['Fena', 0.6], //From 50% to 59%
-		['Ehh', 0.69], //From 60% to 68%
-		['İyi', 0.7], //69%
-		['Güzel', 0.8], //From 70% to 79%
-		['Çok İyi', 0.9], //From 80% to 89%
-		['Sick!', 1], //From 90% to 99%
-		['Mükemmel!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
+		[Language.getPhrase('rating_bad', 'Bad!!'), 0.2],
+		[Language.getPhrase('rating_shit', 'Shit!'), 0.4],
+		[Language.getPhrase('rating_awful', 'Awful'), 0.5],
+		[Language.getPhrase('rating_notbad', 'Not Bad'), 0.6],
+		[Language.getPhrase('rating_meh', 'Meh'), 0.69],
+		[Language.getPhrase('rating_good', 'Good'), 0.7],
+		[Language.getPhrase('rating_great', 'Great'), 0.8],
+		[Language.getPhrase('rating_awesome', 'Awesome'), 0.9],
+		[Language.getPhrase('rating_sick', 'Sick!'), 1],
+		[Language.getPhrase('rating_perfect', 'Perfect!!'), 1]
 	];
 
 	//event variables
@@ -123,6 +123,10 @@ class PlayState extends MusicBeatState
 	public static var uiPrefix:String = "";
 	public static var uiPostfix:String = "";
 	public static var isPixelStage(get, never):Bool;
+	
+	// P.E.U Variables
+	var petLogo:FlxSprite;
+	var petText:FlxText;
 
 	@:noCompletion
 	static function set_stageUI(value:String):String
@@ -669,10 +673,23 @@ class PlayState extends MusicBeatState
 		#end
 
 		super.create();
+		if (ClientPrefs.data.peuwatermark) {
+			createPEUWatermark();
+		}
 		Paths.clearUnusedMemory();
 
 		cacheCountdown();
 		cachePopUpScore();
+		
+		if (ClientPrefs.data.serverConnection)
+		{
+			AlertMsg.show(
+				Language.getPhrase('online_error_title', 'Server Error'),
+				Language.getPhrase('online_error_msg',   'The server is offline or under maintenance. If you keep getting this error, disable the server connection setting.'),
+				6,
+				AlertMsg.COLOR_WARNING
+			);
+		}
 
 		if(eventNotes.length < 1) checkEventNote();
 	}
@@ -1188,8 +1205,8 @@ class PlayState extends MusicBeatState
 		}
 
 		var tempScore:String;
-		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Skor: {1} | Iskalar: {2} | Doğruluk: {3}', [songScore, songMisses, str]);
-		else tempScore = Language.getPhrase('score_text_instakill', 'Skor: {1} | Iskalar: {2}', [songScore, str]);
+		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Accuracy: {3}', [songScore, songMisses, str]);
+		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Misses: {2}', [songScore, str]);
 		scoreTxt.text = tempScore;
 	}
 
@@ -2541,7 +2558,7 @@ class PlayState extends MusicBeatState
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 				canResync = false;
-				MusicBeatState.switchState(new FreeplayState());
+				ThemeManager.switchToFreeplay();
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}
@@ -3290,6 +3307,11 @@ class PlayState extends MusicBeatState
 			//trace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
 			return;
 		}
+		
+		if (ClientPrefs.data.peuwatermark && peuLogo != null && curBeat % 2 == 0) {
+			peuLogo.scale.set(0.45, 0.45);
+			FlxTween.tween(peuLogo.scale, {x: 0.4, y: 0.4}, 0.5, {ease: FlxEase.circOut});
+		}
 
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
@@ -3307,6 +3329,54 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('curBeat', curBeat);
 		callOnScripts('onBeatHit');
+	}
+	
+	function createPEUWatermark():Void {
+		var logoPath:String = 'pet/petlogos/';
+		switch (ClientPrefs.data.peuwatermarklogo.toUpperCase()) {
+			case 'V1':
+				logoPath += 'V1';
+			case 'V2':
+				logoPath += 'V2';
+			case 'V2U':
+				logoPath += 'V2U';
+			case 'V2UP':
+				logoPath += 'V2UP';
+			case 'ONLINE':
+				logoPath += 'ONLINE';
+			case 'UNL':
+				logoPath += 'UNL';
+			case 'ULTRA':
+				logoPath += 'ULTRA':
+			default:
+				logoPath += 'ULTRA';
+		}
+		peuLogo = new FlxSprite(-200, 20);
+		try {
+			peuLogo.loadGraphic(Paths.image(logoPath));
+			peuLogo.setGraphicSize(Std.int(peuLogo.width * 0.4));
+			peuLogo.updateHitbox();
+			peuLogo.antialiasing = ClientPrefs.data.antialiasing;
+			peuLogo.cameras = [camHUD];
+			add(peuLogo);
+		} catch (e:Dynamic) {
+			trace("LOGO YÜKLEME HATASI: " + e);
+			return;
+		}
+		try {
+			peuText = new FlxText(-200, 35, 0, "Psych Engine Ultra");
+			peuText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+			peuText.borderSize = 2;
+			peuText.cameras = [camHUD];
+			add(peuText);
+		} catch (e:Dynamic) {
+			return;
+		}
+		// Logo Tween
+		if (peuLogo != null && peuText != null) {
+			FlxTween.tween(peuLogo, {x: 10}, 1.5, {ease: FlxEase.elasticOut});
+			FlxTween.tween(peuText, {x: 10 + 75}, 1.5, {ease: FlxEase.elasticOut});
+		}
 	}
 
 	public function characterBopper(beat:Int):Void

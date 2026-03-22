@@ -2,85 +2,476 @@ package languages;
 
 /**
  * Türkçe (Turkish)
- * 
- * Yeni çeviri eklemek için:
- *   "anahtar_kelime" => "çevrilen metin"
- * 
- * Image override eklemek için:
- *   "images/orjinal" => "images/languages/images/turkey/yeni"
- * 
- * Not: Key'ler küçük harf, boşluk yerine alt çizgi, noktalama işaretleri kaldırılmış olmalı.
+ * * Yeni çeviri eklemek için:
+ * "anahtar_kelime" => "çevrilen metin"
+ * * Image override eklemek için:
+ * "images/orjinal" => "images/languages/images/turkey/yeni"
  */
+ 
+ // Language System By SametGkTe
+ 
 class Turkish implements ILanguage
 {
     public var langName:String = 'Türkçe';
-    public var alphabetPath:Null<String> = null; // 'alphabet_tr' gibi özel bir alphabet varsa yaz
+    public var alphabetPath:Null<String> = "languages/turkey/alphabet";
 	
 	public function new() {}
     public var phrases:Map<String, String> = [
-        // ── Genel ──────────────────────────────────────────
-        "play_on_a_friday_night"            => "Bir Cuma... Gecesi Oyna.",
-        "freeplay"                          => "Serbest Oyun",
-        "story_mode"                        => "Hikaye Modu",
-        "options"                           => "Ayarlar",
-        "credits"                           => "Yapımcılar",
-        "exit_to_menu"                      => "Menüye Dön",
-        "back"                              => "Geri",
-        "confirm"                           => "Onayla",
+		// Working Translations
+		"credits_title"          => "✦  KREDİLER",
+		"credits_hint"           => "[ CTRL ] Akış  •  [ ESC ] Geri  •  [ ENTER / ← ] Linkler",
+		"credits_help_normal"    => "▲ ▼  Seç   •   ENTER / ←  Linkler\nCTRL  Kredi Akışını İzle",
+		"credits_help_links"     => "ENTER  Linki Aç   •   → / ESC  Geri\nCTRL  Kredi Akışını İzle",
+		"credits_no_links"       => "Link bulunamadı",
+		"credits_no_link"        => "Link Yok",
+		"credits_section_default"=> "KREDİLER",
+		"credits_team_label"     => "— EKİP —",
+		"credits_rpc"            => "Yapımcılar",
 
-        // ── Freeplay ───────────────────────────────────────
-        "search"                            => "Ara",
-        "no_songs_found"                    => "Şarkı bulunamadı.",
-        "personal_best"                     => "En İyi Skorun",
-        "not_played"                        => "Hiç Oynanmadı",
+		// Bölüm başlıkları
+		"credits_sec_peu"        => "Psych Engine Ultra",
+		"credits_sec_mobile"     => "Mobil Portalama Ekibi",
+		"credits_sec_psychteam"  => "Psych Engine Ekibi",
+		"credits_sec_former"     => "Eski Üyeler",
+		"credits_sec_contrib"    => "Katkıda Bulunanlar",
+		"credits_sec_funkin"     => "Funkin' Ekibi",
+		"credits_sec_discord"    => "Psych Engine Discord",
+		"otherteam_peu"          => "diğer",
 
-        // ── Pause Menu ────────────────────────────────────
-        "resume"                            => "Devam Et",
-        "restart_song"                      => "Şarkıyı Yeniden Başlat",
-        "exit_to_menu_pause"                => "Menüye Dön",
-        "botplay"                           => "Bot Oyunu",
+		// Roller
+		"credits_role_samet"   => "Psych Engine Ultra'nın Kurucusu ve Baş Geliştiricisi",
+		"credits_role_nexus"   => "Psych Engine Ultra Çevirmeni (Bazı)",
+		"credits_role_homu"    => "Psych Engine Baş Portlayıcısı ve linc_luajit-rewriten Yazarı",
+		"credits_role_karim"   => "Psych Engine İkinci Portlayıcısı",
+		"credits_role_moxie"   => "Psych Engine Mobile Yardımcısı",
+		"credits_role_shadow"  => "Psych Engine Baş Programcısı",
+		"credits_role_riveren" => "Psych Engine Baş Sanatçısı/Animatörü",
+		"credits_role_bb"      => "Eski Psych Engine Programcısı",
+		"credits_role_crow"    => "Linux Desteği, HScript Iris, Giriş Sistemi v3 ve Diğer PR'lar",
+		"credits_role_kami"    => "Psych Engine Maskotu Pessy'nin Yaratıcısı.",
+		"credits_role_maxneton"=> "Yükleme Ekranı Easter Egg Sanatçısı/Animatörü.",
+		"credits_role_keoiki"  => "Nota Sıçrama Animasyonları ve Latin Alfabesi",
+		"credits_role_sqirra"  => "Çökme İşleyicisi ve\nGrafik Editörü Dalga Formu Taban Kodu",
+		"credits_role_eric"    => "Çalışma Zamanı Shader Desteği ve Diğer PR'lar",
+		"credits_role_maj"     => ".MP4 Video Yükleyici Kütüphanesi (hxvlc)",
+		"credits_role_flicky"  => "Psync ve Tea Time Bestecisi\nVe Bazı Ses Efektleri",
+		"credits_role_kade"    => "Grafik Editörü Hataları ve Diğer PR'lar",
+		"credits_role_super"   => "LUA JIT Fork",
+		"credits_role_cheems"  => "FlxAnimate Yaratıcısı",
+		"credits_role_ninja"   => "Friday Night Funkin' Programcısı",
+		"credits_role_phantom" => "Friday Night Funkin' Animatörü",
+		"credits_role_evil"    => "Friday Night Funkin' Sanatçısı",
+		"credits_role_kawai"   => "Friday Night Funkin' Bestecisi",
+		"credits_role_discord" => "Psych Engine Discord",
+		"credits_role_arkose"  => "Türkçe Alfabe Harfleri",
+		"credits_role_emi3"    => "İspanyolca Resimler vs.",
+		
+		"language_changed_title" => "Dil Değiştirildi!",
+		"language_changed_msg"   => "Türkçe diline geçildi.",
+		
+		"peu_title"               => "P.E.U Ayarları",
+		"peu_rpc_title"           => "P.E.U Ayarları Menüsünde",
+		"peu_watermark"           => "P.E.U Filigranı",
+		"peu_watermark_desc"      => "Aktif edildiğinde, sol üstte Psych Engine Ultra filigranı aktif hale gelir.",
+		"peu_loading_screen"      => "P.E.U Yükleme Ekranı",
+		"peu_loading_screen_desc" => "Aktif edildiğinde, orijinal yükleme ekranı yerine P.E.U yükleme resimlerini kullanır.",
+		"peu_logo_style"          => "P.E.U Logo Stili:",
+		"peu_logo_style_desc"     => "P.E.U Filigranındaki logoyu seçin.",
+		"peu_loading_style"       => "P.E.U Yükleme Ekranı Stili:",
+		"peu_loading_style_desc"  => "P.E.U'nun kullanacağı yükleme ekranı stilini seçin.",
+		"peu_disable_intro"       => "Introyu Kapat",
+		"peu_disable_intro_desc"  => "Aktif edildiğinde, oyun başlangıcında oynatılan intro videosu devre dışı bırakılır.",
+		"peu_menu_theme"          => "Menü Teması:",
+		"peu_menu_theme_desc"     => "Menülerin temasını seçin.",
+		"peu_theme_turkey"        => "Türkiye",
+		"peu_theme_original"      => "Orijinal",
+		
+		"opt_note_colors"        => "Nota Renkleri",
+		"opt_controls"           => "Kontroller",
+		"opt_delay_combo"        => "Gecikme & Kombo",
+		"opt_graphics"           => "Grafik & Performans",
+		"opt_interface"          => "Arayüz & Görseller",
+		"opt_gameplay"           => "Oynanış",
+		"opt_language"           => "Dil",
+		"opt_peu"                => "Psych Engine Ultra Ayarları",
+		"opt_menu_settings"      => "Menü Ayarları",
+		"opt_mobile"             => "Mobil Ayarları",
 
-        // ── Options ───────────────────────────────────────
-        "note_colors"                       => "Nota Renkleri",
-        "controls"                          => "Kontroller",
-        "adjust_offset"                     => "Offset Ayarla",
-        "graphics"                          => "Grafik",
-        "visuals_and_ui"                    => "Görsel & Arayüz",
-        "gameplay"                          => "Oynanış",
-        "accessibility"                     => "Erişilebilirlik",
+		"opt_desc_note_colors"   => "Notaların renklerini ve görünümünü istediğin gibi özelleştir.",
+		"opt_desc_controls"      => "Klavye ve gamepad tuş atamalarını yapılandır.",
+		"opt_desc_delay_combo"   => "Ses ve video ayarlarını düzenle. Kombo görünümünü değiştir.",
+		"opt_desc_graphics"      => "Grafik kalitesini, FPS limitini ve performans ayarlarını optimize et.",
+		"opt_desc_interface"     => "Menü tasarımını ve oyun içi görselleri özelleştir.",
+		"opt_desc_gameplay"      => "Oyun ayarlarını kendi tarzına göre özelleştir!",
+		"opt_desc_language"      => "Oyun dilini değiştir ve yerelleştirme seçeneklerini görüntüle.",
+		"opt_desc_peu"           => "Psych Engine Ultra ayarlarını özelleştir.",
+		"opt_desc_menu_settings" => "Ana menü görünümünü özelleştir.",
 
-        // ── Gameplay ─────────────────────────────────────
-        "game_over"                         => "Oyun Bitti",
-        "week"                              => "Hafta",
-        "difficulty"                        => "Zorluk",
-        "easy"                              => "Kolay",
-        "normal"                            => "Normal",
-        "hard"                              => "Zor",
+		"opt_stat_note_colors"   => "Nota Renklerini Ayarla.",
+		"opt_stat_controls"      => "Varsayılan: W-A-S-D",
+		"opt_stat_delay_combo"   => "Varsayılan ms: 0",
+		"opt_stat_graphics"      => "Oyun Performansını Yönet",
+		"opt_stat_interface"     => "Nota Skinlerini Seç.",
+		"opt_stat_gameplay"      => "Oynanış Ayarlarını Yönet",
+		"opt_stat_language"      => "Dilini Buradan Seç!",
+		"opt_stat_peu"           => "P.E.U'yu Özelleştir",
+		"opt_stat_menu_settings" => "Ana Menüyü Özelleştir",
 
-        // ── TouchPad ─────────────────────────────────────
-        "touchpad_dpadmode_missing"         => "TouchPad dpadMode \"{1}\" bulunamadı.",
-        "touchpad_actionmode_missing"       => "TouchPad actionMode \"{1}\" bulunamadı.",
+		"settings_title"        => "Ayarlar",
+		"settings_subtitle"     => "Oyun deneyimini özelleştir!",
+		"settings_breadcrumb"   => "Ana Menü > Ayarlar",
+		"settings_hint_mobile"  => "D-PAD: Gezin  |  A: Seç  |  B: Geri  |  C: Mobil Kontroller",
+		"settings_hint_desktop" => "YUKARI/AŞAĞI/SOL/SAĞ: Gezin   |   ENTER: Seç   |   ESC: Geri",
 
-        // ── Errors & Warnings ────────────────────────────
-        "chart_editor_unsaved_changes"      => "Kaydedilmemiş değişiklikler var!",
-        "lua_error"                         => "Lua hatası: {1}",
+		// Graphics
+		"graphics_menu"              => "Grafik & Performans",
+		"graphics_low_quality"       => "Düşük Kalite",
+		"graphics_low_quality_desc"  => "Aktif edilirse, bazı arka plan detaylarını devre dışı bırakır,\nyükleme sürelerini azaltır ve performansı artırır. ÖNERİ: AÇIK",
+		"graphics_antialiasing"      => "Kenar Yumuşatma",
+		"graphics_antialiasing_desc" => "Aktif edilmezse, kenar yumuşatmayı devre dışı bırakır, daha keskin görüntüler pahasına performansı artırır. ÖNERİ: KAPALI",
+		"graphics_shaders"           => "Gölgeler",
+		"graphics_shaders_desc"      => "Aktif edilmezse, gölgelendiricileri devre dışı bırakır. Zayıf bilgisayarlar için işlemciyi yorabilir. ÖNERİ: KAPALI",
+		"graphics_gpu_cache"         => "GPU Önbellekleme",
+		"graphics_gpu_cache_desc"    => "Aktif edilirse, dokuları önbelleğe almak için GPU kullanılır, RAM kullanımını azaltır. Modlarınız sprite piksellerini değiştiriyorsa bunu açmayın.",
+		"graphics_framerate"         => "Kare Hızı",
+		"graphics_framerate_desc"    => "Baya Açıklayıcı, değilmi?",
+
+		// Gameplay
+		"gameplay_menu"                 => "Oynanış Ayarları",
+		"gameplay_downscroll"           => "Aşağı Oklar",
+		"gameplay_downscroll_desc"      => "Aktif Edilirse, oyun-içi oklarınız, yukarıdan aşağıya alınır.",
+		"gameplay_middlescroll"         => "Orta Oklar",
+		"gameplay_middlescroll_desc"    => "Aktif Edilirse, oyun-içi oklarınız ortalanır.",
+		"gameplay_opponent_strums"      => "Rakip Okları",
+		"gameplay_opponent_strums_desc" => "Aktif Edilmezse, rakibin oyun-içi okları gizlenir.",
+		"gameplay_ghost_tapping"        => "Hayalet Dokunma",
+		"gameplay_ghost_tapping_desc"   => "Aktif Edilirse, gelen ok olmadığı halde tuşlara basarsanız Iska sayılmaz.",
+		"gameplay_auto_pause"           => "Otomatik Durdurma",
+		"gameplay_auto_pause_desc"      => "Aktif Edilirse, ekranınız odaklanmadığında oyun otomatik olarak duraklatılır.",
+		"gameplay_no_reset"             => "Reset Butonunu Kapat",
+		"gameplay_no_reset_desc"        => "Aktif Edilirse, Sıfırla tuşuna basmak hiçbir şey yapmaz.",
+		"gameplay_old_mod_support"      => "Eski Mod Desteği",
+		"gameplay_old_mod_support_desc" => "Aktif Edilirse, Psych 0.73 Modlarının Çoğunu Sorunsuz Oynayabilmenizi Sağlar. (BETA)",
+		"gameplay_auto_ram"             => "Otomatik RAM Boşaltımı",
+		"gameplay_auto_ram_desc"        => "Kullanılmayan Assetlar 10 saniye içinde Ram Önbelleğinden Kaldırılır. Ram'i Düşük Cihazlar için Önerilir. (BETA)",
+		"gameplay_sustains"             => "Tek Nota Sürdürme",
+		"gameplay_sustains_desc"        => "Aktif Edilirse, Uzun Notaları kaçırırsanız basamazsınız ve tek bir Vuruş/Iska olarak sayılır.",
+		"gameplay_hitsound"             => "Nota Sesi",
+		"gameplay_hitsound_desc"        => "Notalara Bastığınızda 'Tik!' sesi çıkarır.",
+		"gameplay_rating_offset"        => "Derecelendirme Ofseti",
+		"gameplay_rating_offset_desc"   => "'Müq!' için ne kadar geç/erken vurmanız gerektiğini değiştirir.",
+		"gameplay_sick_window"          => "Müq! Vuruşu",
+		"gameplay_sick_window_desc"     => "'Müq!' için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.",
+		"gameplay_good_window"          => "İyi Vuruşu",
+		"gameplay_good_window_desc"     => "'İyi' derecesini elde etmek için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.",
+		"gameplay_bad_window"           => "Kötü Vuruşu",
+		"gameplay_bad_window_desc"      => "'Kötü' notu almak için sahip olduğunuz süreyi milisaniye cinsinden değiştirir.",
+		"gameplay_safe_frames"          => "Güvenli Kareler",
+		"gameplay_safe_frames_desc"     => "Bir notayı erken veya geç çalmak için kaç kareye sahip olduğunuzu değiştirir.",
+		"gameplay_import_save"          => "Ayarları İçe Aktar",
+		"gameplay_import_save_desc"     => "Bir funkin.sol dosyasını seçerek oyunun kayıt dosyasını değiştirebilirsiniz.",
+
+		// Visuals
+		"visuals_menu"                => "Arayüz & Görseller",
+		"visuals_note_skin"           => "Nota Kostümleri:",
+		"visuals_note_skin_desc"      => "Tercih ettiğiniz Nota Kostümü varyasyonunu seçin.",
+		"visuals_splash_skin"         => "Nota Efekti:",
+		"visuals_splash_skin_desc"    => "Tercih ettiğiniz Nota Efektini seçin veya kapatın.",
+		"visuals_splash_alpha"        => "Nota Efekt Şeffaflığı",
+		"visuals_splash_alpha_desc"   => "Nota Sıçramaları Efektleri ne kadar şeffaf olmalıdır? %0 kapatır.",
+		"visuals_hide_hud"            => "Arayüzü Gizle",
+		"visuals_hide_hud_desc"       => "Aktif edilirse, ekran göstergelerinin (HUD) çoğunu gizler.",
+		"visuals_time_bar"            => "Zaman Barı:",
+		"visuals_time_bar_desc"       => "Zaman Çubuğu neyi göstermelidir?",
+		"visuals_time_remaining"      => "Kalan Süre",
+		"visuals_time_elapsed"        => "Geçen Süre",
+		"visuals_time_songname"       => "Şarkı Adı",
+		"visuals_time_disabled"       => "Kapalı",
+		"visuals_flashing"            => "Yanıp / Sönen Işıklar",
+		"visuals_flashing_desc"       => "Yanıp sönen ışıklara karşı hassassanız bu seçeneğin işaretini kaldırın!",
+		"visuals_cam_zooms"           => "Kamera Zoomları",
+		"visuals_cam_zooms_desc"      => "Aktif Edilmezse, kamera vuruşta yakınlaştırma yapmaz.",
+		"visuals_score_zoom"          => "Skor Yakınlaştırması",
+		"visuals_score_zoom_desc"     => "Aktif Edilmezse, her nota vuruşunda skor metninin yakınlaşmasını devre dışı bırakır.",
+		"visuals_health_alpha"        => "Can Bar Opaklığı",
+		"visuals_health_alpha_desc"   => "Can Çubuğu ve Simgeler Ne Kadar Şeffaf Olmalı.",
+		"visuals_fps_counter"         => "FPS Sayacı",
+		"visuals_fps_counter_desc"    => "Aktif edilmezse, FPS Sayacını gizler.",
+		"visuals_pause_music"         => "Durdurma Ekranı Müziği:",
+		"visuals_pause_music_desc"    => "Durdurma Ekranı İçin Hangi Şarkıyı Tercih Edersin?",
+		"visuals_check_updates"       => "Güncellemeleri Kontrol Et",
+		"visuals_check_updates_desc"  => "Aktif edilirse, oyunu başlattığınızda güncellemeleri kontrol eder.",
+		"visuals_discord_rpc"         => "Discord Durumu",
+		"visuals_discord_rpc_desc"    => "Aktif edilmezse, Discord'daki Oynuyor Durumundan Uygulamayı gizler.",
+		"visuals_combo_stacking"      => "Kombo Stoklama",
+		"visuals_combo_stacking_desc" => "Aktif edilmezse, Dereceler ve Kombo üst üste gelmez.",
+
+		// Main Menu Settings
+		"menu_settings_title"          => "Ana Menü Ayarları",
+		"menu_cat_side_panel"          => "Sol Panel Ayarları",
+		"menu_cat_side_panel_desc"     => "Ana menünün sol tarafındaki profil, istatistik ve son oynanan panelleri.",
+		"menu_opt_profile"             => "Profil Paneli",
+		"menu_opt_profile_desc"        => "Sol üstteki isim, ikon, seviye ve XP barını gösterir.",
+		"menu_opt_stats"               => "İstatistik Paneli",
+		"menu_opt_stats_desc"          => "Toplam skor, oynanan şarkı sayısı ve doğruluk oranını gösterir.",
+		"menu_opt_last_played"         => "Son Oynanan Paneli",
+		"menu_opt_last_played_desc"    => "En son oynanan şarkıyı ve skorunu gösterir.",
+		"menu_cat_top_bar"             => "Üst Bar Ayarları",
+		"menu_cat_top_bar_desc"        => "Ekranın üstündeki saat, tarih ve selamlama yazılarını özelleştir.",
+		"menu_opt_clock"               => "Saat & Tarih",
+		"menu_opt_clock_desc"          => "Üst sağdaki saat ve tarih göstergesini açar/kapatır.",
+		"menu_opt_greeting"            => "Selamlama Yazısı",
+		"menu_opt_greeting_desc"       => "'Günaydın, Oyuncu!' gibi karşılama metnini gösterir.",
+		"menu_cat_bottom_bar"          => "Alt Bar Ayarları",
+		"menu_cat_bottom_bar_desc"     => "Ekranın altındaki duyuru şeridini ve sürüm yazısını yönet.",
+		"menu_opt_news"                => "Duyuru Şeridi",
+		"menu_opt_news_desc"           => "Altta kayan duyuru/haber metnini gösterir.",
+		"menu_opt_version"             => "Sürüm Yazısı",
+		"menu_opt_version_desc"        => "Sağ alttaki sürüm numarasını gösterir.",
+		"menu_cat_bg"                  => "Arka Plan Efektleri",
+		"menu_cat_bg_desc"             => "Parçacıklar, yüzen küreler ve grid arka planı gibi görsel efektler.",
+		"menu_opt_particles"           => "Parçacık Efekti",
+		"menu_opt_particles_desc"      => "Arka planda yükselen küçük parçacıkları gösterir.",
+		"menu_opt_orbs"                => "Yüzen Küreler",
+		"menu_opt_orbs_desc"           => "Arka planda yavaşça hareket eden parlak küreleri gösterir.",
+		"menu_opt_grid"                => "Grid Arka Planı",
+		"menu_opt_grid_desc"           => "Arka plandaki hareketli grid desenini gösterir.",
+		"menu_opt_scanlines"           => "Tarama Çizgileri",
+		"menu_opt_scanlines_desc"      => "Ekranda hareket eden ince yatay tarama çizgilerini gösterir.",
+		"menu_opt_parallax"            => "Paralaks Efekti",
+		"menu_opt_parallax_desc"       => "Fareyle arka planın hafifçe hareket etmesini sağlar.",
+		"menu_cat_video"               => "Menü Videosu",
+		"menu_cat_video_desc"          => "Ana menü arka planı yerine özel bir video oynat.",
+		"menu_opt_menu_video"          => "Menü Videosu",
+		"menu_opt_menu_video_desc"     => "Açık olduğunda arka plan resmi yerine video oynatılır.",
+		"menu_opt_video_path"          => "Video Konumu",
+		"menu_opt_video_path_desc"     => "Oynatılacak video dosyasının yolu. (.mp4 önerilir)",
+
+		// Options base keys
+		"note_colors"    => "Nota Renkleri",
+		"controls"       => "Kontroller",
+		"adjust_offset"  => "Offset Ayarla",
+		"graphics"       => "Grafik",
+		"visuals_and_ui" => "Görsel & Arayüz",
+		"gameplay"       => "Oynanış",
+		"accessibility"  => "Erişilebilirlik",
+		
+		"base_options_title"          => "Ayarlar",
+		"base_options_hint"           => "Yukarı / Aşağı = Değiştir  |  ENTER = Seç  |  R = Sıfırla  |  ESC = Geri",
+		"base_options_binding"        => "TUŞ ATANIYOR...",
+		"base_options_binding_cancel" => "ESC - İptal Et",
+		"base_options_binding_delete" => "BACKSPACE - Sil",
+		"base_options_file_selected"  => "DOSYA seçildi: ",
+		"base_options_ps_not_found"   => "PowerShell bulunamadı!\nManuel olarak yolu girin.",
+		"base_options_error"          => "HATA",
+
+		// Pause menu
+		"pause_Resume"               => "Devam Et",
+		"pause_Restart Song"         => "Şarkıyı Yeniden Başlat",
+		"pause_Change Difficulty"    => "Zorluk Değiştir",
+		"pause_Options"              => "Ayarlar",
+		"pause_Exit to menu"         => "Menüye Çık",
+		"pause_Leave Charting Mode"  => "Haritalama Modundan Çık",
+		"pause_Skip Time"            => "Zamana Atla",
+		"pause_End Song"             => "Şarkıyı Bitir",
+		"pause_Toggle Practice Mode" => "Pratik Modunu Aç/Kapat",
+		"pause_Toggle Botplay"       => "Bot Oyunu Aç/Kapat",
+		"pause_BACK"                 => "GERİ",
+		"pause_song_progress"        => "ŞARKI İLERLEMESİ",
+		"pause_score"                => "ANLIK SKOR",
+		"pause_accuracy"             => "DOĞRULUK",
+		"pause_misses"               => "MISS",
+		"pause_hint"                 => "↑↓: Seç   ENTER: Onayla   ESC: Devam Et   F5: Yenile",
+		"pause_missing_file"         => "Eksik dosya: ",
+		"pause_chart_error"          => "HARITA YÜKLENİRKEN HATA:\n{1}",
+
+		// Gameplay generic
+		"game_over"  => "Oyun Bitti",
+		"week"       => "Hafta",
+		"difficulty" => "Zorluk",
+		"easy"       => "Kolay",
+		"normal"     => "Normal",
+		"hard"       => "Zor",
+
+		// Navigation / Freeplay (eksikti, eklendi)
+		"play_on_a_friday_night" => "Bir Cuma Gecesi... Oyna.",
+		"freeplay"               => "Serbest Oyun",
+		"story_mode"             => "Hikaye Modu",
+		"options"                => "Ayarlar",
+		"credits"                => "Yapımcılar",
+		"exit_to_menu"           => "Menüye Dön",
+		"back"                   => "Geri",
+		"confirm"                => "Onayla",
+		"resume"                 => "Devam Et",
+		"restart_song"           => "Şarkıyı Yeniden Başlat",
+		"botplay"                => "Bot Modu",
+		"search"                 => "Ara",
+		"no_songs_found"         => "Şarkı bulunamadı.",
+		"personal_best"          => "En İyi Skorun",
+		"not_played"             => "Oynanmadı",
+		
+		// In-game
+		"score_text"           => "Skor: {1} | Iskalar: {2} | Doğruluk: {3}",
+		"score_text_instakill" => "Skor: {1} | Iskalar: {2}",
+
+		// Menu titles
+		"menu_title_story"        => "Hikaye Modu",
+		"menu_title_freeplay"     => "Serbest Oyun",
+		"menu_title_changelog"    => "Güncelleme Günlüğü",
+		"menu_title_mods"         => "Mod Merkezi",
+		"menu_title_achievements" => "Başarımlar",
+		"menu_title_credits"      => "Yapımcılar",
+		"menu_title_settings"     => "Ayarlar",
+
+		// Menu descriptions
+		"menu_desc_story"        => "Ana hikayeyi yaşa ve rakiplerini alt et!\nEpik bir macera seni bekliyor.",
+		"menu_desc_freeplay"     => "Tüm şarkılar senin emrinde!\nPratik yap, rekorlar kır.",
+		"menu_desc_changelog"    => "Psych Engine Ultra yenilikleri!\nSürüm notlarını incele.",
+		"menu_desc_mods"         => "Topluluk modlarını keşfet!\nSınırsız içerik dünyası.",
+		"menu_desc_achievements" => "Kazandığın tüm başarılar!\nKoleksiyonunu tamamla.",
+		"menu_desc_credits"      => "Muhteşem ekibimiz!\nBu projeyi hazırlayanlar.",
+		"menu_desc_settings"     => "Oyunu kişiselleştir!\nHer şey kontrolünde.",
+
+		// News
+		"news_label" => "DUYURU:",
+		"news_1"     => "Yeni güncelleme yayınlandı! Güncelleme Kayıtlarından Bakın!",
+		"news_2"     => "Psych Engine Ultra Çok İyiii :D",
+		"news_3"     => "Haftalık turnuva başladı! Katılmayı unutmayın.",
+		"news_4"     => "Discord Sunucumuza Katılmayı Unutmayın",
+		"news_5"     => "Haydi Gidelim!",
+
+		// Top bar
+		"main_menu_logo"    => "PSYCH ENGİNE ULTRA",
+		"main_menu_edition" => "TÜRKİYE EDİTİON",
+		"main_menu_version" => "Psych Engine Ultra",
+
+		// Changelog
+		"changelog_title" => "Psych Engine Ultra",
+		"changelog_notes" => "\n- Arayüz Yenilendi!\n- Profil Sistemi Güncellendi\n- Menü Temaları Eklendi.\n- Mod Desteği Optimize Edildi.\n- P.E Ultra 0.5 temeline alındı.\n- Birazcık Bugfix.\n \n- ŞUANKİ SÜRÜM: Ultra Edition\n Durum: Güncel Sürüm",
+		"changelog_hint"  => "Kapatmak için ESC veya ENTER'a basın",
+
+		// Profile & Rank
+		"profile_level" => "Seviye",
+		"rank_rookie"   => "ROOKIE",
+		"rank_bronze"   => "BRONZ",
+		"rank_silver"   => "GÜMÜŞ",
+		"rank_gold"     => "ALTIN",
+		"rank_plat"     => "PLATİN",
+		"rank_diamond"  => "ELMAS",
+
+		// Stats
+		"stats_songs"   => "şarkı",
+		"stats_hours"   => "saat",
+		"stats_minutes" => "dk",
+
+		// Last played
+		"last_played_none"  => "Henüz oynanmadı",
+		"last_played_empty" => "Biraz Oyun Vakti!",
+		"quick_play_replay" => "TEKRAR OYNA",
+		"quick_play_none"   => "YOK",
+		"score_label"       => "Skor",
+		"song_not_found"    => "ŞARKI BULUNAMADI!",
+
+		// Difficulty
+		"diff_easy"   => "KOLAY",
+		"diff_normal" => "NORMAL",
+		"diff_hard"   => "ZOR",
+		"diff_custom" => "ÖZEL",
+
+		// Days
+		"day_sun" => "Pazar",
+		"day_mon" => "Pazartesi",
+		"day_tue" => "Salı",
+		"day_wed" => "Çarşamba",
+		"day_thu" => "Perşembe",
+		"day_fri" => "Cuma",
+		"day_sat" => "Cumartesi",
+
+		// Months
+		"month_jan" => "Ocak",
+		"month_feb" => "Şubat",
+		"month_mar" => "Mart",
+		"month_apr" => "Nisan",
+		"month_may" => "Mayıs",
+		"month_jun" => "Haziran",
+		"month_jul" => "Temmuz",
+		"month_aug" => "Ağustos",
+		"month_sep" => "Eylül",
+		"month_oct" => "Ekim",
+		"month_nov" => "Kasım",
+		"month_dec" => "Aralık",
+
+		// Greetings
+		"greeting_morning" => "Günaydın",
+		"greeting_day"     => "İyi günler",
+		"greeting_evening" => "İyi akşamlar",
+		"greeting_night"   => "İyi geceler",
+		
+		"rating_bad"     => "Çok Kötü!",
+		"rating_shit"    => "Berbat!",
+		"rating_awful"   => "Kötü",
+		"rating_notbad"  => "Fena Değil",
+		"rating_meh"     => "Eh İşte",
+		"rating_good"    => "İyi",
+		"rating_great"   => "Güzel",
+		"rating_awesome" => "Harika",
+		"rating_sick"    => "Çok İyi!",
+		"rating_perfect" => "Mükemmel!!",
+		
+		"opt_locked_title" => "Ayar Kilitli",
+		"opt_locked_msg"   => "\"{1}\" ayarını değiştirebilmek için önce \"{2}\" seçeneğini açmanız gerekiyor.",
+
+		// Achievements
+		"achievements_title"        => "BAŞARILAR",
+		"achievements_subtitle"     => "Kazandığın başarıları incele!",
+		"achievements_breadcrumb"   => "Ana Menü > Başarılar",
+		"achievements_completed"    => "Tamamlandı",
+		"achievements_total"        => "Toplam",
+		"achievements_unlocked"     => "Açılan",
+		"achievements_completion"   => "Tamamlanma",
+		"achievements_hints"        => "↑↓: Gezin  |  DEL: Sıfırla  |  ESC: Geri",
+		"achievements_progress"     => "İLERLEME",
+		"achievements_rpc"          => "Başarılar",
+		"achievement_done"          => "✓ Tamamlandı",
+		"achievement_locked"        => "Kilitli",
+		"reset_achievement"         => "Başarıyı Sıfırla:",
+		"reset_achievement_confirm" => "Bu başarının ilerlemesi sıfırlanacak. Emin misin?",
+
+		"touchpad_dpadmode_missing"   => "TouchPad dpadMode \"{1}\" bulunamadı.",
+		"touchpad_actionmode_missing" => "TouchPad actionMode \"{1}\" bulunamadı.",
+
+		"chart_editor_unsaved_changes" => "Kaydedilmemiş değişiklikler var!",
+		"lua_error"                    => "Lua hatası: {1}",
+
+		"debug_memory"  => "Bellek",
+		"debug_peak"    => "Maks",
+		"debug_version" => "Sürüm",
+		"debug_system"  => "Sistem",
+		
+		"online_error_title" => "Server Hatası",
+		"online_error_msg"   => "Sunucu Aktif Değil Veya Bakımda, Bu Hatayı Sürekli alıyorsanız Server Bağlantısını Kapatın.",
+		
+		"gameplay_serverconnect"   => "Sunucu Bağlantısı",
+		"gameplay_serverconnect_desc"   => "Aktif Edildiğinde, sunucuya olan bağlantınız kesilir ve skorlarınız dahil sunucuya gönderilmez.",
     ];
 
-    public var imageOverrides:Map<String, String> = [
-        // Sözdizimi: "orijinal/path" => "dil-özel/path"
-        // .png uzantısı ekleme, Paths.image() bunu halleder
-        
-        // ── UI Images ────────────────────────────────────
-        "bad"                               => "languages/images/turkey/kötü",
-        "good"                              => "languages/images/turkey/iyi",
-        "sick"                              => "languages/images/turkey/mükemmel",
-        "shit"                              => "languages/images/turkey/berbat",
-
-        // ── Title Screen ─────────────────────────────────
-        "logoBumpin"                        => "languages/images/turkey/logoBumpin",
-        "titleEnter"                        => "languages/images/turkey/titleEnter",
-
-        // ── Menu ─────────────────────────────────────────
-        // "menuBG"                         => "languages/images/turkey/menuBG",
-    ];
+	public var imageOverrides:Map<String, String> = [
+		"bad"        => "languages/turkey/kötü",
+		"good"       => "languages/turkey/iyi",
+		"sick"       => "languages/turkey/müq",
+		"shit"       => "languages/turkey/berbat",
+		"set"        => "languages/turkey/hazir",
+		"go"         => "languages/turkey/basla",
+		"ready"      => "languages/turkey/yerlerinize",
+		"bad-pixel"  => "languages/turkey/pixelUI/kötü-piksel",
+		"good-pixel" => "languages/turkey/pixelUI/iyi-piksel",
+		"sick-pixel" => "languages/turkey/pixelUI/müq-piksel",
+		"shit-pixel" => "languages/turkey/pixelUI/berbat-piksel",
+		"go-pixel"   => "languages/turkey/pixelUI/basla-piksel",
+		"ready-pixel"=> "languages/turkey/pixelUI/yerlerinize-piksel",
+		"set-pixel"  => "languages/turkey/pixelUI/hazir-piksel",
+		"combo-pixel"=> "languages/turkey/pixelUI/kombo-piksel",
+		"easy"=> "languages/turkey/difficulties/easy",
+		"hard"=> "languages/turkey/difficulties/hard"
+	];
 }

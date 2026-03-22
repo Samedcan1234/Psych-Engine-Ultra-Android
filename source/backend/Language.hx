@@ -14,7 +14,7 @@ class Language
     private static var _languagesRegistered:Bool = false; // ← DÜZELTME 1: tekrar clear() engeli
 
     #if TRANSLATIONS_ALLOWED
-    private static var currentLang:ILanguage = null;
+    public static var currentLang:ILanguage = null;
     private static var phrases:Map<String, String> = [];
     private static var imageOverrides:Map<String, String> = [];
     #end
@@ -28,6 +28,15 @@ class Language
         registeredLanguages.set('turkish',  new Turkish());
         registeredLanguages.set('spanish',  new Spanish());
     }
+	
+	public static function getAlphabetPath():String
+	{
+		#if TRANSLATIONS_ALLOWED
+		if (currentLang != null && currentLang.alphabetPath != null)
+			return currentLang.alphabetPath;
+		#end
+		return 'alphabet';
+	}
 
     public static function reloadPhrases():Void
     {
@@ -54,7 +63,7 @@ class Language
 
         if (currentLang == null)
         {
-            trace('[Language] "$langKey" bulunamadı, English\'e dönülüyor.');
+            trace('[Language] "$langKey" not found,  Turning Back To English.');
             ClientPrefs.data.language = defaultLangKey;
             currentLang = registeredLanguages.get(defaultLangKey);
         }
@@ -67,7 +76,7 @@ class Language
             : 'alphabet';
         AlphaCharacter.loadAlphabetData(alphaPath);
 
-        trace('[Language] Yüklendi: ' + langKey + ' | Phrase sayısı: ' + Lambda.count(phrases)); // ← DEBUG
+        trace('[Language] Loaded: ' + langKey + Lambda.count(phrases)); // ← DEBUG
         #else
         AlphaCharacter.loadAlphabetData();
         #end

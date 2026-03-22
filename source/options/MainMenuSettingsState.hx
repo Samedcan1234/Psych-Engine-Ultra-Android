@@ -1,160 +1,126 @@
 package options;
 
-/**
- * Ana Menü ayarlarını kategorize şekilde düzenleyen state.
- * OptionsState > 'Görünüş & Arayüz' altından veya doğrudan açılabilir.
- *
- * Ayarlar otomatik olarak ClientPrefs.data'ya kaydedilir.
- * MainMenuState bu değerleri create() içinde okur.
- */
 class MainMenuSettingsState extends CategoryOptionsMenu
 {
 	override function create()
 	{
-		title    = 'Ana Menü Ayarları';
+		title    = Language.getPhrase('menu_settings_title', 'Ana Menü Ayarları');
 		rpcTitle = 'Ana Menü Ayarları';
 
-		// ══════════════════════════════════════════════
-		// KATEGORİ 1 — Sol Panel (Profil & İstatistik)
-		// ══════════════════════════════════════════════
+		// ── Sol Panel ────────────────────────────────────────────
 		var catSidePanel = new OptionCategory(
-			'Sol Panel Ayarları',
-			'Ana menünün sol tarafındaki profil, istatistik ve son oynanan panelleri.'
+			Language.getPhrase('menu_cat_side_panel',      'Sol Panel Ayarları'),
+			Language.getPhrase('menu_cat_side_panel_desc', 'Ana menünün sol tarafındaki profil, istatistik ve son oynanan panelleri.')
 		);
 
-		var optProfile = new Option(
-			'Profil Paneli',
-			'Sol üstteki isim, ikon, seviye ve XP barını gösterir.',
-			'showProfilePanel',
-			BOOL
-		);
-		catSidePanel.addOption(optProfile);
+		catSidePanel.addOption(new Option(
+			Language.getPhrase('menu_opt_profile',      'Profil Paneli'),
+			Language.getPhrase('menu_opt_profile_desc', 'Sol üstteki isim, ikon, seviye ve XP barını gösterir.'),
+			'showProfilePanel', BOOL));
 
-		var optStats = new Option(
-			'İstatistik Paneli',
-			'Toplam skor, oynanan şarkı sayısı ve doğruluk oranını gösterir.',
-			'showStatsPanel',
-			BOOL
-		);
-		catSidePanel.addOption(optStats);
+		catSidePanel.addOption(new Option(
+			Language.getPhrase('menu_opt_stats',      'İstatistik Paneli'),
+			Language.getPhrase('menu_opt_stats_desc', 'Toplam skor, oynanan şarkı sayısı ve doğruluk oranını gösterir.'),
+			'showStatsPanel', BOOL));
 
-		var optLastPlayed = new Option(
-			'Son Oynanan Paneli',
-			'En son oynanan şarkıyı ve skorunu gösterir.',
-			'showLastPlayedPanel',
-			BOOL
-		);
-		catSidePanel.addOption(optLastPlayed);
+		catSidePanel.addOption(new Option(
+			Language.getPhrase('menu_opt_last_played',      'Son Oynanan Paneli'),
+			Language.getPhrase('menu_opt_last_played_desc', 'En son oynanan şarkıyı ve skorunu gösterir.'),
+			'showLastPlayedPanel', BOOL));
 
 		addCategory(catSidePanel);
 
-		// ══════════════════════════════════════════════
-		// KATEGORİ 2 — Üst Bar
-		// ══════════════════════════════════════════════
+		// ── Üst Bar ──────────────────────────────────────────────
 		var catTopBar = new OptionCategory(
-			'Üst Bar Ayarları',
-			'Ekranın üstündeki saat, tarih ve selamlama yazılarını özelleştir.'
+			Language.getPhrase('menu_cat_top_bar',      'Üst Bar Ayarları'),
+			Language.getPhrase('menu_cat_top_bar_desc', 'Ekranın üstündeki saat, tarih ve selamlama yazılarını özelleştir.')
 		);
 
-		var optClock = new Option(
-			'Saat & Tarih',
-			'Üst sağdaki saat ve tarih göstergesini açar/kapatır.',
-			'showClock',
-			BOOL
-		);
-		catTopBar.addOption(optClock);
+		catTopBar.addOption(new Option(
+			Language.getPhrase('menu_opt_clock',      'Saat & Tarih'),
+			Language.getPhrase('menu_opt_clock_desc', 'Üst sağdaki saat ve tarih göstergesini açar/kapatır.'),
+			'showClock', BOOL));
 
-		var optGreeting = new Option(
-			'Selamlama Yazısı',
-			'"Günaydın, Oyuncu!" gibi karşılama metnini gösterir.',
-			'showGreeting',
-			BOOL
-		);
-		catTopBar.addOption(optGreeting);
+		catTopBar.addOption(new Option(
+			Language.getPhrase('menu_opt_greeting',      'Selamlama Yazısı'),
+			Language.getPhrase('menu_opt_greeting_desc', '"Günaydın, Oyuncu!" gibi karşılama metnini gösterir.'),
+			'showGreeting', BOOL));
 
 		addCategory(catTopBar);
 
-		// ══════════════════════════════════════════════
-		// KATEGORİ 3 — Alt Bar & Haberler
-		// ══════════════════════════════════════════════
+		// ── Alt Bar ──────────────────────────────────────────────
 		var catBottomBar = new OptionCategory(
-			'Alt Bar Ayarları',
-			'Ekranın altındaki duyuru şeridini ve sürüm yazısını yönet.'
+			Language.getPhrase('menu_cat_bottom_bar',      'Alt Bar Ayarları'),
+			Language.getPhrase('menu_cat_bottom_bar_desc', 'Ekranın altındaki duyuru şeridini ve sürüm yazısını yönet.')
 		);
 
-		var optNews = new Option(
-			'Duyuru Şeridi',
-			'Altta kayan duyuru/haber metnini gösterir.',
-			'showNewsBar',
-			BOOL
-		);
-		catBottomBar.addOption(optNews);
+		catBottomBar.addOption(new Option(
+			Language.getPhrase('menu_opt_news',      'Duyuru Şeridi'),
+			Language.getPhrase('menu_opt_news_desc', 'Altta kayan duyuru/haber metnini gösterir.'),
+			'showNewsBar', BOOL));
 
-		var optVersion = new Option(
-			'Sürüm Yazısı',
-			'Sağ alttaki sürüm numarasını gösterir.',
-			'showVersionText',
-			BOOL
-		);
-		catBottomBar.addOption(optVersion);
+		catBottomBar.addOption(new Option(
+			Language.getPhrase('menu_opt_version',      'Sürüm Yazısı'),
+			Language.getPhrase('menu_opt_version_desc', 'Sağ alttaki sürüm numarasını gösterir.'),
+			'showVersionText', BOOL));
 
 		addCategory(catBottomBar);
 
-		// ══════════════════════════════════════════════
-		// KATEGORİ 4 — Arka Plan Efektleri
-		// ══════════════════════════════════════════════
+		// ── Arka Plan Efektleri ───────────────────────────────────
 		var catBG = new OptionCategory(
-			'Arka Plan Efektleri',
-			'Parçacıklar, yüzen küreler ve grid arka planı gibi görsel efektler.'
+			Language.getPhrase('menu_cat_bg',      'Arka Plan Efektleri'),
+			Language.getPhrase('menu_cat_bg_desc', 'Parçacıklar, yüzen küreler ve grid arka planı gibi görsel efektler.')
 		);
 
-		var optParticles = new Option(
-			'Parçacık Efekti',
-			'Arka planda yükselen küçük parçacıkları gösterir.',
-			'showParticles',
-			BOOL
-		);
-		catBG.addOption(optParticles);
+		catBG.addOption(new Option(
+			Language.getPhrase('menu_opt_particles',      'Parçacık Efekti'),
+			Language.getPhrase('menu_opt_particles_desc', 'Arka planda yükselen küçük parçacıkları gösterir.'),
+			'showParticles', BOOL));
 
-		var optOrbs = new Option(
-			'Yüzen Küreler',
-			'Arka planda yavaşça hareket eden parlak küreleri gösterir.',
-			'showFloatingOrbs',
-			BOOL
-		);
-		catBG.addOption(optOrbs);
+		catBG.addOption(new Option(
+			Language.getPhrase('menu_opt_orbs',      'Yüzen Küreler'),
+			Language.getPhrase('menu_opt_orbs_desc', 'Arka planda yavaşça hareket eden parlak küreleri gösterir.'),
+			'showFloatingOrbs', BOOL));
 
-		var optGrid = new Option(
-			'Grid Arka Planı',
-			'Arka plandaki hareketli grid desenini gösterir.',
-			'showGridBG',
-			BOOL
-		);
-		catBG.addOption(optGrid);
+		catBG.addOption(new Option(
+			Language.getPhrase('menu_opt_grid',      'Grid Arka Planı'),
+			Language.getPhrase('menu_opt_grid_desc', 'Arka plandaki hareketli grid desenini gösterir.'),
+			'showGridBG', BOOL));
 
-		var optScanline = new Option(
-			'Tarama Çizgileri',
-			'Ekranda hareket eden ince yatay tarama çizgilerini gösterir.',
-			'showScanlines',
-			BOOL
-		);
-		catBG.addOption(optScanline);
+		catBG.addOption(new Option(
+			Language.getPhrase('menu_opt_scanlines',      'Tarama Çizgileri'),
+			Language.getPhrase('menu_opt_scanlines_desc', 'Ekranda hareket eden ince yatay tarama çizgilerini gösterir.'),
+			'showScanlines', BOOL));
 
-		var optParallax = new Option(
-			'Paralaks Efekti',
-			'Fareyle arka planın hafifçe hareket etmesini sağlar.',
-			'showParallax',
-			BOOL
-		);
-		catBG.addOption(optParallax);
+		catBG.addOption(new Option(
+			Language.getPhrase('menu_opt_parallax',      'Paralaks Efekti'),
+			Language.getPhrase('menu_opt_parallax_desc', 'Fareyle arka planın hafifçe hareket etmesini sağlar.'),
+			'showParallax', BOOL));
 
 		addCategory(catBG);
 
-		// ══════════════════════════════════════════════
-		// Menüyü inşa et
-		// ══════════════════════════════════════════════
-		buildMenu();
+		// ── Menü Videosu ─────────────────────────────────────────
+		var catVideo = new OptionCategory(
+			Language.getPhrase('menu_cat_video',      'Menü Videosu'),
+			Language.getPhrase('menu_cat_video_desc', 'Ana menü arka planı yerine özel bir video oynat.')
+		);
 
+		catVideo.addOption(new Option(
+			Language.getPhrase('menu_opt_menu_video',      'Menü Videosu'),
+			Language.getPhrase('menu_opt_menu_video_desc', 'Açık olduğunda arka plan resmi yerine video oynatılır.'),
+			'menuVideo', BOOL));
+
+		var optMenuVideoPath = new Option(
+			Language.getPhrase('menu_opt_video_path',      'Video Konumu'),
+			Language.getPhrase('menu_opt_video_path_desc', 'Oynatılacak video dosyasının yolu. (.mp4 önerilir)'),
+			'menuVideoPath', FILE);
+		optMenuVideoPath.options   = ['.mp4'];
+		optMenuVideoPath.dependsOn = 'menuVideo';
+		catVideo.addOption(optMenuVideoPath);
+
+		addCategory(catVideo);
+
+		buildMenu();
 		super.create();
 	}
 }

@@ -40,14 +40,13 @@ class MainMenuTurkey extends MusicBeatState
 		'👥', '⚙️'
 	];
 
-	static final RED:FlxColor       = 0xFFE30A17;
-	static final RED_DARK:FlxColor  = 0xFF8B0000;
-	static final RED_LIGHT:FlxColor = 0xFFFF4444;
-	static final WHITE:FlxColor     = 0xFFFFFFFF;
-	static final BG_DARK:FlxColor   = 0xFF0D0005;
-	static final CARD_BG:FlxColor   = 0xCC140008;
+	static final RED:FlxColor        = 0xFFE30A17;
+	static final RED_DARK:FlxColor   = 0xFF8B0000;
+	static final RED_LIGHT:FlxColor  = 0xFFFF4444;
+	static final WHITE:FlxColor      = 0xFFFFFFFF;
+	static final BG_DARK:FlxColor    = 0xFF0D0005;
+	static final CARD_BG:FlxColor    = 0xCC140008;
 
-	// Arka plan görselleri
 	var bgImages:Array<FlxSprite> = [];
 	var bgImagePaths:Array<String> = ['pet/turkey/1', 'pet/turkey/2', 'pet/turkey/3', 'pet/turkey/5'];
 	var curBgIndex:Int = 0;
@@ -55,11 +54,9 @@ class MainMenuTurkey extends MusicBeatState
 	static final BG_CHANGE_TIME:Float = 10.0;
 	var isBgTransitioning:Bool = false;
 
-	// PET Logo
 	var petLogo:FlxSprite;
 	var petLogoBaseScale:Float = 0.06;
 
-	// UI
 	var bg:FlxSprite;
 	var logoText:FlxText;
 	var logoSubText:FlxText;
@@ -87,18 +84,14 @@ class MainMenuTurkey extends MusicBeatState
 		#end
 
 		persistentUpdate = persistentDraw = true;
-
-		// ── ARKA PLAN RENK ──────────────────────────────────────
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, BG_DARK);
 		add(bg);
-
-		// ── ARKA PLAN GÖRSELLERİ - TAM EKRAN ───────────────────
 		for (i in 0...bgImagePaths.length)
 		{
 			var bgImg = new FlxSprite(0, 0);
 			bgImg.loadGraphic(Paths.image(bgImagePaths[i]));
 			bgImg.antialiasing = ClientPrefs.data.antialiasing;
-			bgImg.setGraphicSize(FlxG.width, FlxG.height); // Tam ekran kaplasın
+			bgImg.setGraphicSize(FlxG.width, FlxG.height); 
 			bgImg.updateHitbox();
 			bgImg.x = 0;
 			bgImg.y = 0;
@@ -107,7 +100,6 @@ class MainMenuTurkey extends MusicBeatState
 			bgImages.push(bgImg);
 		}
 
-		// Sol gradient overlay
 		var gradLeft = FlxGradient.createGradientFlxSprite(
 			Std.int(FlxG.width / 2), FlxG.height,
 			[0x55E30A17, 0x00E30A17],
@@ -118,7 +110,6 @@ class MainMenuTurkey extends MusicBeatState
 
 		createParticles();
 
-		// ── PET LOGO ────────────────────────────────────────────
 		petLogo = new FlxSprite();
 		petLogo.loadGraphic(Paths.image('pet/petlogo'));
 		petLogo.antialiasing = ClientPrefs.data.antialiasing;
@@ -129,7 +120,6 @@ class MainMenuTurkey extends MusicBeatState
 		petLogo.alpha = 0.92;
 		add(petLogo);
 
-		// BG değişim ipucu - ok ikonları
 		var leftArrowHint = new FlxText(FlxG.width - Std.int(FlxG.width * 0.48) - 15, FlxG.height - 35, 30, "◄", 18);
 		leftArrowHint.setFormat(Paths.font("vcr.ttf"), 18, 0xFF444444, LEFT);
 		add(leftArrowHint);
@@ -142,7 +132,6 @@ class MainMenuTurkey extends MusicBeatState
 		bgHint.setFormat(Paths.font("vcr.ttf"), 13, 0xFF444444, CENTER);
 		add(bgHint);
 
-		// ── LOGO ────────────────────────────────────────────────
 		var logoBG = FlxGradient.createGradientFlxSprite(
 			500, 100,
 			[0xAAE30A17, 0x00E30A17],
@@ -165,7 +154,6 @@ class MainMenuTurkey extends MusicBeatState
 		logoSubText.setFormat(Paths.font("vcr.ttf"), 18, RED_LIGHT, LEFT);
 		add(logoSubText);
 
-		// ── ALT BAR ─────────────────────────────────────────────
 		versionText = new FlxText(FlxG.width - 200, FlxG.height - 28, 190, "v" + MainMenuState.psychEngineVersion, 14);
 		versionText.setFormat(Paths.font("vcr.ttf"), 14, 0xFF666666, RIGHT);
 		add(versionText);
@@ -174,7 +162,6 @@ class MainMenuTurkey extends MusicBeatState
 		hint.setFormat(Paths.font("vcr.ttf"), 14, 0xFF555555, LEFT);
 		add(hint);
 
-		// ── SEÇIM ÇUBUĞU ────────────────────────────────────────
 		selectorGlow = new FlxSprite(0, 0).makeGraphic(Std.int(FlxG.width * 0.47) - 40, 82, RED);
 		selectorGlow.x = 20;
 		selectorGlow.alpha = 0.12;
@@ -184,7 +171,6 @@ class MainMenuTurkey extends MusicBeatState
 		selectorBar.x = 20;
 		add(selectorBar);
 
-		// ── MENÜ KARTLARI ────────────────────────────────────────
 		var cardWidth:Int = Std.int(FlxG.width * 0.47) - 48;
 
 		for (i in 0...optionShit.length)
@@ -216,7 +202,6 @@ class MainMenuTurkey extends MusicBeatState
 			menuArrows.push(arrow);
 		}
 
-		// Kamera
 		camFollow = new FlxObject(0, 0, 1, 1);
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
@@ -228,6 +213,7 @@ class MainMenuTurkey extends MusicBeatState
 		changeItem();
 
 		FlxG.camera.fade(FlxColor.BLACK, 0.5, true);
+		addTouchPad("UP_DOWN", "A_B_E");
 		super.create();
 	}
 
@@ -249,7 +235,6 @@ class MainMenuTurkey extends MusicBeatState
 		}
 	}
 
-	// ── ARKA PLAN DEĞİŞİMİ ──────────────────────────────────────
 	function changeBg(targetIndex:Int)
 	{
 		if (isBgTransitioning || targetIndex == curBgIndex) return;
@@ -259,10 +244,8 @@ class MainMenuTurkey extends MusicBeatState
 		curBgIndex = targetIndex;
 		bgTimer = 0;
 
-		// Eskiyi karat
 		FlxTween.tween(bgImages[oldIndex], {alpha: 0}, 0.8, {ease: FlxEase.quadInOut});
 
-		// Yeniyi aydınlat
 		FlxTween.tween(bgImages[curBgIndex], {alpha: 0.35}, 0.8, {
 			ease: FlxEase.quadInOut,
 			onComplete: function(t:FlxTween) {
@@ -294,7 +277,6 @@ class MainMenuTurkey extends MusicBeatState
 		changeBg(prev);
 	}
 
-	// ── UPDATE ──────────────────────────────────────────────────
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -310,7 +292,6 @@ class MainMenuTurkey extends MusicBeatState
 			FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal)
 		);
 
-		// Otomatik BG değişimi
 		if (!isBgTransitioning)
 		{
 			bgTimer += elapsed;
@@ -318,26 +299,21 @@ class MainMenuTurkey extends MusicBeatState
 				changeBgRandom();
 		}
 
-		// Partiküller
 		for (p in particles)
 			if (p.y < -5) { p.y = FlxG.height + 5; p.x = FlxG.random.float(0, FlxG.width); }
 
-		// PET Logo hafif nefes
 		if (petLogo != null)
 		{
 			var breathe = petLogoBaseScale + Math.sin(ambientTime * 1.2) * 0.012;
 			petLogo.scale.set(breathe, breathe);
 		}
 
-		// Selector glow pulse
 		selectorGlow.alpha = 0.10 + Math.sin(ambientTime * 3) * 0.05;
 
-		// Ok titreme
 		for (i in 0...menuArrows.length)
 			if (i == curSelected)
 				menuArrows[i].x = (Std.int(FlxG.width * 0.47) - 58) + Math.sin(ambientTime * 4) * 4;
 
-		// Logo nefes
 		var breathe = 1 + Math.sin(ambientTime * 1.5) * 0.008;
 		logoText.scale.set(breathe, breathe);
 
@@ -348,7 +324,6 @@ class MainMenuTurkey extends MusicBeatState
 			if (controls.UI_UP_P)    changeItem(-1);
 			if (controls.UI_DOWN_P)  changeItem(1);
 
-			// Sol/Sağ ok ile BG değiştir
 			if (controls.UI_LEFT_P)  changeBgPrev();
 			if (controls.UI_RIGHT_P) changeBgNext();
 
@@ -361,7 +336,7 @@ class MainMenuTurkey extends MusicBeatState
 
 			if (controls.ACCEPT) selectEntry();
 
-			if (controls.justPressed('debug_1'))
+			else if (controls.justPressed('debug_1') || touchPad.buttonE.justPressed)
 			{
 				selectedSomethin = true;
 				MusicBeatState.switchState(new MasterEditorMenu());
@@ -462,17 +437,14 @@ class MainMenuTurkey extends MusicBeatState
 	{
 		super.beatHit();
 
-		// Logo beat bump
 		FlxTween.cancelTweensOf(logoText.scale);
 		logoText.scale.set(1.06, 1.06);
 		FlxTween.tween(logoText.scale, {x: 1, y: 1}, 0.3, {ease: FlxEase.quadOut});
 
-		// Selector bar flash
 		FlxTween.cancelTweensOf(selectorBar);
 		selectorBar.color = WHITE;
 		FlxTween.color(selectorBar, 0.3, WHITE, RED);
 
-		// PET Logo beat bump - dışarıdan ayarlanabilir
 		if (petLogo != null)
 		{
 			FlxTween.cancelTweensOf(petLogo.scale);

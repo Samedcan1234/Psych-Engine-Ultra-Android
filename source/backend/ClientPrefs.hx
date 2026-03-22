@@ -8,7 +8,6 @@ import states.TitleState;
 
 // Add a variable here and it will get automatically saved
 @:structInit class SaveVariables {
-	// Mobile and Mobile Controls Releated
 	public var extraButtons:String = "NONE"; // mobile extra button option
 	public var hitboxPos:Bool = true; // hitbox extra button position option
 	public var dynamicColors:Bool = true; // yes cause its cool -Karim
@@ -22,12 +21,14 @@ import states.TitleState;
 	public var fpsRework:Bool = false;
 	
 	//P.E.T variables
-	public var menuTheme:String = 'V2.5';
-	public var petwatermark:Bool = true;
-	public var petloadingscreen:Bool = true;
-	public var petwatermarklogo:String = 'ONLINE';
-	public var petloadingscreenimage:String = 'ONLINE';
+	public var menuTheme:String = 'V3';
+	public var peuwatermark:Bool = true;
+	public var peuloadingscreen:Bool = true;
+	public var peuwatermarklogo:String = 'ONLINE';
+	public var peuloadingscreenimage:String = 'ONLINE';
 	public var disableIntroVideo:Bool = false;
+	public var familyGame:Bool = true;
+	public var serverConnection:Bool = true;
 	
 	
 	// MainMenu (V3)
@@ -43,6 +44,12 @@ import states.TitleState;
 	public var showParallax:Bool = true;
 	public var showLastPlayedPanel:Bool = true;
 	public var showFloatingOrbs:Bool = true;
+	
+	public var modsPath:String = '';
+	public var _resetModPath:Bool = false;
+	
+	public var menuVideo:Bool = false;
+	public var menuVideoPath:String = '';
 	
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;

@@ -27,21 +27,25 @@ import DateTools;
 import states.PlayState;
 import states.LoadingState;
 import states.AdminPanel;
+import objects.VideoSprite;
+import objects.EmojiText;
+import objects.EmojiAtlas;
+import objects.EmojiUtil;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '1.0.4';
+	public static var psychEngineVersion:String = '0.1.3';
 	public static var curSelected:Int = 0;
 	
 	var menuItems:FlxTypedGroup<FlxSpriteGroup>;
 	var optionShit:Array<String> = [
-		'hikaye_modu',
-		'serbest_oyun',
-		'guncelleme',
-		#if MODS_ALLOWED 'modlar', #end
-		#if ACHIEVEMENTS_ALLOWED 'basarimlar', #end
-		'yapimcilar',
-		'ayarlar'
+		'story_mode',
+		'freeplay',
+		'changelog',
+		#if MODS_ALLOWED 'mods', #end
+		#if ACHIEVEMENTS_ALLOWED 'achievements', #end
+		'credits',
+		'settings'
 	];
 
 	// UI
@@ -53,8 +57,11 @@ class MainMenuState extends MusicBeatState
 	var cardGlows:Array<FlxSprite> = [];
 	var cardIcons:Array<FlxSprite> = [];
 	var cardTitles:Array<FlxText> = [];
-	var systemStatusText:FlxText;
 	var mouseCursor:FlxSprite;
+	
+	#if VIDEOS_ALLOWED
+	var menuVideoBG:VideoSprite;
+	#end
 	
 	var allowMouse:Bool = true;
 	
@@ -85,7 +92,7 @@ class MainMenuState extends MusicBeatState
 	var descriptionTitle:FlxText;
 	var descriptionText:FlxText;
 	
-	// Profil Sistemi Değişkenleri
+	// Profil Sistemi
 	var profilePanel:FlxSprite;
 	var profilePanelGlow:FlxSprite;
 	var profileName:FlxText;
@@ -94,9 +101,9 @@ class MainMenuState extends MusicBeatState
 	var profileXPBar:FlxBar;
 	var profileXPText:FlxText;
 	var profileRank:FlxText;
-	var profileRankIcon:FlxText;
+	var profileRankIcon:EmojiText;
 	
-	// İstatistik Sistemi Değişkenleri
+	// İstatistik Sistemi
 	var statsPanel:FlxSprite;
 	var statsPanelGlow:FlxSprite; 
 	var statsTotalScore:FlxText;
@@ -147,66 +154,88 @@ class MainMenuState extends MusicBeatState
 	var prevLeft:Bool = false;
 
 	var menuColorMap:Map<String, FlxColor> = [
-		'hikaye_modu' => 0xFF4A90E2,
-		'serbest_oyun' => 0xFF00E5FF,
-		'guncelleme' => 0xFF8B5CF6,
-		'modlar' => 0xFF10B981,
-		'basarimlar' => 0xFF00E5FF,
-		'yapimcilar' => 0xFF10B981,
-		'ayarlar' => 0xFF64748B
+		'story_mode'   => 0xFF4A90E2,
+		'freeplay'     => 0xFF00E5FF,
+		'changelog'    => 0xFF8B5CF6,
+		'mods'         => 0xFF10B981,
+		'achievements' => 0xFF00E5FF,
+		'credits'      => 0xFF10B981,
+		'settings'     => 0xFF64748B
 	];
 	
 	var menuIconMap:Map<String, String> = [
-		'hikaye_modu' => "⭐",
-		'serbest_oyun' => "🎵",
-		'guncelleme' => "📋",
-		'modlar' => "🧬",
-		'basarimlar' => "💎",
-		'yapimcilar' => "🖥️",
-		'ayarlar' => "🛡️"
+		'story_mode'   => "⭐",
+		'freeplay'     => "🎵",
+		'changelog'    => "📋",
+		'mods'         => "🧬",
+		'achievements' => "💎",
+		'credits'      => "",
+		'settings'     => ""
 	];
 
-	var menuDescriptions:Map<String, String> = [
-		'hikaye_modu' => "Ana hikayeyi yaşa ve rakiplerini alt et!\nEpik bir macera seni bekliyor.",
-		'serbest_oyun' => "Tüm şarkılar senin emrinde!\nPratik yap, rekorlar kır.",
-		'guncelleme' => "P.E.T XQ Edition yenilikleri!\nSürüm notlarını incele.",
-		'modlar' => "Topluluk modlarını keşfet!\nSınırsız içerik dünyası.",
-		'basarimlar' => "Kazandığın tüm başarılar!\nKoleksiyonunu tamamla.",
-		'yapimcilar' => "Muhteşem ekibimiz!\nBu projeyi hazırlayanlar.",
-		'ayarlar' => "Oyunu kişiselleştir!\nHer şey kontrolünde."
-	];
-	
-	var menuTitles:Map<String, String> = [
-		'hikaye_modu' => "HİKAYE MODU",
-		'serbest_oyun' => "SERBEST OYUN",
-		'guncelleme' => "GÜNCELLEME GÜNLÜĞÜ",
-		'modlar' => "MOD MERKEZİ",
-		'basarimlar' => "BAŞARILAR",
-		'yapimcilar' => "YAPIMCILAR",
-		'ayarlar' => "AYARLAR"
-	];
-	
-	var newsItems:Array<String> = [
-		"Yeni güncelleme yayınlandı! Yeni özellikler eklendi. Güncelleme Kayıtlarından Bakın!",
-		"Psych Engine Türkiye Çok İyiii :D",
-		"Haftalık turnuva başladı! Katılmayı unutmayın.",
-		"Discord Sunucumuza Katılmayı Unutmayın",
-		"Bide Şu Kodları Yaparken Ellerim Yanmasa!"
-	];
+	// Boş — create() içinde Language ile doldurulur
+	var menuDescriptions:Map<String, String> = [];
+	var menuTitles:Map<String, String>       = [];
+	var newsItems:Array<String>              = [];
 
-	static inline var PLAYER_NAME:String = "Oyuncu";
+	static inline var PLAYER_NAME:String = "Player";
+
+	// ═══════════════════════════════════════════════════════════════
+	// DİL VERİSİNİ DOLDUR
+	// ═══════════════════════════════════════════════════════════════
+
+	function _buildLanguageData():Void
+	{
+		menuTitles = [
+			'story_mode'   => Language.getPhrase('menu_title_story',        'Story Mode'),
+			'freeplay'     => Language.getPhrase('menu_title_freeplay',     'Freeplay'),
+			'changelog'    => Language.getPhrase('menu_title_changelog',    'Change Log'),
+			'mods'         => Language.getPhrase('menu_title_mods',         'Mods'),
+			'achievements' => Language.getPhrase('menu_title_achievements', 'Achievements'),
+			'credits'      => Language.getPhrase('menu_title_credits',      'Credits'),
+			'settings'     => Language.getPhrase('menu_title_settings',     'Settings')
+		];
+
+		menuDescriptions = [
+			'story_mode'   => Language.getPhrase('menu_desc_story',        'Experience the main story and defeat your rivals!\nAn epic adventure awaits you.'),
+			'freeplay'     => Language.getPhrase('menu_desc_freeplay',     'All the songs are here!\nPractice and break records.'),
+			'changelog'    => Language.getPhrase('menu_desc_changelog',    'New features in Psych Engine Ultra!\nCheck out the release notes.'),
+			'mods'         => Language.getPhrase('menu_desc_mods',         'Discover community mods!\nA world of unlimited content.'),
+			'achievements' => Language.getPhrase('menu_desc_achievements', 'All your achievements!\nComplete your collection.'),
+			'credits'      => Language.getPhrase('menu_desc_credits',      'Our team!\nThe people behind this project.'),
+			'settings'     => Language.getPhrase('menu_desc_settings',     'Customize the game!\nYou\'re in full control.')
+		];
+
+		newsItems = [
+			Language.getPhrase('news_1', 'A new update has been released! Check the Change Logs!'),
+			Language.getPhrase('news_2', 'Psych Engine Ultra is sooo cool :D'),
+			Language.getPhrase('news_3', 'The weekly tournament has started! Don\'t forget to join.'),
+			Language.getPhrase('news_4', 'Don\'t forget to join our Discord server'),
+			Language.getPhrase('news_5', 'Let\'s Gooo!')
+		];
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// CREATE
+	// ═══════════════════════════════════════════════════════════════
 
 	override function create()
 	{
+		// Dil verilerini en başta doldur
+		_buildLanguageData();
+
 		#if mobile
 		final enter:String = (controls.mobileC) ? 'A' : 'ENTER';
-		final back:String = (controls.mobileC) ? 'B' : 'BACK';
+		final back:String  = (controls.mobileC) ? 'B' : 'BACK';
 		#end
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence("Ana Menüde - XQ Edition", null);
+		DiscordClient.changePresence("Main Menu", null);
 		#end
 
 		persistentUpdate = persistentDraw = true;
+		
+		if (!EmojiAtlas.instance.isLoaded())
+			EmojiAtlas.instance.load("emoji_atlas", 32);
 
 		// ═══════════════════════════════════════
 		// ARKA PLAN
@@ -216,23 +245,39 @@ class MainMenuState extends MusicBeatState
 		bgLayer1.screenCenter();
 		add(bgLayer1);
 		
-		// Grid — oluştur, sonra visibility set et, sonra add
 		gridBG = new FlxBackdrop(FlxGridOverlay.createGrid(60, 60, 120, 120, true, 0x08FFFFFF, 0x0));
 		gridBG.velocity.set(15, 15);
 		gridBG.alpha = 0.2;
 		gridBG.visible = ClientPrefs.data.showGridBG;
 		add(gridBG);
 		
-		bgLayer2 = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bgLayer2.antialiasing = ClientPrefs.data.antialiasing;
-		bgLayer2.setGraphicSize(Std.int(FlxG.width * 1.3));
-		bgLayer2.updateHitbox();
-		bgLayer2.screenCenter();
-		bgLayer2.alpha = 0.4;
-		bgLayer2.color = currentTheme;
-		add(bgLayer2);
+		#if VIDEOS_ALLOWED
+		if (ClientPrefs.data.menuVideo && ClientPrefs.data.menuVideoPath != null && ClientPrefs.data.menuVideoPath.trim() != '')
+		{
+			menuVideoBG = new VideoSprite(ClientPrefs.data.menuVideoPath, true, true);
+			menuVideoBG.setGraphicSize(FlxG.width, FlxG.height);
+			menuVideoBG.updateHitbox();
+			menuVideoBG.screenCenter();
+			add(menuVideoBG);
+			menuVideoBG.videoSprite.bitmap.play();
+			bgLayer2 = new FlxSprite().makeGraphic(1, 1, FlxColor.TRANSPARENT);
+			add(bgLayer2);
+		}
+		else
+		{
+		#end
+			bgLayer2 = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+			bgLayer2.antialiasing = ClientPrefs.data.antialiasing;
+			bgLayer2.setGraphicSize(Std.int(FlxG.width * 1.3));
+			bgLayer2.updateHitbox();
+			bgLayer2.screenCenter();
+			bgLayer2.alpha = 0.4;
+			bgLayer2.color = currentTheme;
+			add(bgLayer2);
+		#if VIDEOS_ALLOWED
+		}
+		#end
 
-		// Scanline — oluştur, visibility set et, add
 		scanline = new FlxBackdrop(null, Y, 0, 2);
 		scanline.makeGraphic(FlxG.width, 4, 0x11FFFFFF);
 		scanline.velocity.y = 40;
@@ -245,7 +290,6 @@ class MainMenuState extends MusicBeatState
 		vignette.alpha = 0.6;
 		add(vignette);
 
-		// Parçacıklar & küreler (fonksiyon içinde zaten showParticles/showFloatingOrbs kontrolü var)
 		createParticles();
 		createFloatingOrbs();
 
@@ -264,16 +308,15 @@ class MainMenuState extends MusicBeatState
 		topBarLine.alpha = 0.8;
 		add(topBarLine);
 		
-		engineLogo = new FlxText(30, 15, 0, "PSYCH ENGİNE ULTRA", 36);
+		engineLogo = new FlxText(30, 15, 0, Language.getPhrase('main_menu_logo', 'PSYCH ENGINE ULTRA'), 36);
 		engineLogo.setFormat(Paths.font("vcr.ttf"), 36, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		engineLogo.borderSize = 2;
 		add(engineLogo);
+
+		var systemStatus = new FlxText(30, 52, 0, Language.getPhrase('main_menu_edition', 'ULTRA EDITION'), 14);
+		systemStatus.setFormat(Paths.font("vcr.ttf"), 14, currentTheme, LEFT);
+		add(systemStatus);
 		
-		systemStatusText = new FlxText(30, 52, 0, "TÜRKİYE EDİTİON", 14);
-		systemStatusText.setFormat(Paths.font("vcr.ttf"), 14, currentTheme, LEFT);
-		add(systemStatusText);
-		
-		// Saat & tarih — oluştur, visibility set et, add
 		clockText = new FlxText(FlxG.width - 200, 18, 180, "", 28);
 		clockText.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, RIGHT);
 		clockText.visible = ClientPrefs.data.showClock;
@@ -284,7 +327,6 @@ class MainMenuState extends MusicBeatState
 		dateText.visible = ClientPrefs.data.showClock;
 		add(dateText);
 		
-		// Selamlama — oluştur, visibility set et, add
 		greetingText = new FlxText(FlxG.width - 450, 30, 240, "", 18);
 		greetingText.setFormat(Paths.font("vcr.ttf"), 18, currentTheme, RIGHT);
 		greetingText.visible = ClientPrefs.data.showGreeting;
@@ -316,8 +358,8 @@ class MainMenuState extends MusicBeatState
 			cardGlows.push(glow);
 			
 			var iconName:String = optionShit[i];
-			if(iconName == 'guncelleme') iconName = 'guncelleme_kayitlari';
-			if(iconName == 'basarimlar') iconName = 'basarilar';
+			if (iconName == 'changelog')    iconName = 'changelogs';
+			if (iconName == 'achievements') iconName = 'achievements';
 			
 			var icon = new FlxSprite(40, 30);
 			try {
@@ -329,6 +371,12 @@ class MainMenuState extends MusicBeatState
 			icon.updateHitbox();
 			card.add(icon);
 			cardIcons.push(icon);
+
+			var emojiStr:String = menuIconMap.exists(optionShit[i]) ? menuIconMap.get(optionShit[i]) : "❓";
+			var iconEmoji = new EmojiText(40, 155, 120, emojiStr, 0);
+			iconEmoji.emojiScale = 1.2;
+			iconEmoji.x = 100 - 19;
+			card.add(iconEmoji);
 			
 			var title = new FlxText(10, 180, 180, menuTitles.get(optionShit[i]), 24);
 			title.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
@@ -345,7 +393,7 @@ class MainMenuState extends MusicBeatState
 		}
 
 		// ═══════════════════════════════════════
-		// SAĞ AÇIKLAMA PANELİ
+		// AÇIKLAMA PANELİ
 		// ═══════════════════════════════════════
 
 		var descBG = new FlxSprite(FlxG.width - 420, 100).makeGraphic(400, 150, 0xAA000000);
@@ -364,7 +412,6 @@ class MainMenuState extends MusicBeatState
 
 		// ═══════════════════════════════════════
 		// PROFİL PANELİ
-		// Tüm elemanları oluştur → add et → sonunda toplu visibility
 		// ═══════════════════════════════════════
 
 		profilePanelGlow = new FlxSprite(28, 108).makeGraphic(244, 154, 0xFF10B981);
@@ -387,14 +434,15 @@ class MainMenuState extends MusicBeatState
 		profileName.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, LEFT);
 		add(profileName);
 		
-		profileRankIcon = new FlxText(105, 165, 30, "🥇", 16);
+		profileRankIcon = new EmojiText(105, 165, 40, "🥇", 0);
+		profileRankIcon.emojiScale = 0.65;
 		add(profileRankIcon);
 		
-		profileRank = new FlxText(130, 167, 100, "ROOKIE", 14);
+		profileRank = new FlxText(130, 167, 100, Language.getPhrase('rank_rookie', 'ROOKIE'), 14);
 		profileRank.setFormat(Paths.font("vcr.ttf"), 14, 0xFFFFD700, LEFT);
 		add(profileRank);
 		
-		profileLevel = new FlxText(105, 185, 150, "Level: 1", 14);
+		profileLevel = new FlxText(105, 185, 150, Language.getPhrase('profile_level', 'Level') + ": 1", 14);
 		profileLevel.setFormat(Paths.font("vcr.ttf"), 14, 0xFF888888, LEFT);
 		add(profileLevel);
 		
@@ -406,7 +454,6 @@ class MainMenuState extends MusicBeatState
 		profileXPText.setFormat(Paths.font("vcr.ttf"), 12, 0xFF888888, CENTER);
 		add(profileXPText);
 
-		// Profil paneli — tüm elemanlar add edildikten sonra toplu visibility
 		var _showProfile:Bool = ClientPrefs.data.showProfilePanel;
 		profilePanelGlow.visible = _showProfile;
 		profilePanel.visible     = _showProfile;
@@ -421,7 +468,6 @@ class MainMenuState extends MusicBeatState
 
 		// ═══════════════════════════════════════
 		// İSTATİSTİK PANELİ
-		// Tüm elemanları oluştur → add et → sonunda toplu visibility
 		// ═══════════════════════════════════════
 
 		statsPanelGlow = new FlxSprite(28, 278).makeGraphic(244, 164, 0xFFF59E0B);
@@ -454,7 +500,6 @@ class MainMenuState extends MusicBeatState
 		statsPlayTime.setFormat(Paths.font("vcr.ttf"), 14, 0xFF888888, LEFT);
 		add(statsPlayTime);
 
-		// İstatistik paneli — tüm elemanlar add edildikten sonra toplu visibility
 		var _showStats:Bool = ClientPrefs.data.showStatsPanel;
 		statsPanelGlow.visible   = _showStats;
 		statsPanel.visible       = _showStats;
@@ -469,7 +514,6 @@ class MainMenuState extends MusicBeatState
 
 		// ═══════════════════════════════════════
 		// SON OYNANAN PANELİ
-		// Tüm elemanları oluştur → add et → sonunda toplu visibility
 		// ═══════════════════════════════════════
 
 		lastPlayedPanel = new FlxSprite(30, 460).makeGraphic(240, 120, 0xCC000000);
@@ -478,7 +522,7 @@ class MainMenuState extends MusicBeatState
 		var lastBorder = new FlxSprite(30, 460).makeGraphic(240, 2, 0xFF8B5CF6);
 		add(lastBorder);
 		
-		lastPlayedSong = new FlxText(45, 475, 210, "NOT PLAYED", 18);
+		lastPlayedSong = new FlxText(45, 475, 210, Language.getPhrase('last_played_none', 'NOT PLAYED'), 18);
 		lastPlayedSong.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, LEFT);
 		add(lastPlayedSong);
 		
@@ -486,14 +530,14 @@ class MainMenuState extends MusicBeatState
 		lastPlayedDifficulty.setFormat(Paths.font("vcr.ttf"), 14, 0xFFFF5555, LEFT);
 		add(lastPlayedDifficulty);
 		
-		lastPlayedScore = new FlxText(45, 520, 210, "Score: 0", 12);
+		lastPlayedScore = new FlxText(45, 520, 210, Language.getPhrase('score_label', 'Score') + ": 0", 12);
 		lastPlayedScore.setFormat(Paths.font("vcr.ttf"), 12, 0xFF888888, LEFT);
 		add(lastPlayedScore);
 		
 		quickPlayButton = new FlxSprite(45, 535).makeGraphic(210, 35, 0xFF8B5CF6);
 		add(quickPlayButton);
 		
-		quickPlayText = new FlxText(45, 542, 210, "REPLAY", 16);
+		quickPlayText = new FlxText(45, 542, 210, Language.getPhrase('quick_play_replay', 'REPLAY'), 16);
 		quickPlayText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER);
 		add(quickPlayText);
 		
@@ -501,7 +545,6 @@ class MainMenuState extends MusicBeatState
 		quickPlayGlow.alpha = 0;
 		add(quickPlayGlow);
 
-		// Son oynanan paneli — tüm elemanlar add edildikten sonra toplu visibility
 		var _showLast:Bool = ClientPrefs.data.showLastPlayedPanel;
 		lastPlayedPanel.visible      = _showLast;
 		lastBorder.visible           = _showLast;
@@ -521,7 +564,7 @@ class MainMenuState extends MusicBeatState
 		newsPanel = new FlxSprite(0, FlxG.height - 110).makeGraphic(FlxG.width, 40, 0x66000000);
 		add(newsPanel);
 		
-		newsTitle = new FlxText(20, FlxG.height - 100, 100, "DUYURU:", 16);
+		newsTitle = new FlxText(20, FlxG.height - 100, 100, Language.getPhrase('news_label', 'NOTICE:'), 16);
 		newsTitle.setFormat(Paths.font("vcr.ttf"), 16, currentTheme, LEFT);
 		add(newsTitle);
 		
@@ -529,7 +572,6 @@ class MainMenuState extends MusicBeatState
 		newsText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFEEEEEE, LEFT);
 		add(newsText);
 
-		// Haber şeridi — tüm elemanlar add edildikten sonra toplu visibility
 		var _showNews:Bool = ClientPrefs.data.showNewsBar;
 		newsPanel.visible = _showNews;
 		newsTitle.visible = _showNews;
@@ -545,7 +587,8 @@ class MainMenuState extends MusicBeatState
 		bottomLine = new FlxSprite(0, FlxG.height - 70).makeGraphic(FlxG.width, 2, currentTheme);
 		add(bottomLine);
 		
-		versionText = new FlxText(FlxG.width - 300, FlxG.height - 45, 280, "PSYCH XQ V3 | " + psychEngineVersion, 16);
+		versionText = new FlxText(FlxG.width - 300, FlxG.height - 45, 280,
+			Language.getPhrase('main_menu_version', 'Psych Engine Ultra') + " " + psychEngineVersion, 16);
 		versionText.setFormat(Paths.font("vcr.ttf"), 16, 0xFF888888, RIGHT);
 		add(versionText);
 		versionText.visible = ClientPrefs.data.showVersionText;
@@ -554,7 +597,7 @@ class MainMenuState extends MusicBeatState
 		// KAMERA
 		// ═══════════════════════════════════════
 
-		camFollow = new FlxObject(0, 0, 1, 1);
+		camFollow    = new FlxObject(0, 0, 1, 1);
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
 		add(camFollowPos);
@@ -573,23 +616,26 @@ class MainMenuState extends MusicBeatState
 		addTouchPad("LEFT_RIGHT", "A_B_E");
 		super.create();
 	}
-	
+
 	override function beatHit()
 	{
 		super.beatHit();
 		if (adminPanel != null)
 			adminPanel.onBeat();
 		
-		if(isChangelogOpen && changelogLogo != null)
+		if (isChangelogOpen && changelogLogo != null)
 		{
 			var bumpSize = 0.7 + bumpIntensity; 
 			changelogLogo.scale.set(bumpSize, bumpSize);
-			
 			FlxTween.cancelTweensOf(changelogLogo.scale);
 			FlxTween.tween(changelogLogo.scale, {x: 0.7, y: 0.7}, 0.3, {ease: FlxEase.quadOut});
 		}
 	}
 	
+	// ═══════════════════════════════════════════════════════════════
+	// CHANGELOG
+	// ═══════════════════════════════════════════════════════════════
+
 	function openChangelog()
 	{
 		isChangelogOpen = true;
@@ -599,7 +645,7 @@ class MainMenuState extends MusicBeatState
 		changelogBG.scrollFactor.set();
 		add(changelogBG);
 		
-		changelogLogo = new FlxSprite().loadGraphic(Paths.image('pet/petlogo'));
+		changelogLogo = new FlxSprite().loadGraphic(Paths.image('pet/peulogo'));
 		changelogLogo.antialiasing = ClientPrefs.data.antialiasing;
 		changelogLogo.setGraphicSize(Std.int(changelogLogo.width * 0.04)); 
 		changelogLogo.updateHitbox();
@@ -609,14 +655,16 @@ class MainMenuState extends MusicBeatState
 		changelogLogo.scrollFactor.set();
 		add(changelogLogo);
 		
-		changelogTextTitle = new FlxText(0, changelogLogo.y + changelogLogo.height + 20, FlxG.width, "P.E.T - XQ EDITION V3", 32);
+		changelogTextTitle = new FlxText(0, changelogLogo.y + changelogLogo.height + 20,
+			FlxG.width, Language.getPhrase('changelog_title', 'Psych Engine Ultra'), 32);
 		changelogTextTitle.setFormat(Paths.font("vcr.ttf"), 32, 0xFF00E5FF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		changelogTextTitle.screenCenter(X);
 		changelogTextTitle.alpha = 0;
 		changelogTextTitle.scrollFactor.set();
 		add(changelogTextTitle);
 
-		var notes = "\n- Arayüz Yenilendi!\n- Profil Sistemi Güncellendi\n- Menü Temaları Eklendi, V1 ve Türkiye. Ayarlar > P.E.T Ayarları'ndan Ayarlanabilir!.\n- 'Mod Desteği Optimize Edildi. Artık Şarkılar Daha Hızlı Yükleniyor.\n- Sürüm, P.E Ultra'nın Temeline Alındı! 0.5\n- Birazcık Bugfix.\n \n- ŞUANKİ SÜRÜM: XQ EDİTİON V3 First-Release\n Durum: Güncel Sürüm\n \nBazı Güncellemeleri Önizleyebilmek için SametGkTe'yi Takipte Kalın!";
+		var notes = Language.getPhrase('changelog_notes',
+			"\n- Interface Renewed!\n- Profile System Updated\n- Menu Themes Added.\n- Mod Support Optimized.\n- Based on P.E Ultra 0.5\n- Some Bugfixes.\n \n- CURRENT VERSION: Ultra Edition\n Status: Up to Date");
 		
 		changelogTextNotes = new FlxText(0, changelogTextTitle.y + 40, FlxG.width - 200, notes, 22);
 		changelogTextNotes.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, CENTER);
@@ -625,58 +673,59 @@ class MainMenuState extends MusicBeatState
 		changelogTextNotes.scrollFactor.set();
 		add(changelogTextNotes);
 		
-		changelogHint = new FlxText(0, FlxG.height - 40, FlxG.width, "Kapatmak için ESC veya ENTER'a basın", 18);
+		changelogHint = new FlxText(0, FlxG.height - 40, FlxG.width,
+			Language.getPhrase('changelog_hint', 'Press ESC or ENTER to close'), 18);
 		changelogHint.setFormat(Paths.font("vcr.ttf"), 18, 0xFF888888, CENTER);
 		changelogHint.alpha = 0;
 		changelogHint.scrollFactor.set();
 		add(changelogHint);
 		
-		FlxTween.tween(changelogBG, {alpha: 0.90}, 0.4);
-		FlxTween.tween(changelogLogo, {alpha: 1, y: 50}, 0.5, {ease: FlxEase.backOut, startDelay: 0.1});
-		FlxTween.tween(changelogTextTitle, {alpha: 1}, 0.5, {ease: FlxEase.quadOut, startDelay: 0.2});
-		FlxTween.tween(changelogTextNotes, {alpha: 1}, 0.5, {ease: FlxEase.quadOut, startDelay: 0.3});
-		FlxTween.tween(changelogHint, {alpha: 1}, 0.5, {ease: FlxEase.quadOut, startDelay: 0.4});
+		FlxTween.tween(changelogBG,        {alpha: 0.90}, 0.4);
+		FlxTween.tween(changelogLogo,      {alpha: 1, y: 50}, 0.5, {ease: FlxEase.backOut,  startDelay: 0.1});
+		FlxTween.tween(changelogTextTitle, {alpha: 1},    0.5, {ease: FlxEase.quadOut, startDelay: 0.2});
+		FlxTween.tween(changelogTextNotes, {alpha: 1},    0.5, {ease: FlxEase.quadOut, startDelay: 0.3});
+		FlxTween.tween(changelogHint,      {alpha: 1},    0.5, {ease: FlxEase.quadOut, startDelay: 0.4});
 	}
 
 	function closeChangelog()
 	{
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		
-		FlxTween.tween(changelogBG, {alpha: 0}, 0.3);
-		FlxTween.tween(changelogLogo, {alpha: 0, "scale.x": 0.5, "scale.y": 0.5}, 0.3);
+		FlxTween.tween(changelogBG,        {alpha: 0}, 0.3);
+		FlxTween.tween(changelogLogo,      {alpha: 0, "scale.x": 0.5, "scale.y": 0.5}, 0.3);
 		FlxTween.tween(changelogTextTitle, {alpha: 0}, 0.3);
 		FlxTween.tween(changelogTextNotes, {alpha: 0}, 0.3);
-		FlxTween.tween(changelogHint, {alpha: 0}, 0.3, {
+		FlxTween.tween(changelogHint,      {alpha: 0}, 0.3, {
 			onComplete: function(t:FlxTween) {
-				remove(changelogBG);
-				remove(changelogLogo);
-				remove(changelogTextTitle);
-				remove(changelogTextNotes);
+				remove(changelogBG);       remove(changelogLogo);
+				remove(changelogTextTitle); remove(changelogTextNotes);
 				remove(changelogHint);
 				
-				changelogBG.destroy();
-				changelogLogo.destroy();
-				changelogTextTitle.destroy();
-				changelogTextNotes.destroy();
+				changelogBG.destroy();        changelogLogo.destroy();
+				changelogTextTitle.destroy(); changelogTextNotes.destroy();
 				changelogHint.destroy();
 				
-				isChangelogOpen = false;
+				isChangelogOpen  = false;
 				selectedSomethin = false; 
 			}
 		});
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// PARTİKÜLLER
+	// ═══════════════════════════════════════════════════════════════
 	
 	function createParticles()
 	{
 		if (!ClientPrefs.data.showParticles) return;
-		for(i in 0...40)
+		for (i in 0...40)
 		{
 			var p = new FlxSprite(FlxG.random.float(0, FlxG.width), FlxG.random.float(0, FlxG.height));
 			var size = Std.int(FlxG.random.float(1, 4));
 			p.makeGraphic(size, size, FlxColor.WHITE);
-			p.alpha = FlxG.random.float(0.1, 0.4);
-			p.velocity.y = FlxG.random.float(-15, -5);
-			p.velocity.x = FlxG.random.float(-3, 3);
+			p.alpha       = FlxG.random.float(0.1, 0.4);
+			p.velocity.y  = FlxG.random.float(-15, -5);
+			p.velocity.x  = FlxG.random.float(-3, 3);
 			add(p);
 			particles.push(p);
 		}
@@ -685,7 +734,7 @@ class MainMenuState extends MusicBeatState
 	function createFloatingOrbs()
 	{
 		if (!ClientPrefs.data.showFloatingOrbs) return;
-		for(i in 0...8)
+		for (i in 0...8)
 		{
 			var orb = new FlxSprite(FlxG.random.float(400, FlxG.width - 50), FlxG.random.float(100, FlxG.height - 100));
 			orb.makeGraphic(Std.int(FlxG.random.float(20, 40)), Std.int(FlxG.random.float(20, 40)), currentTheme);
@@ -694,70 +743,70 @@ class MainMenuState extends MusicBeatState
 			floatingOrbs.push(orb);
 		}
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// İSTATİSTİKLER
+	// ═══════════════════════════════════════════════════════════════
 	
 	function loadStats()
 	{
-		var totalScore:Int = 0;
-		var songsPlayed:Int = 0;
+		var totalScore:Int    = 0;
+		var songsPlayed:Int   = 0;
 		var totalAccuracy:Float = 0;
-		var fcCount:Int = 0;
+		var fcCount:Int       = 0;
 		
-		for(week in WeekData.weeksList)
+		for (week in WeekData.weeksList)
 		{
 			var weekData = WeekData.weeksLoaded.get(week);
-			if(weekData == null) continue;
+			if (weekData == null) continue;
 			
-			for(song in weekData.songs)
+			for (song in weekData.songs)
 			{
-				for(diff in 0...3)
+				for (diff in 0...3)
 				{
 					var score = Highscore.getScore(song[0], diff);
-					if(score > 0)
+					if (score > 0)
 					{
-						totalScore += score;
+						totalScore   += score;
 						songsPlayed++;
 						
 						var acc = Highscore.getRating(song[0], diff);
-						if(acc > 0) totalAccuracy += acc;
-						
-						if(Highscore.getRating(song[0], diff) >= 100)
-							fcCount++;
+						if (acc > 0) totalAccuracy += acc;
+						if (Highscore.getRating(song[0], diff) >= 100) fcCount++;
 					}
 				}
 			}
 		}
 		
-		FlxG.save.data.totalScore = totalScore;
+		FlxG.save.data.totalScore  = totalScore;
 		FlxG.save.data.songsPlayed = songsPlayed;
-		FlxG.save.data.fcCount = fcCount;
+		FlxG.save.data.fcCount     = fcCount;
 		FlxG.save.flush();
 		
-		statsTotalScore.text = formatNumber(totalScore);
-		statsSongsPlayed.text = songsPlayed + " şarkı";
+		statsTotalScore.text  = formatNumber(totalScore);
+		statsSongsPlayed.text = songsPlayed + " " + Language.getPhrase('stats_songs', 'Songs');
 		
 		var avgAcc = songsPlayed > 0 ? totalAccuracy / songsPlayed : 0;
 		statsAccuracy.text = "%" + FlxMath.roundDecimal(avgAcc, 2);
 		
-		if(avgAcc >= 95)
-			statsAccuracy.color = 0xFF10B981;
-		else if(avgAcc >= 85)
-			statsAccuracy.color = 0xFFF59E0B;
-		else
-			statsAccuracy.color = 0xFFFF5555;
+		if (avgAcc >= 95)      statsAccuracy.color = 0xFF10B981;
+		else if (avgAcc >= 85) statsAccuracy.color = 0xFFF59E0B;
+		else                   statsAccuracy.color = 0xFFFF5555;
 		
 		statsPerfects.text = "FC: " + fcCount;
 		
 		var totalMinutes = songsPlayed * 3;
-		var hours = Math.floor(totalMinutes / 60);
+		var hours   = Math.floor(totalMinutes / 60);
 		var minutes = totalMinutes % 60;
 		
-		if(hours > 0)
-			statsPlayTime.text = hours + " saat " + minutes + " dk";
+		if (hours > 0)
+			statsPlayTime.text = hours   + " " + Language.getPhrase('stats_hours',   'hr') + " "
+			                   + minutes + " " + Language.getPhrase('stats_minutes', 'min');
 		else
-			statsPlayTime.text = minutes + " dakika";
+			statsPlayTime.text = minutes + " " + Language.getPhrase('stats_minutes', 'min');
 		
-		var level = Math.floor(totalScore / 50000) + 1;
-		profileLevel.text = "Seviye: " + level;
+		var level      = Math.floor(totalScore / 50000) + 1;
+		profileLevel.text = Language.getPhrase('profile_level', 'Level') + ": " + level;
 		
 		var xpProgress = (totalScore % 50000) / 50000 * 100;
 		profileXPBar.value = xpProgress;
@@ -768,69 +817,77 @@ class MainMenuState extends MusicBeatState
 	
 	function updatePlayerRank(score:Int)
 	{
-		if(score >= 1000000)
+		if (score >= 1000000)
 		{
-			profileRank.text = "ELMAS";
+			profileRank.text  = Language.getPhrase('rank_diamond', 'DIAMOND');
 			profileRank.color = 0xFFB9F2FF;
-			profileRankIcon.text = "💎";
+			profileRankIcon.setText("💎");
 		}
-		else if(score >= 500000)
+		else if (score >= 500000)
 		{
-			profileRank.text = "PLATİN";
+			profileRank.text  = Language.getPhrase('rank_plat', 'PLATINUM');
 			profileRank.color = 0xFFE5E4E2;
-			profileRankIcon.text = "⭐";
+			profileRankIcon.setText("⭐");
 		}
-		else if(score >= 250000)
+		else if (score >= 250000)
 		{
-			profileRank.text = "ALTIN";
+			profileRank.text  = Language.getPhrase('rank_gold', 'GOLD');
 			profileRank.color = 0xFFFFD700;
-			profileRankIcon.text = "🥇";
+			profileRankIcon.setText("🥇");
 		}
-		else if(score >= 100000)
+		else if (score >= 100000)
 		{
-			profileRank.text = "GÜMÜŞ";
+			profileRank.text  = Language.getPhrase('rank_silver', 'SILVER');
 			profileRank.color = 0xFFC0C0C0;
-			profileRankIcon.text = "🥈";
+			profileRankIcon.setText("🥈");
 		}
 		else
 		{
-			profileRank.text = "BRONZ";
+			profileRank.text  = Language.getPhrase('rank_bronze', 'BRONZE');
 			profileRank.color = 0xFFCD7F32;
-			profileRankIcon.text = "🥉";
+			profileRankIcon.setText("🥉");
 		}
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// SON OYNANAN
+	// ═══════════════════════════════════════════════════════════════
 	
 	function loadLastPlayed()
 	{
-		if(FlxG.save.data.lastPlayedSong != null && FlxG.save.data.lastPlayedSong != "")
+		if (FlxG.save.data.lastPlayedSong != null && FlxG.save.data.lastPlayedSong != "")
 		{
 			lastPlayedSong.text = FlxG.save.data.lastPlayedSong;
 			
-			if(FlxG.save.data.lastPlayedScore != null)
-				lastPlayedScore.text = "Skor: " + formatNumber(FlxG.save.data.lastPlayedScore);
+			if (FlxG.save.data.lastPlayedScore != null)
+				lastPlayedScore.text = Language.getPhrase('score_label', 'Score') + ": " + formatNumber(FlxG.save.data.lastPlayedScore);
 			
-			if(FlxG.save.data.lastPlayedDifficulty != null)
+			if (FlxG.save.data.lastPlayedDifficulty != null)
 			{
 				var diff:Int = FlxG.save.data.lastPlayedDifficulty;
-				var diffNames = ["EASY", "NORMAL", "HARD"];
+				var diffNames  = [
+					Language.getPhrase('diff_easy',   'EASY'),
+					Language.getPhrase('diff_normal', 'NORMAL'),
+					Language.getPhrase('diff_hard',   'HARD')
+				];
 				var diffColors = [0xFF10B981, 0xFFF59E0B, 0xFFFF5555];
 				
-				if(diff >= 0 && diff < diffNames.length) {
-					lastPlayedDifficulty.text = diffNames[diff];
+				if (diff >= 0 && diff < diffNames.length) {
+					lastPlayedDifficulty.text  = diffNames[diff];
 					lastPlayedDifficulty.color = diffColors[diff];
 				} else {
-					lastPlayedDifficulty.text = "CUSTOM";
+					lastPlayedDifficulty.text  = Language.getPhrase('diff_custom', 'CUSTOM');
 					lastPlayedDifficulty.color = 0xFF8B5CF6;
 				}
 			}
 		}
 		else
 		{
-			lastPlayedSong.text = "Henüz oynanmadı";
+			lastPlayedSong.text      = Language.getPhrase('last_played_none',  'Not played yet');
 			lastPlayedDifficulty.text = "-";
-			lastPlayedScore.text = "Biraz Oyun Vakti!";
+			lastPlayedScore.text     = Language.getPhrase('last_played_empty', 'Time to Play!');
 			
-			quickPlayText.text = "YOK";
+			quickPlayText.text  = Language.getPhrase('quick_play_none', 'NONE');
 			quickPlayText.color = 0xFF555555;
 			quickPlayButton.color = 0xFF222222;
 		}
@@ -841,16 +898,15 @@ class MainMenuState extends MusicBeatState
 		selectedSomethin = true;
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 
-		var songName:String = FlxG.save.data.lastPlayedSong;
-		var difficulty:Int = FlxG.save.data.lastPlayedDifficulty != null ? FlxG.save.data.lastPlayedDifficulty : 1;
-
-		var songPath = Paths.formatToSongPath(songName);
-		var pooped:String = Highscore.formatSong(songPath, difficulty);
+		var songName:String  = FlxG.save.data.lastPlayedSong;
+		var difficulty:Int   = FlxG.save.data.lastPlayedDifficulty != null ? FlxG.save.data.lastPlayedDifficulty : 1;
+		var songPath         = Paths.formatToSongPath(songName);
+		var pooped:String    = Highscore.formatSong(songPath, difficulty);
 
 		try 
 		{
-			PlayState.SONG = Song.loadFromJson(pooped, songPath);
-			PlayState.isStoryMode = false;
+			PlayState.SONG           = Song.loadFromJson(pooped, songPath);
+			PlayState.isStoryMode    = false;
 			PlayState.storyDifficulty = difficulty;
 
 			FlxFlicker.flicker(quickPlayButton, 1, 0.06, true, false, function(flick:FlxFlicker)
@@ -859,29 +915,31 @@ class MainMenuState extends MusicBeatState
 			});
 
 			FlxTween.tween(lastPlayedPanel, {x: FlxG.width + 500}, 0.5, {ease: FlxEase.backIn});
-			FlxTween.tween(profilePanel, {x: FlxG.width + 500}, 0.5, {ease: FlxEase.backIn});
-			FlxTween.tween(statsPanel, {x: FlxG.width + 500}, 0.5, {ease: FlxEase.backIn});
+			FlxTween.tween(profilePanel,    {x: FlxG.width + 500}, 0.5, {ease: FlxEase.backIn});
+			FlxTween.tween(statsPanel,      {x: FlxG.width + 500}, 0.5, {ease: FlxEase.backIn});
 		} 
 		catch(e:Dynamic) 
 		{
-			trace('HATA: Şarkı yüklenemedi! ' + e);
+			trace('Error loading song: $e');
 			selectedSomethin = false;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			
-			lastPlayedSong.text = "ŞARKI BULUNAMADI!";
+			lastPlayedSong.text  = Language.getPhrase('song_not_found', 'SONG NOT FOUND!');
 			lastPlayedSong.color = 0xFFFF5555;
 		}
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// YARDIMCILAR
+	// ═══════════════════════════════════════════════════════════════
 	
 	function formatNumber(num:Int):String
 	{
-		var str = Std.string(num);
+		var str    = Std.string(num);
 		var result = "";
-		var count = 0;
-		for(i in 0...str.length)
+		var count  = 0;
+		for (i in 0...str.length)
 		{
-			if(count > 0 && count % 3 == 0)
-				result = "." + result;
+			if (count > 0 && count % 3 == 0) result = "." + result;
 			result = str.charAt(str.length - 1 - i) + result;
 			count++;
 		}
@@ -890,28 +948,49 @@ class MainMenuState extends MusicBeatState
 	
 	function updateTimeAndGreeting()
 	{
-		var now = Date.now();
-		var hour = now.getHours();
+		var now    = Date.now();
+		var hour   = now.getHours();
 		var minute = now.getMinutes();
 		
 		clockText.text = StringTools.lpad(Std.string(hour), "0", 2) + ":" + StringTools.lpad(Std.string(minute), "0", 2);
 		
-		var days = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
-		var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+		var days = [
+			Language.getPhrase('day_sun', 'Sunday'),
+			Language.getPhrase('day_mon', 'Monday'),
+			Language.getPhrase('day_tue', 'Tuesday'),
+			Language.getPhrase('day_wed', 'Wednesday'),
+			Language.getPhrase('day_thu', 'Thursday'),
+			Language.getPhrase('day_fri', 'Friday'),
+			Language.getPhrase('day_sat', 'Saturday')
+		];
+		var months = [
+			Language.getPhrase('month_jan', 'January'),
+			Language.getPhrase('month_feb', 'February'),
+			Language.getPhrase('month_mar', 'March'),
+			Language.getPhrase('month_apr', 'April'),
+			Language.getPhrase('month_may', 'May'),
+			Language.getPhrase('month_jun', 'June'),
+			Language.getPhrase('month_jul', 'July'),
+			Language.getPhrase('month_aug', 'August'),
+			Language.getPhrase('month_sep', 'September'),
+			Language.getPhrase('month_oct', 'October'),
+			Language.getPhrase('month_nov', 'November'),
+			Language.getPhrase('month_dec', 'December')
+		];
 		dateText.text = days[now.getDay()] + ", " + now.getDate() + " " + months[now.getMonth()];
 		
 		var greeting = "";
-		if(hour >= 5 && hour < 12)
-			greeting = "Günaydın";
-		else if(hour >= 12 && hour < 18)
-			greeting = "İyi günler";
-		else if(hour >= 18 && hour < 22)
-			greeting = "İyi akşamlar";
-		else
-			greeting = "İyi geceler";
+		if      (hour >= 5  && hour < 12) greeting = Language.getPhrase('greeting_morning', 'Good morning');
+		else if (hour >= 12 && hour < 18) greeting = Language.getPhrase('greeting_day',     'Good day');
+		else if (hour >= 18 && hour < 22) greeting = Language.getPhrase('greeting_evening', 'Good evening');
+		else                               greeting = Language.getPhrase('greeting_night',   'Good night');
 		
 		greetingText.text = greeting + ", " + PLAYER_NAME + "!";
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// UPDATE
+	// ═══════════════════════════════════════════════════════════════
 
 	override function update(elapsed:Float)
 	{
@@ -919,22 +998,19 @@ class MainMenuState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.F2)
 		{
-			if (adminPanel.isOpen)
-				adminPanel.closePanel();
-			else
-				adminPanel.openPanel();
+			if (adminPanel.isOpen) adminPanel.closePanel();
+			else                   adminPanel.openPanel();
 		}
 		
 		if (adminPanel.isOpen)
 		{
 			adminPanel.handleInput(controls);
 			adminPanel.handleUpdate(elapsed);
-			if (controls.BACK)
-				adminPanel.closePanel();
+			if (controls.BACK) adminPanel.closePanel();
 			return; 
 		}
 		
-		ambientPulse += elapsed;
+		ambientPulse    += elapsed;
 		breathingEffect += elapsed * 2;
 
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
@@ -949,7 +1025,7 @@ class MainMenuState extends MusicBeatState
 		updateParticles(elapsed);
 		updateNews(elapsed);
 		
-		if(Math.floor(ambientPulse) % 30 == 0 && Math.floor(ambientPulse) > 0)
+		if (Math.floor(ambientPulse) % 30 == 0 && Math.floor(ambientPulse) > 0)
 			updateTimeAndGreeting();
 
 		if (isChangelogOpen)
@@ -962,7 +1038,7 @@ class MainMenuState extends MusicBeatState
 		{
 			handleCheats(elapsed);
 
-			if (controls.UI_LEFT_P) changeItem(-1);
+			if (controls.UI_LEFT_P)  changeItem(-1);
 			if (controls.UI_RIGHT_P) changeItem(1);
 			
 			if (controls.BACK)
@@ -1002,11 +1078,15 @@ class MainMenuState extends MusicBeatState
 		if (ClientPrefs.data.showParallax) updateParallax(elapsed, lerpVal);
 		updateFloatingOrbs(elapsed);
 		
-		if(profilePanelGlow != null) profilePanelGlow.alpha = 0.1 + Math.sin(ambientPulse * 2) * 0.05;
-		if(statsPanelGlow != null) statsPanelGlow.alpha = 0.1 + Math.sin(ambientPulse * 2 + 1) * 0.05;
-		if(topBarGlow != null) topBarGlow.alpha = 0.15 + Math.sin(ambientPulse) * 0.05;
-		if(bottomBarGlow != null) bottomBarGlow.alpha = 0.1 + Math.sin(ambientPulse + 2) * 0.05;
+		if (profilePanelGlow != null) profilePanelGlow.alpha = 0.1 + Math.sin(ambientPulse * 2) * 0.05;
+		if (statsPanelGlow   != null) statsPanelGlow.alpha   = 0.1 + Math.sin(ambientPulse * 2 + 1) * 0.05;
+		if (topBarGlow       != null) topBarGlow.alpha       = 0.15 + Math.sin(ambientPulse) * 0.05;
+		if (bottomBarGlow    != null) bottomBarGlow.alpha    = 0.1 + Math.sin(ambientPulse + 2) * 0.05;
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// KART POZİSYONLARI
+	// ═══════════════════════════════════════════════════════════════
 
 	function updateCardPositions(elapsed:Float, lerpVal:Float)
 	{
@@ -1018,7 +1098,7 @@ class MainMenuState extends MusicBeatState
 			var targetX = centerX - 100 + (card.ID - curSelected) * spacing;
 			var targetY = FlxG.height / 2 - 140;
 			
-			if(card.ID == curSelected)
+			if (card.ID == curSelected)
 			{
 				targetY -= 20;
 				card.scale.set(FlxMath.lerp(card.scale.x, 1.1, lerpVal), FlxMath.lerp(card.scale.y, 1.1, lerpVal));
@@ -1041,19 +1121,17 @@ class MainMenuState extends MusicBeatState
 	{
 		var mouseOffsetX = (FlxG.mouse.screenX - FlxG.width / 2) / FlxG.width;
 		var mouseOffsetY = (FlxG.mouse.screenY - FlxG.height / 2) / FlxG.height;
-		
 		bgLayer1.x = FlxMath.lerp(bgLayer1.x, -100 - mouseOffsetX * 30, lerpVal);
 		bgLayer1.y = FlxMath.lerp(bgLayer1.y, -100 - mouseOffsetY * 30, lerpVal);
-		
-		bgLayer2.x = FlxMath.lerp(bgLayer2.x, -50 - mouseOffsetX * 60, lerpVal);
-		bgLayer2.y = FlxMath.lerp(bgLayer2.y, -50 - mouseOffsetY * 60, lerpVal);
+		bgLayer2.x = FlxMath.lerp(bgLayer2.x, -50  - mouseOffsetX * 60, lerpVal);
+		bgLayer2.y = FlxMath.lerp(bgLayer2.y, -50  - mouseOffsetY * 60, lerpVal);
 	}
 	
 	function updateParticles(elapsed:Float)
 	{
-		for(p in particles)
+		for (p in particles)
 		{
-			if(p.y < -10)
+			if (p.y < -10)
 			{
 				p.y = FlxG.height + 10;
 				p.x = FlxG.random.float(0, FlxG.width);
@@ -1065,11 +1143,10 @@ class MainMenuState extends MusicBeatState
 	function updateNews(elapsed:Float)
 	{
 		newsTimer += elapsed;
-		if(newsTimer > 5)
+		if (newsTimer > 5)
 		{
 			newsTimer = 0;
 			newsIndex = (newsIndex + 1) % newsItems.length;
-			
 			FlxTween.tween(newsText, {alpha: 0}, 0.3, {
 				onComplete: function(twn:FlxTween) {
 					newsText.text = newsItems[newsIndex];
@@ -1081,19 +1158,22 @@ class MainMenuState extends MusicBeatState
 
 	function updateFloatingOrbs(elapsed:Float)
 	{
-		for(i in 0...floatingOrbs.length)
+		for (i in 0...floatingOrbs.length)
 		{
 			var orb = floatingOrbs[i];
 			orb.y += Math.sin(ambientPulse + i) * 0.5;
 			orb.x += Math.cos(ambientPulse * 0.5 + i) * 0.3;
 			orb.alpha = 0.05 + Math.sin(ambientPulse + i * 0.5) * 0.05;
-			
-			if(orb.x < -100) orb.x = FlxG.width + 100;
-			if(orb.x > FlxG.width + 100) orb.x = -100;
-			if(orb.y < -100) orb.y = FlxG.height + 100;
-			if(orb.y > FlxG.height + 100) orb.y = -100;
+			if (orb.x < -100) orb.x = FlxG.width + 100;
+			if (orb.x > FlxG.width + 100) orb.x = -100;
+			if (orb.y < -100) orb.y = FlxG.height + 100;
+			if (orb.y > FlxG.height + 100) orb.y = -100;
 		}
 	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// MENÜ DEĞIŞTIRME
+	// ═══════════════════════════════════════════════════════════════
 	
 	function changeItem(change:Int = 0)
 	{
@@ -1103,22 +1183,22 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
-		var choice:String = optionShit[curSelected];
+		var choice:String    = optionShit[curSelected];
 		var newColor:FlxColor = menuColorMap.exists(choice) ? menuColorMap.get(choice) : 0xFF333333;
 		
 		currentTheme = newColor;
-		
-		FlxTween.color(bgLayer2, 0.5, bgLayer2.color, newColor);
-		FlxTween.color(topBarLine, 0.3, topBarLine.color, newColor);
-		FlxTween.color(topBarGlow, 0.3, topBarGlow.color, newColor);
-		FlxTween.color(bottomLine, 0.3, bottomLine.color, newColor);
+		if (!ClientPrefs.data.menuVideo)
+			FlxTween.color(bgLayer2, 0.5, bgLayer2.color, newColor);
+		FlxTween.color(topBarLine,       0.3, topBarLine.color,       newColor);
+		FlxTween.color(topBarGlow,       0.3, topBarGlow.color,       newColor);
+		FlxTween.color(bottomLine,       0.3, bottomLine.color,       newColor);
 		FlxTween.color(descriptionTitle, 0.3, descriptionTitle.color, newColor);
 		
 		descriptionTitle.text = menuTitles.get(choice);
-		descriptionText.text = menuDescriptions.get(choice);
+		descriptionText.text  = menuDescriptions.get(choice);
 		
 		descriptionText.alpha = 0;
-		descriptionText.y = 170;
+		descriptionText.y     = 170;
 		FlxTween.tween(descriptionText, {alpha: 1, y: 160}, 0.3, {ease: FlxEase.quadOut});
 		
 		camFollow.x = FlxG.width / 2 + (curSelected - (optionShit.length / 2)) * 50;
@@ -1129,7 +1209,7 @@ class MainMenuState extends MusicBeatState
 		selectedSomethin = true;
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 		
-		if (optionShit[curSelected] == 'guncelleme')
+		if (optionShit[curSelected] == 'changelog')
 		{
 			openChangelog();
 			return; 
@@ -1148,36 +1228,36 @@ class MainMenuState extends MusicBeatState
 					var daChoice:String = optionShit[curSelected];
 					switch (daChoice)
 					{
-						case 'hikaye_modu':  ThemeManager.switchToStoryMenu();
-						case 'serbest_oyun': ThemeManager.switchToFreeplay();
-						case 'basarimlar':   ThemeManager.switchToAchievements();
-						case 'yapimcilar':   ThemeManager.switchToCredits();
-						case 'ayarlar':      ThemeManager.switchToOptions();
+						case 'story_mode':   ThemeManager.switchToStoryMenu();
+						case 'freeplay':     ThemeManager.switchToFreeplay();
+						case 'achievements': ThemeManager.switchToAchievements();
+						case 'credits':      ThemeManager.switchToCredits();
+						case 'settings':     ThemeManager.switchToOptions();
 						#if MODS_ALLOWED
-						case 'modlar':       ThemeManager.switchToMods();
+						case 'mods':         ThemeManager.switchToMods();
 						#end
 					}
 				});
 			}
 		});
 
-		FlxTween.tween(topBar, {y: -100}, 0.5, {ease: FlxEase.backIn});
-		FlxTween.tween(bottomBar, {y: FlxG.height + 100}, 0.5, {ease: FlxEase.backIn});
-		FlxTween.tween(profilePanel, {x: -300}, 0.5, {ease: FlxEase.backIn});
-		FlxTween.tween(statsPanel, {x: -300}, 0.5, {ease: FlxEase.backIn, startDelay: 0.05});
-		FlxTween.tween(lastPlayedPanel, {x: -300}, 0.5, {ease: FlxEase.backIn, startDelay: 0.1});
-		FlxTween.tween(newsPanel, {y: FlxG.height + 100}, 0.5, {ease: FlxEase.backIn});
+		FlxTween.tween(topBar,          {y: -100},              0.5, {ease: FlxEase.backIn});
+		FlxTween.tween(bottomBar,       {y: FlxG.height + 100}, 0.5, {ease: FlxEase.backIn});
+		FlxTween.tween(profilePanel,    {x: -300},              0.5, {ease: FlxEase.backIn});
+		FlxTween.tween(statsPanel,      {x: -300},              0.5, {ease: FlxEase.backIn, startDelay: 0.05});
+		FlxTween.tween(lastPlayedPanel, {x: -300},              0.5, {ease: FlxEase.backIn, startDelay: 0.1});
+		FlxTween.tween(newsPanel,       {y: FlxG.height + 100}, 0.5, {ease: FlxEase.backIn});
 	}
 
 	function handleCheats(elapsed:Float)
 	{
-		var upNow = controls.UI_UP_P;
+		var upNow    = controls.UI_UP_P;
 		var rightNow = controls.UI_RIGHT_P;
-		var leftNow = controls.UI_LEFT_P;
+		var leftNow  = controls.UI_LEFT_P;
 
-		if (upNow && !prevUp) { cheatSequence.push(0); cheatLastInputTime = 0; }
+		if (upNow    && !prevUp)    { cheatSequence.push(0); cheatLastInputTime = 0; }
 		if (rightNow && !prevRight) { cheatSequence.push(3); cheatLastInputTime = 0; }
-		if (leftNow && !prevLeft) { cheatSequence.push(2); cheatLastInputTime = 0; }
+		if (leftNow  && !prevLeft)  { cheatSequence.push(2); cheatLastInputTime = 0; }
 
 		prevUp = upNow; prevRight = rightNow; prevLeft = leftNow;
 		cheatLastInputTime += elapsed;
@@ -1189,5 +1269,22 @@ class MainMenuState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('secret'));
 			MusicBeatState.switchState(new CodeMenuState());
 		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// DESTROY
+	// ═══════════════════════════════════════════════════════════════
+
+	override function destroy()
+	{
+		#if VIDEOS_ALLOWED
+		if (menuVideoBG != null)
+		{
+			menuVideoBG.videoSprite.bitmap.stop();
+			menuVideoBG.destroy();
+			menuVideoBG = null;
+		}
+		#end
+		super.destroy();
 	}
 }

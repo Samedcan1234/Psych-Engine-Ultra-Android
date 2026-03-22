@@ -1,6 +1,7 @@
 package;
 
 import objects.AlertMgr;
+import backend.ServerAlertSystem;
 import debug.FPSCounter;
 import backend.Highscore;
 import flixel.FlxGame;
@@ -86,7 +87,7 @@ class Main extends Sprite
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
-
+		
 		#if HSCRIPT_ALLOWED
 		Iris.warn = function(x, ?pos:haxe.PosInfos) {
 			Iris.logLevel(WARN, x, pos);
@@ -153,6 +154,9 @@ class Main extends Sprite
 			FlxG.scaleMode = new MobileScaleMode();
 		});
 		#end
+		MobileData.init();
+		trace('[DEBUG] dpadModes keys: ' + [for (k in MobileData.dpadModes.keys()) k]);
+		trace('[DEBUG] Shared path: ' + Paths.getSharedPath('mobile/DPadModes'));
 		addChild(new FlxGame(game.width, game.height, #if COPYSTATE_ALLOWED !CopyState.checkExistingFiles() ? CopyState : #end game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
@@ -160,6 +164,9 @@ class Main extends Sprite
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		Lib.current.stage.addChild(new AlertMgr());
+		trace('[Main] ServerAlertSystem init çağrılıyor...');
+		ServerAlertSystem.init();
+		trace('[Main] ServerAlertSystem init tamamlandı');
 		if(fpsVar != null) {
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}

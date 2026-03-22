@@ -14,19 +14,9 @@ import flixel.input.keyboard.FlxKey;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = [
-		'Nota Renkleri',
-		'Kontroller',
-		'Gecikme Ve Kombo',
-		'Grafikler',
-		'Görünüş & Arayüz',
-		'Oynanış',
-		'P.E.U Ayarları',
-		'Menü Ayarları'
-		#if TRANSLATIONS_ALLOWED , 'Dil' #end
-		,'Mobil Ayarlar'
-	];
-	
+	// Boş bırakıyoruz, create() içinde Language ile dolduracağız
+	var options:Array<String> = [];
+
 	private var categoryCards:FlxTypedGroup<FlxSprite>;
 	private var cardGlows:FlxTypedGroup<FlxSprite>;
 	private var cardBorders:FlxTypedGroup<FlxSprite>;
@@ -49,7 +39,7 @@ class OptionsState extends MusicBeatState
 
 	// UI
 	
-	// BG Katman
+	// BG 
 	var bg:FlxSprite;
 	var bgPattern:FlxBackdrop;
 	var bgGradient:FlxSprite;
@@ -63,13 +53,13 @@ class OptionsState extends MusicBeatState
 	var breadcrumbText:FlxText;
 	var versionText:FlxText;
 	
-	// Profil
+	// Profile
 	var profilePanel:FlxSprite;
 	var profileIcon:FlxSprite;
 	var profileName:FlxText;
 	var profileStats:FlxText;
 	
-	// Açıklama
+	// Desc
 	var descPanel:FlxSprite;
 	var descPanelGlow:FlxSprite;
 	var descIcon:FlxSprite;
@@ -77,7 +67,7 @@ class OptionsState extends MusicBeatState
 	var descText:FlxText;
 	var descStats:FlxText;
 	
-	// Efektler
+	// Efects
 	var particleEmitter:FlxEmitter;
 	var secondaryParticles:FlxEmitter;
 	var glowEffect:FlxSprite;
@@ -85,16 +75,16 @@ class OptionsState extends MusicBeatState
 	var scanlines:FlxSprite;
 	var floatingShapes:FlxTypedGroup<FlxSprite>;
 	
-	// Kontrol İpucuları
+	// Control Hints
 	var controlHintsPanel:FlxSprite;
 	var controlHintsText:FlxText;
 	
-	// Kamera
+	// Cam
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	var bgColorTween:FlxTween;
 	
-	// Animasyon
+	// Anim
 	var animTimer:Float = 0;
 	var pulseTimer:Float = 0;
 	var waveTimer:Float = 0;
@@ -102,7 +92,7 @@ class OptionsState extends MusicBeatState
 	var glowTimer:Float = 0;
 	var orbTimer:Float = 0;
 	
-	// Kart Holder
+	// Cart Holder
 	var cardWidth:Int = 340;
 	var cardHeight:Int = 140;
 	var cardSpacingX:Int = 20;
@@ -110,100 +100,19 @@ class OptionsState extends MusicBeatState
 	var gridStartX:Float = 70;
 	var gridStartY:Float = 135;
 
-	// Kategori Renkleri
-	var optionsColor:Map<String, Array<Int>> = [
-		'Nota Renkleri'    => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
-		'Kontroller'       => [0xFFE67E22, 0xFFD35400, 0xFFA04000],
-		'Gecikme Ve Kombo' => [0xFFE74C3C, 0xFFC0392B, 0xFF922B21],
-		'Grafikler'        => [0xFF3498DB, 0xFF2980B9, 0xFF1F618D],
-		'Arayüz'           => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
-		'Oynanış'          => [0xFF2ECC71, 0xFF27AE60, 0xFF1E8449],
-		'Dil'              => [0xFFF39C12, 0xFFE67E22, 0xFFCA6F1E],
-		'P.E.U Ayarları'   => [0xFFE91E63, 0xFFC2185B, 0xFF880E4F]
-	];
-	
-	// Kategori Path
-	var optionsIconPaths:Map<String, String> = [
-		'Nota Renkleri'    => 'nota_renkleri',
-		'Kontroller'       => 'kontroller',
-		'Gecikme Ve Kombo' => 'gecikme_ve_kombo',
-		'Grafikler'        => 'grafik_ve_performans',
-		'Arayüz'           => 'arayuz',
-		'Oynanış'          => 'oynanis',
-		'Dil'              => 'dil',
-		'P.E.U Ayarları'   => 'peu'
-	];
-	
-	// Kategori Açıklaması
-	var optionsDesc:Map<String, String> = [
-		'Nota Renkleri'    => 'Notalarin renklerini ve gorunumunu dilediginiz gibi ozellestirin.',
-		'Kontroller'       => 'Klavye ve gamepad tus atamalarini yapilandirin.',
-		'Gecikme Ve Kombo' => 'Ses ve video gecikme ayarlarini yapin. Kombo gosterim stilini degistirin.',
-		'Grafikler'        => 'Grafik kalitesi, FPS limiti ve performans ayarlarini optimize edin.',
-		'Arayüz'           => 'Menu tasarimi ve oyun ici gorsel ogeleri kisisellestirin.',
-		'Oynanış'          => 'Oynanış Ayarlarınızı Düzenleyin, Tam kendi tarzınıza Göre!.',
-		'Dil'              => 'Oyun dilini degistirin ve yerellestirme seceneklerini goruntuleyin.',
-		'P.E.U Ayarları'   => 'Psych Engine Ultra\'yı kişileştirin.'
-	];
-	
-	// Katergori Açıklama 2
-	var optionsStats:Map<String, String> = [
-		'Nota Renkleri'    => 'Nota Renklerini Ayarlar',
-		'Kontroller'       => 'Varsayılan: W-A-S-D',
-		'Gecikme Ve Kombo' => 'Varsayılan ms: 0',
-		'Grafikler'        => 'Grafikleri Ayarla XQ, Pc çökmesin ama',
-		'Arayüz'           => 'Ekran Kartın yanacak xq',
-		'Oynanış'          => 'Okların nerede olacağını belirle',
-		'Dil'              => 'NE MUTLU TÜRKÜM DİYENE',
-		'P.E.U Ayarları'   => 'çokzorladı'
-	];
-
-	function openSelectedSubstate(label:String)
-	{
-		if (label != 'Gecikme Ve Kombo')
-		{
-			removeTouchPad();
-			persistentUpdate = false;
-		}
-
-		playExitAnimation(function() {
-			switch(label)
-			{
-				case 'Nota Renkleri':
-					openSubState(new options.NotesColorSubState());
-				case 'Kontroller':
-					openSubState(new options.ControlsSubState());
-				case 'Grafikler':
-					openSubState(new options.GraphicsSettingsSubState());
-				case 'Arayüz':
-					openSubState(new options.VisualsSettingsSubState());
-				case 'Oynanış':
-					openSubState(new options.GameplaySettingsSubState());
-				case 'Gecikme Ve Kombo':
-					MusicBeatState.switchState(new options.NoteOffsetState());
-				case 'Dil':
-					openSubState(new options.LanguageSubState());
-				case 'Mobil Ayarlar':
-					openSubState(new mobile.options.MobileOptionsSubState());
-				case 'P.E.U Ayarları':
-					openSubState(new options.PEUSettingsState());
-				case 'Menü Ayarları':
-					openSubState(new options.MainMenuSettingsState());
-			}
-		});
-	}
-	
-	function openSecretMenu()
-	{
-		playExitAnimation(function() {
-			openSubState(new options.XqOptionsState());
-		});
-	}
+	// Boş bırakıyoruz, create() içinde dolduracağız
+	var optionsColor:Map<String, Array<Int>> = [];
+	var optionsIconPaths:Map<String, String> = [];
+	var optionsDesc:Map<String, String> = [];
+	var optionsStats:Map<String, String> = [];
 
 	override function create()
 	{
+		// ── Önce tüm dil metinlerini doldur ──────────────────────
+		_buildLanguageData();
+
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence("Ayarlar Menusu", null);
+		DiscordClient.changePresence("Settings Menu", null);
 		#end
 
 		createBackgroundSystem();
@@ -246,8 +155,114 @@ class OptionsState extends MusicBeatState
 
 		super.create();
 	}
+	
+	function _buildLanguageData():Void
+	{
+		// options dizisi
+		options = [
+			Language.getPhrase('opt_note_colors',   'Note Colors'),
+			Language.getPhrase('opt_controls',      'Controls'),
+			Language.getPhrase('opt_delay_combo',   'Delay & Combo'),
+			Language.getPhrase('opt_graphics',      'Graphics & Performance'),
+			Language.getPhrase('opt_interface',     'Interface & Visuals'),
+			Language.getPhrase('opt_gameplay',      'Gameplay'),
+			Language.getPhrase('opt_peu',           'P.E.U Settings'),
+			Language.getPhrase('opt_menu_settings', 'Menu Settings')
+		];
+		#if TRANSLATIONS_ALLOWED
+		options.push(Language.getPhrase('opt_language', 'Language'));
+		#end
+		#if mobile
+		options.push(Language.getPhrase('opt_mobile', 'Mobile Settings'));
+		#end
 
-	// BG System
+		// optionsDesc
+		optionsDesc = [
+			Language.getPhrase('opt_note_colors',   'Note Colors')             => Language.getPhrase('opt_desc_note_colors',   'Customize the colors and appearance of the notes however you like.'),
+			Language.getPhrase('opt_controls',      'Controls')                => Language.getPhrase('opt_desc_controls',      'Configure keyboard and gamepad button assignments.'),
+			Language.getPhrase('opt_delay_combo',   'Delay & Combo')           => Language.getPhrase('opt_desc_delay_combo',   'Adjust the audio and video settings. Change the combo display style.'),
+			Language.getPhrase('opt_graphics',      'Graphics & Performance')  => Language.getPhrase('opt_desc_graphics',      'Optimize graphics quality, FPS limit, and performance settings.'),
+			Language.getPhrase('opt_interface',     'Interface & Visuals')     => Language.getPhrase('opt_desc_interface',     'Customize the menu design and in-game visuals.'),
+			Language.getPhrase('opt_gameplay',      'Gameplay')                => Language.getPhrase('opt_desc_gameplay',      'Customize Your Game Settings to Suit Your Style!'),
+			Language.getPhrase('opt_language',      'Language')                => Language.getPhrase('opt_desc_language',      'Change the game language and view the localization options.'),
+			Language.getPhrase('opt_peu',           'P.E.U Settings')          => Language.getPhrase('opt_desc_peu',           'Customize Psych Engine Ultra Settings.'),
+			Language.getPhrase('opt_menu_settings', 'Menu Settings')           => Language.getPhrase('opt_desc_menu_settings', 'Customize the main menu appearance.')
+		];
+
+		// optionsStats
+		optionsStats = [
+			Language.getPhrase('opt_note_colors',   'Note Colors')             => Language.getPhrase('opt_stat_note_colors',   'Adjust Note Colors Using Colors.'),
+			Language.getPhrase('opt_controls',      'Controls')                => Language.getPhrase('opt_stat_controls',      'Default: W-A-S-D'),
+			Language.getPhrase('opt_delay_combo',   'Delay & Combo')           => Language.getPhrase('opt_stat_delay_combo',   'Default ms: 0'),
+			Language.getPhrase('opt_graphics',      'Graphics & Performance')  => Language.getPhrase('opt_stat_graphics',      'Manage Your Gaming Performance'),
+			Language.getPhrase('opt_interface',     'Interface & Visuals')     => Language.getPhrase('opt_stat_interface',     'Select your Note Skins.'),
+			Language.getPhrase('opt_gameplay',      'Gameplay')                => Language.getPhrase('opt_stat_gameplay',      'Manage Gameplay Settings'),
+			Language.getPhrase('opt_language',      'Language')                => Language.getPhrase('opt_stat_language',      'Select Your Language Here!'),
+			Language.getPhrase('opt_peu',           'P.E.U Settings')          => Language.getPhrase('opt_stat_peu',           'Customize P.E.U'),
+			Language.getPhrase('opt_menu_settings', 'Menu Settings')           => Language.getPhrase('opt_stat_menu_settings', 'Customize Main Menu')
+		];
+
+		// optionsColor
+		optionsColor = [
+			Language.getPhrase('opt_note_colors',   'Note Colors')             => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
+			Language.getPhrase('opt_controls',      'Controls')                => [0xFFE67E22, 0xFFD35400, 0xFFA04000],
+			Language.getPhrase('opt_delay_combo',   'Delay & Combo')           => [0xFFE74C3C, 0xFFC0392B, 0xFF922B21],
+			Language.getPhrase('opt_graphics',      'Graphics & Performance')  => [0xFF3498DB, 0xFF2980B9, 0xFF1F618D],
+			Language.getPhrase('opt_interface',     'Interface & Visuals')     => [0xFF9B59B6, 0xFF8E44AD, 0xFF6C3483],
+			Language.getPhrase('opt_gameplay',      'Gameplay')                => [0xFF2ECC71, 0xFF27AE60, 0xFF1E8449],
+			Language.getPhrase('opt_language', 'Language')                   => [0xFF7F8C8D, 0xFF707B7C, 0xFF212F3D],
+			Language.getPhrase('opt_peu', 'P.E.U Settings')                  => [0xFF8E44AD, 0xFF7D3C98, 0xFF4A235A],
+			Language.getPhrase('opt_menu_settings', 'Menu Settings')         => [0xFFF39C12, 0xFFD68910, 0xFF7E5109],
+		];
+
+		// optionsIconPaths
+		optionsIconPaths = [
+			Language.getPhrase('opt_note_colors',   'Note Colors')             => 'note_colors',
+			Language.getPhrase('opt_controls',      'Controls')                => 'controls',
+			Language.getPhrase('opt_delay_combo',   'Delay & Combo')           => 'delay_and_combo',
+			Language.getPhrase('opt_graphics',      'Graphics & Performance')  => 'graphics_and_performance',
+			Language.getPhrase('opt_interface',     'Interface & Visuals')     => 'interface_and_visuals',
+			Language.getPhrase('opt_gameplay',      'Gameplay')                => 'gameplay',
+			Language.getPhrase('opt_language',      'Language')                => 'language',
+			Language.getPhrase('opt_peu',           'P.E.U Settings')          => 'peu',
+			Language.getPhrase('opt_menu_settings', 'Menu Settings')           => 'menu_settings'
+		];
+	}
+
+	function openSelectedSubstate(label:String)
+	{
+		if (label != Language.getPhrase('opt_delay_combo', 'Delay & Combo'))
+		{
+			removeTouchPad();
+			persistentUpdate = false;
+		}
+
+		playExitAnimation(function() {
+			if      (label == Language.getPhrase('opt_note_colors',   'Note Colors'))            openSubState(new options.NotesColorSubState());
+			else if (label == Language.getPhrase('opt_controls',      'Controls'))               openSubState(new options.ControlsSubState());
+			else if (label == Language.getPhrase('opt_graphics',      'Graphics & Performance')) openSubState(new options.GraphicsSettingsSubState());
+			else if (label == Language.getPhrase('opt_interface',     'Interface & Visuals'))    openSubState(new options.VisualsSettingsSubState());
+			else if (label == Language.getPhrase('opt_gameplay',      'Gameplay'))               openSubState(new options.GameplaySettingsSubState());
+			else if (label == Language.getPhrase('opt_delay_combo',   'Delay & Combo'))          MusicBeatState.switchState(new options.NoteOffsetState());
+			else if (label == Language.getPhrase('opt_language',      'Language'))               openSubState(new options.LanguageSubState());
+			else if (label == Language.getPhrase('opt_peu',           'P.E.U Settings'))         openSubState(new options.PEUSettingsState());
+			else if (label == Language.getPhrase('opt_menu_settings', 'Menu Settings'))          openSubState(new options.MainMenuSettingsState());
+			#if mobile
+			else if (label == Language.getPhrase('opt_mobile', 'Mobile Settings'))              openSubState(new mobile.options.MobileOptionsSubState());
+			#end
+		});
+	}
+	
+	function openSecretMenu()
+	{
+		playExitAnimation(function() {
+			openSubState(new options.XqOptionsState());
+		});
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	// BG SİSTEMİ
+	// ═══════════════════════════════════════════════════════════════
 	
 	function createBackgroundSystem()
 	{
@@ -346,8 +361,6 @@ class OptionsState extends MusicBeatState
 			g.fillRect(new flash.geom.Rectangle(0, i * 3, FlxG.width, 1), 0x08000000);
 	}
 	
-	// Efekt Sistemi
-	
 	function createParticleSystems()
 	{
 		particleEmitter = new FlxEmitter(FlxG.width / 2, 50, 80);
@@ -403,8 +416,6 @@ class OptionsState extends MusicBeatState
 		}
 	}
 	
-	// Holder
-	
 	function createHeader()
 	{
 		headerPanel = new FlxSprite(0, -110).makeGraphic(FlxG.width, 110, 0xEE000000);
@@ -417,28 +428,25 @@ class OptionsState extends MusicBeatState
 		headerGlow.scrollFactor.set(0, 0);
 		add(headerGlow);
 		
-		titleText = new FlxText(40, 15, FlxG.width - 280, "AYARLAR", 44);
-		titleText.setFormat(Paths.font("vcr.ttf"), 44, FlxColor.WHITE, LEFT,
-			FlxTextBorderStyle.OUTLINE, 0xFF8D58FD);
+		titleText = new FlxText(40, 15, FlxG.width - 280, Language.getPhrase('settings_title', 'Settings'), 44);
+		titleText.setFormat(Paths.font("vcr.ttf"), 44, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF8D58FD);
 		titleText.borderSize = 4;
 		titleText.scrollFactor.set(0, 0);
 		titleText.alpha = 0;
 		add(titleText);
 		
-		subtitleText = new FlxText(40, 62, FlxG.width - 280, "Oyun deneyiminizi kişileştirin!", 18);
+		subtitleText = new FlxText(40, 62, FlxG.width - 280, Language.getPhrase('settings_subtitle', 'Customize your gaming experience!'), 18);
 		subtitleText.setFormat(Paths.font("vcr.ttf"), 18, 0xFFBBBBBB, LEFT);
 		subtitleText.scrollFactor.set(0, 0);
 		subtitleText.alpha = 0;
 		add(subtitleText);
 		
-		breadcrumbText = new FlxText(40, 86, FlxG.width - 280, "Ana Menü > Ayarlar", 12);
+		breadcrumbText = new FlxText(40, 86, FlxG.width - 280, Language.getPhrase('settings_breadcrumb', 'Main Menu > Settings'), 12);
 		breadcrumbText.setFormat(Paths.font("vcr.ttf"), 12, 0xFF888888, LEFT);
 		breadcrumbText.scrollFactor.set(0, 0);
 		breadcrumbText.alpha = 0;
 		add(breadcrumbText);
 	}
-	
-	// Profil Paneli
 	
 	function createProfilePanel()
 	{
@@ -461,7 +469,7 @@ class OptionsState extends MusicBeatState
 		profileIcon.alpha = 0;
 		add(profileIcon);
 		
-		profileName = new FlxText(FlxG.width - 115, 28, 100, "Xqz64", 18);
+		profileName = new FlxText(FlxG.width - 115, 28, 100, Language.getPhrase('profile_name', 'Oyuncu'), 18);
 		profileName.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, LEFT,
 			FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		profileName.borderSize = 2;
@@ -475,8 +483,6 @@ class OptionsState extends MusicBeatState
 		profileStats.alpha = 0;
 		add(profileStats);
 	}
-	
-	// Kart Sistemi
 	
 	function createCardGrid()
 	{
@@ -503,7 +509,6 @@ class OptionsState extends MusicBeatState
 			glow.scrollFactor.set(1, 1); glow.ID = num;
 			cardGlows.add(glow);
 			
-			// Ana Kart
 			var card:FlxSprite = FlxGradient.createGradientFlxSprite(cardWidth, cardHeight, colors, 1, 135);
 			card.x = cardX; card.y = cardY;
 			card.alpha = 0; card.scrollFactor.set(1, 1); card.ID = num;
@@ -513,7 +518,6 @@ class OptionsState extends MusicBeatState
 			border.alpha = 0; border.scrollFactor.set(1, 1); border.ID = num;
 			cardBorders.add(border);
 			
-			// Ikon
 			var iconPath = optionsIconPaths.exists(option) ? optionsIconPaths.get(option) : 'pet';
 			var icon:FlxSprite = new FlxSprite(cardX + 12, cardY + 12);
 			if (Paths.image('ultra/settings/images/' + iconPath) != null)
@@ -533,27 +537,13 @@ class OptionsState extends MusicBeatState
 			titleTxt.scrollFactor.set(1, 1); titleTxt.ID = num;
 			cardTitleTexts.add(titleTxt);
 			
-			var stats = optionsStats.exists(option) ? optionsStats.get(option) : 'Ayarlar';
+			var stats = optionsStats.exists(option) ? optionsStats.get(option) : 'Settings';
 			var cardDesc:FlxText = new FlxText(cardX + 95, cardY + 52, cardWidth - 110, stats, 12);
 			cardDesc.setFormat(Paths.font("vcr.ttf"), 12, 0xFFCCCCCC, LEFT);
 			cardDesc.alpha = 0; cardDesc.scrollFactor.set(1, 1); cardDesc.ID = num;
 			cardDescTexts.add(cardDesc);
-			
-			if (option == 'P.E.T Ayarları')
-			{
-				var badge:FlxSprite = new FlxSprite(cardX + cardWidth - 55, cardY + 10).makeGraphic(50, 20, 0xFFE91E63);
-				badge.alpha = 0; badge.scrollFactor.set(1, 1); badge.ID = num;
-				cardBadges.add(badge);
-				
-				var badgeText:FlxText = new FlxText(cardX + cardWidth - 53, cardY + 13, 46, "YENI", 11);
-				badgeText.setFormat(Paths.font("vcr.ttf"), 11, FlxColor.WHITE, CENTER);
-				badgeText.alpha = 0; badgeText.scrollFactor.set(1, 1);
-				add(badgeText);
-			}
 		}
 	}
-	
-	// Açıklama Paneli
 	
 	function createDescriptionPanel()
 	{
@@ -584,16 +574,14 @@ class OptionsState extends MusicBeatState
 		descStats.scrollFactor.set(0, 0); add(descStats);
 	}
 	
-	// Kontrol İpucusu
-	
 	function createControlHints()
 	{
 		controlHintsPanel = new FlxSprite(0, FlxG.height).makeGraphic(FlxG.width, 28, 0xAA000000);
 		controlHintsPanel.scrollFactor.set(0, 0); add(controlHintsPanel);
 
 		var hintStr:String = controls.mobileC
-			? "D-PAD: Gezin  |  A: Seç  |  B: Geri  |  C: Mobil Kontroller"
-			: "YUKARI/ASAGI/SOL/SAG: Gezin   |   ENTER: Sec   |   ESC: Geri";
+			? Language.getPhrase('settings_hint_mobile',  'D-PAD: Gezin  |  A: Seç  |  B: Geri  |  C: Mobil Kontroller')
+			: Language.getPhrase('settings_hint_desktop', 'YUKARI/ASAGI/SOL/SAG: Gezin   |   ENTER: Sec   |   ESC: Geri');
 		
 		controlHintsText = new FlxText(0, FlxG.height + 6, FlxG.width, hintStr, 12);
 		controlHintsText.setFormat(Paths.font("vcr.ttf"), 12, 0xFFAAAAAA, CENTER);
@@ -688,6 +676,10 @@ class OptionsState extends MusicBeatState
 		new FlxTimer().start(0.45, function(tmr:FlxTimer) { callback(); });
 	}
 
+	// ═══════════════════════════════════════════════════════════════
+	// SUBSTATE KAPANINCA
+	// ═══════════════════════════════════════════════════════════════
+
 	override function closeSubState()
 	{
 		super.closeSubState();
@@ -695,7 +687,7 @@ class OptionsState extends MusicBeatState
 		secretIndex = 0;
 		
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence("Ayarlar Menusu", null);
+		DiscordClient.changePresence("Settings Menu", null);
 		#end
 
 		controls.isInSubstate = false;
@@ -704,9 +696,11 @@ class OptionsState extends MusicBeatState
 		addTouchPad('LEFT_FULL', 'A_B_C');
 		persistentUpdate = true;
 
+		// Dil değişmiş olabilir, yeniden oluştur
+		_buildLanguageData();
 		playEntranceAnimation();
 	}
-
+	
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -854,9 +848,8 @@ class OptionsState extends MusicBeatState
 		if (controls.UI_DOWN_P)  changeGridSelection( 0, 1);
 
 		var cPressedState:Bool = false;
-		if (touchPad != null && touchPad.buttonC != null && touchPad.buttonC.justPressed) {
+		if (touchPad != null && touchPad.buttonC != null && touchPad.buttonC.justPressed)
 			cPressedState = true;
-		}
 
 		if (cPressedState || (FlxG.keys.justPressed.CONTROL && controls.mobileC))
 		{
@@ -894,6 +887,10 @@ class OptionsState extends MusicBeatState
 		}
 	}
 	
+	// ═══════════════════════════════════════════════════════════════
+	// GRID SEÇİM
+	// ═══════════════════════════════════════════════════════════════
+
 	function changeGridSelection(dx:Int, dy:Int)
 	{
 		curCol += dx;
@@ -934,7 +931,7 @@ class OptionsState extends MusicBeatState
 		var selectedOption = options[curSelected];
 		
 		descTitle.text = selectedOption;
-		if (optionsDesc.exists(selectedOption)) descText.text  = optionsDesc.get(selectedOption);
+		if (optionsDesc.exists(selectedOption))  descText.text  = optionsDesc.get(selectedOption);
 		if (optionsStats.exists(selectedOption)) descStats.text = optionsStats.get(selectedOption);
 		
 		var iconPath = optionsIconPaths.exists(selectedOption) ? optionsIconPaths.get(selectedOption) : 'pet';

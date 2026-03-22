@@ -95,6 +95,7 @@ class TitleState extends MusicBeatState
 		{
 			ClientPrefs.loadPrefs();
 			Language.reloadPhrases();
+			MobileData.init();
 		}
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
@@ -642,17 +643,11 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		// --- YENİ LOGO BUMP EFEKTİ ---
-		// Eğer intro geçilmişse ve logonun büyüme animasyonu bitmişse ritme göre boyutunu esnet!
 		if(logoBl != null && skippedIntro && logoTweenFinished)
 		{
-			// Boyutu biraz büyüt (Bump etkisi)
 			logoBl.scale.set(1.05, 1.05); 
 			
-			// Önceki boyuta küçülme animasyonu varsa iptal et
 			FlxTween.cancelTweensOf(logoBl.scale);
-			
-			// Yavaşça tekrar normal haline (1.0) küçülsün
 			FlxTween.tween(logoBl.scale, {x: 1, y: 1}, 0.3, {ease: FlxEase.quadOut});
 		}
 
@@ -710,32 +705,27 @@ class TitleState extends MusicBeatState
 				case 13:
 					deleteCoolText();
 				case 14:
-					// PET Logo - üstte
-					var petLogo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('pet/petlogo'));
-					petLogo.antialiasing = ClientPrefs.data.antialiasing;
-					petLogo.setGraphicSize(Std.int(FlxG.width * 0.25));
-					petLogo.updateHitbox();
-					petLogo.screenCenter(X);
-					petLogo.y = 20;
-					petLogo.alpha = 0;
-					petLogo.y += 80;
-					credGroup.add(petLogo);
-					extraSprites.push(petLogo);
-					FlxTween.tween(petLogo, {y: petLogo.y - 10, alpha: 1}, 2.5, {ease: FlxEase.expoOut});
+					var peuLogo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('pet/peulogo'));
+					peuLogo.antialiasing = ClientPrefs.data.antialiasing;
+					peuLogo.setGraphicSize(Std.int(FlxG.width * 0.25));
+					peuLogo.updateHitbox();
+					peuLogo.screenCenter(X);
+					peuLogo.y = 20;
+					peuLogo.alpha = 0;
+					peuLogo.y += 80;
+					credGroup.add(peuLogo);
+					extraSprites.push(peuLogo);
+					FlxTween.tween(peuLogo, {y: peuLogo.y - 10, alpha: 1}, 2.5, {ease: FlxEase.expoOut});
 
 				case 15:
-					// Psych Engine Turkiye yazısı - logonun altında boşluklu
-					createCoolText(['Psych Engine Türkiye'], 250); // 80px aşağıda başlasın
+					createCoolText(['Psych Engine Ultra'], 250); // 80px aşağıda başlasın
 
 				case 16:
-					// By SametGkTe yazısı
 					addMoreText('SametGkTe TarafIndan', 280);
 					addIconToText('credits/gkte', true, -40);
 
 				case 17:
 					deleteCoolText();
-
-				// Aşağıdaki case numaralarını öteliyoruz
 				case 18:
 					addMoreText('Friday');
 				case 19:
@@ -796,7 +786,7 @@ class TitleState extends MusicBeatState
 						remove(ngSpr);
 						remove(credGroup);
 						FlxG.camera.flash(FlxColor.WHITE, 0.6);
-						startLogoTween(); // LOGO GELSİN
+						startLogoTween();
 						transitioning = false;
 					});
 				}
@@ -805,7 +795,7 @@ class TitleState extends MusicBeatState
 					remove(ngSpr);
 					remove(credGroup);
 					FlxG.camera.flash(FlxColor.WHITE, 3);
-					startLogoTween(); // LOGO GELSİN
+					startLogoTween();
 					sound.onComplete = function() {
 						FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
@@ -843,24 +833,18 @@ class TitleState extends MusicBeatState
 		}
 	}
 
-	// Logo Intro Tween'i için küçük bir yardımcı fonksiyon
 	function startLogoTween()
 	{
 		if (logoBl != null)
 		{
-			// Başlangıç değerleri (emin olmak için tekrar sıfırlıyoruz)
 			logoBl.alpha = 0;
 			logoBl.scale.set(0.1, 0.1);
 			logoTweenFinished = false;
 
-			// Yavaşça saydamlığını (alpha) 1'e çıkart
 			FlxTween.tween(logoBl, {alpha: 1}, 1.2, {ease: FlxEase.quadOut});
-			
-			// Yaylanarak (elasticOut) normal boyutuna (1.0) büyüsün
 			FlxTween.tween(logoBl.scale, {x: 1, y: 1}, 1.5, {
 				ease: FlxEase.elasticOut,
 				onComplete: function(twn:FlxTween) {
-					// Büyüme bitince beatHit içindeki Bump efekti devreye girecek
 					logoTweenFinished = true; 
 				}
 			});

@@ -57,7 +57,7 @@ class ThanksCreditsState extends MusicBeatState
 
 		// YENİ: Son resmi SADECE RESİM OLARAK hazırla
 		endImage = new FlxSprite();
-		var endImagePath = 'credits/thanks'; // assets/images/credits/thanks.png
+		var endImagePath = 'pet/peulogo'; // assets/images/credits/thanks.png
 		
 		if(Paths.fileExists('images/$endImagePath.png', IMAGE))
 		{
@@ -68,8 +68,7 @@ class ThanksCreditsState extends MusicBeatState
 			// Eğer resim yoksa varsayılan placeholder oluştur
 			trace("WARNING: credits/thanks.png bulunamadı! Lütfen ekleyin.");
 			endImage.makeGraphic(1000, 600, 0xFF1a1a1a);
-			
-			// Uyarı metni ekle (sadece geliştirme aşamasında görmek için)
+
 			var warningText = new FlxText(0, 0, 1000, "LÜTFEN\nassets/images/credits/thanks.png\nEKLEYİN", 48);
 			warningText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			warningText.borderSize = 3;
@@ -140,33 +139,32 @@ class ThanksCreditsState extends MusicBeatState
 
 	function pushDefaultCreditsData()
 	{
-		// Sadece kişileri ekle (header'sız)
-		creditsData.push(['SametGkTe', 'gkte', 'Psych Engine Türkiye Yapımcısı / Çevirmen / Kodlayıcı', 'https://tiktok.com/@gktegameplay', '24ED13']);
-		creditsData.push(['Nexus', 'nexusbotu', 'Yardımcı / Çevirmen', 'https://tiktok.com/@nexus00.3', '24ED13']);
-		creditsData.push(['Nixamic', 'shucks', 'Beta Kullanıcısı', 'https://tiktok.com/@nixamic_amz', 'C96116']);
-		creditsData.push(['XQZ64', 'tabi', 'Beta Kullanıcısı', 'https://tiktok.com/@xqz248', '3B3734']);
-		creditsData.push(['Feyza', 'fey', 'Beta Kullanıcısı', 'https://tiktok.com/@feyzawashere', 'B01E1E']);
-		creditsData.push(['Umut', 'bf2', 'Beta Kullanıcısı', 'https://tiktok.com/@lxbs0', '2472B3']);
-		creditsData.push(['Mert', 'matt', 'Beta Kullanıcısı', 'https://tiktok.com/@fnf_oynuyom_real', '41464A']);
-		creditsData.push(['Ömer FK', 'bob', 'Beta Kullanıcısı', 'https://tiktok.com/@0mbi_efendi23', '211E1E']);
-		creditsData.push(['mvoreZz', 'bulut', 'Beta Kullanıcısı', 'https://tiktok.com/@mvorezz', 'BF179A']);
-		creditsData.push(['Syran', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@syran_moon', '2472B3']);
-		creditsData.push(['ProMusas', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@fnf_gamer4231', '2472B3']);
-		creditsData.push(['Mortis Meain', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@bs_editorx', '2472B3']);
-		creditsData.push(['Ardaa', 'sarv', 'Beta Kullanıcısı', 'https://tiktok.com/@ardaa.fnf', 'B51F95']);
-		creditsData.push(['MuratGkTe', 'darnell', 'Beta Kullanıcısı', 'https://tiktok.com/@metal1_1sonic', '6A1FB5']);
-		creditsData.push(['RiasFNF', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@baki.1223', '2472B3']);
-		creditsData.push(['ilovepico', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@browhyiamlovefnf', '2472B3']);
-		creditsData.push(['BilalGkTe', 'nonsense', 'Beta Kullanıcısı', 'https://tiktok.com/@gktegameplay1', '1FB1CC']);
-		creditsData.push(['Slasher', 'bf', 'Beta Kullanıcısı', 'https://tiktok.com/@chikenjokey0', '2472B3']);
-		creditsData.push(['Balc', 'whitty', 'Beta Kullanıcısı', 'https://tiktok.com/@balc_tr', '302B30']);
-		creditsData.push(['Ozna', 'matt', 'Beta Kullanıcısı', 'https://tiktok.com/@ozan.can623', '41464A']);
-		creditsData.push(['Shadow Mario', 'shadowmario', 'Main Programmer of Psych Engine', 'https://twitter.com/Shadow_Mario_', '444444']);
-		creditsData.push(['Riveren', 'riveren', 'Main Artist/Animator of Psych Engine', 'https://twitter.com/riverennn', 'B42F71']);
-		creditsData.push(['ninjamuffin99', 'ninjamuffin99', "Programmer of Friday Night Funkin'", 'https://twitter.com/ninja_muffin99', 'CF2D2D']);
-		creditsData.push(['PhantomArcade', 'phantomarcade', "Animator of Friday Night Funkin'", 'https://twitter.com/PhantomArcade3K', 'FADC45']);
-		creditsData.push(['evilsk8r', 'evilsk8r', "Artist of Friday Night Funkin'", 'https://twitter.com/evilsk8r', '5ABD4B']);
-		creditsData.push(['kawaisprite', 'kawaisprite', "Composer of Friday Night Funkin'", 'https://twitter.com/kawaisprite', '378FC7']);
+		creditsData.push(['SametGkTe', 'gkte', Language.getPhrase('credits_role_samet', 'Header Of And Creator Of Psych Engine Ultra'), 'https://tiktok.com/@gktegameplay', 'FFE7C0']);
+		creditsData.push(['Nexus', 'nex', Language.getPhrase('credits_role_nexus', 'Translator Of Psych Engine Ultra'), 'https://tiktok.com/@skynexus.0.03', 'FFE7C0']);
+		creditsData.push(['ArkoseLabs', 'arkoselabs', Language.getPhrase('credits_role_arkose', 'Turkish Alphabet İmages'), 'https://tiktok.com/@skynexus.0.03', 'FFE7C0']);
+		creditsData.push(['emi3', 'puta', Language.getPhrase('credits_role_emi3', 'Spanish Ratings, İmages etc.'), 'https://gamebanana.com/members/1709917', '6FA8DC']);
+		creditsData.push(['HomuHomu833', 'homura', Language.getPhrase('credits_role_homu', 'Head Porter of Psych Engine and Author of linc_luajit-rewriten'), 'https://youtube.com/@HomuHomu833', 'FFE7C0']);
+		creditsData.push(['Karim Akra', 'karim', Language.getPhrase('credits_role_karim', 'Second Porter of Psych Engine'), 'https://youtube.com/@Karim0690', 'FFB4F0']);
+		creditsData.push(['Moxie', 'moxie', Language.getPhrase('credits_role_moxie', 'Helper of Psych Engine Mobile'), 'https://twitter.com/moxie_specalist', 'F592C4']);
+		creditsData.push(['Shadow Mario', 'shadowmario', Language.getPhrase('credits_role_shadow', 'Main Programmer and Head of Psych Engine'), 'https://ko-fi.com/shadowmario', '444444']);
+		creditsData.push(['Riveren', 'riveren', Language.getPhrase('credits_role_riveren', 'Main Artist/Animator of Psych Engine'), 'https://x.com/riverennn', '14967B']);
+		creditsData.push(['bb-panzu', 'bb', Language.getPhrase('credits_role_bb', 'Ex-Programmer of Psych Engine'), 'https://x.com/bbsub3', '3E813A']);
+		creditsData.push(['crowplexus', 'crowplexus', Language.getPhrase('credits_role_crow', 'Linux Support, HScript Iris, Input System v3, and Other PRs'), 'https://twitter.com/IamMorwen', 'CFCFCF']);
+		creditsData.push(['Kamizeta', 'kamizeta', Language.getPhrase('credits_role_kami', 'Creator of Pessy, Psych Engine\'s mascot.'), 'https://www.instagram.com/cewweey/', 'D21C11']);
+		creditsData.push(['MaxNeton', 'maxneton', Language.getPhrase('credits_role_maxneton', 'Loading Screen Easter Egg Artist/Animator.'), 'https://bsky.app/profile/maxneton.bsky.social', '3C2E4E']);
+		creditsData.push(['Keoiki', 'keoiki', Language.getPhrase('credits_role_keoiki', 'Note Splash Animations and Latin Alphabet'), 'https://x.com/Keoiki_', 'D2D2D2']);
+		creditsData.push(['SqirraRNG', 'sqirra', Language.getPhrase('credits_role_sqirra', 'Crash Handler and Base code for\nChart Editor\'s Waveform'), 'https://x.com/gedehari', 'E1843A']);
+		creditsData.push(['EliteMasterEric', 'mastereric', Language.getPhrase('credits_role_eric', 'Runtime Shaders support and Other PRs'), 'https://x.com/EliteMasterEric', 'FFBD40']);
+		creditsData.push(['MAJigsaw77', 'majigsaw', Language.getPhrase('credits_role_maj', '.MP4 Video Loader Library (hxvlc)'), 'https://x.com/MAJigsaw77', '5F5F5F']);
+		creditsData.push(['iFlicky', 'flicky', Language.getPhrase('credits_role_flicky', 'Composer of Psync and Tea Time\nAnd some sound effects'), 'https://x.com/flicky_i', '9E29CF']);
+		creditsData.push(['KadeDev', 'kade', Language.getPhrase('credits_role_kade', 'Fixed some issues on Chart Editor and Other PRs'), 'https://x.com/kade0912', '64A250']);
+		creditsData.push(['superpowers04', 'superpowers04', Language.getPhrase('credits_role_super', 'LUA JIT Fork'), 'https://x.com/superpowers04', 'B957ED']);
+		creditsData.push(['CheemsAndFriends', 'cheems', Language.getPhrase('credits_role_cheems', 'Creator of FlxAnimate'), 'https://x.com/CheemsnFriendos', 'E1E1E1']);
+		creditsData.push(['ninjamuffin99', 'ninjamuffin99', Language.getPhrase('credits_role_ninja', "Programmer of Friday Night Funkin'"), 'https://x.com/ninja_muffin99', 'CF2D2D']);
+		creditsData.push(['PhantomArcade', 'phantomarcade', Language.getPhrase('credits_role_phantom', "Animator of Friday Night Funkin'"), 'https://x.com/PhantomArcade3K', 'FADC45']);
+		creditsData.push(['evilsk8r', 'evilsk8r', Language.getPhrase('credits_role_evil', "Artist of Friday Night Funkin'"), 'https://x.com/evilsk8r', '5ABD4B']);
+		creditsData.push(['kawaisprite', 'kawaisprite', Language.getPhrase('credits_role_kawai', "Composer of Friday Night Funkin'"), 'https://x.com/kawaisprite', '378FC7']);
+		creditsData.push([Language.getPhrase('credits_role_discord', 'Join the Psych Ward!'), 'discord', '', 'https://discord.gg/2ka77eMXDv', '5165F6']);
 	}
 
 	function createCreditItems()

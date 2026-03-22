@@ -54,13 +54,13 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	
 	// Category colors
 	var categoryColors:Map<String, Array<Int>> = [
-		'Nota Renkleri' => [0xFF666666, 0xFF888888],
-		'Kontroller' => [0xFFE0A32A, 0xFFFF9900],
-		'Gecikme Ve Kombo' => [0xFFAA0044, 0xFFFF0066],
-		'Grafikler' => [0xFF31B0D1, 0xFF00CCFF],
-		'Arayüz' => [0xFF8D58FD, 0xFFAA77FF],
-		'Oynanis' => [0xFF58FD69, 0xFF77FF88],
-		'Dil' => [0xFFFFD700, 0xFFFFEE00]
+		'Note Colors' => [0xFF666666, 0xFF888888],
+		'Controls' => [0xFFE0A32A, 0xFFFF9900],
+		'Delay & Combo' => [0xFFAA0044, 0xFFFF0066],
+		'Graphics & Performance' => [0xFF31B0D1, 0xFF00CCFF],
+		'Interface & Visuals' => [0xFF8D58FD, 0xFFAA77FF],
+		'Gameplay' => [0xFF58FD69, 0xFF77FF88],
+		'Language' => [0xFFFFD700, 0xFFFFEE00]
 	];
 	
 	// Kilitli option için gri renk sabiti
@@ -71,8 +71,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	{
 		super();
 
-		if(title == null) title = 'Ayarlar';
-		if(rpcTitle == null) rpcTitle = 'Ayarlar Menüsü';
+		if(title == null) title = Language.getPhrase('base_options_title', 'Settings');
+		if(rpcTitle == null) rpcTitle = 'Settings Menu';
 		
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(rpcTitle, null);
@@ -146,7 +146,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		FlxTween.tween(titleText, {alpha: 1}, 0.6, {ease: FlxEase.quartOut, startDelay: 0.3});
 		
 		// Subtitle hint
-		var subtitleText:FlxText = new FlxText(60, 90, FlxG.width - 120, "Yukarı / Aşağı = Değiştir  |  ENTER = Seç  |  R = Ayarı Sıfırla  |  ESC = Geri Dön", 22);
+		var subtitleText:FlxText = new FlxText(60, 90, FlxG.width - 120,
+			Language.getPhrase('base_options_hint',
+				'Up / Down = Navigate  |  ENTER = Select  |  R = Reset  |  ESC = Back'), 22);
 		subtitleText.setFormat(Paths.font("vcr.ttf"), 22, 0xFFCCCCCC, LEFT);
 		subtitleText.scrollFactor.set();
 		subtitleText.alpha = 0;
@@ -468,8 +470,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 						bindingBlack.scrollFactor.set();
 						FlxTween.tween(bindingBlack, {alpha: 0.8}, 0.35, {ease: FlxEase.quartOut});
 						add(bindingBlack);
-
-						bindingText = new Alphabet(FlxG.width / 2, 200, "TUS ATANIYOR...", false);
+						
+						bindingText = new Alphabet(FlxG.width / 2, 200,
+							Language.getPhrase('base_options_binding', 'ASSIGNING KEY...'), false);
 						bindingText.alignment = CENTERED;
 						bindingText.alpha = 0;
 						bindingText.scrollFactor.set();
@@ -479,7 +482,10 @@ class BaseOptionsMenu extends MusicBeatSubstate
 						final escape:String = (controls.mobileC) ? "B" : "ESC";
 						final backspace:String = (controls.mobileC) ? "C" : "Backspace";
 						
-						bindingText2 = new Alphabet(FlxG.width / 2, 380, curOption.name + "\n\nESC - Iptal Et\nBACKSPACE - Sil", true);
+						bindingText2 = new Alphabet(FlxG.width / 2, 380,
+							curOption.name
+							+ "\n\n" + Language.getPhrase('base_options_binding_cancel', 'ESC - Cancel')
+							+ "\n"   + Language.getPhrase('base_options_binding_delete', 'BACKSPACE - Delete'), true);
 						bindingText2.alignment = CENTERED;
 						bindingText2.alpha = 0;
 						bindingText2.scrollFactor.set();
@@ -495,6 +501,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				case FILE:
 					if(controls.ACCEPT)
 					{
+						lime.app.Application.current.window.alert(
+							Language.getPhrase('base_options_file_selected', 'FILE selected: ') + curOption.name, 'DEBUG');
 						openFileSelector(curOption);
 						FlxG.sound.play(Paths.sound('scrollMenu'));
 					}
@@ -506,8 +514,32 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					if (curOption.dependsOn != null && isOptionLocked(curOption))
 					{
 						if (controls.UI_LEFT_P || controls.UI_RIGHT_P)
+						{
 							FlxG.sound.play(Paths.sound('cancelMenu'));
-						// Kilidi geç, başka hiçbir şey yapma
+
+							// Parent bool option'ın adını bul
+							var parentName:String = curOption.dependsOn; // fallback: variable adı
+							for (parentOpt in optionsArray)
+							{
+								if (parentOpt.variable == curOption.dependsOn)
+								{
+									parentName = parentOpt.name;
+									break;
+								}
+							}
+
+							var msg:String = Language.getPhrase(
+								'opt_locked_msg',
+								'"{1}" ayarını değiştirebilmek için önce "{2}" seçeneğini açmanız gerekiyor.'
+							).replace('{1}', curOption.name).replace('{2}', parentName);
+
+							AlertMsg.show(
+								Language.getPhrase('opt_locked_title', 'Ayar Kilitli'),
+								msg,
+								4,
+								AlertMsg.COLOR_WARNING
+							);
+						}
 					}
 					else
 					{
@@ -950,55 +982,78 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	function openFileSelector(option:Option)
 	{
-		var initialDir:String = '';
 		var fileExtension:String = '';
-		
 		if(option.options != null && option.options.length > 0)
 			fileExtension = option.options[0];
-		
-		#if windows
-		openFileSelectorWindows(option, initialDir, fileExtension);
-		#elseif android
-		openFileSelectorAndroid(option, fileExtension);
-		#elseif linux
-		openFileSelectorLinux(option, initialDir, fileExtension);
-		#elseif mac
-		openFileSelectorMac(option, initialDir, fileExtension);
-		#end
+
+		StorageUtil.openFilePicker(fileExtension, function(result:String)
+		{
+			option.setValue(result);
+			for (fs in fileSelectorGroup)
+			{
+				if (fs.optionID == curSelected)
+				{
+					fs.selectedPath = result;
+					break;
+				}
+			}
+			option.change();
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+		});
 	}
 
 	function openFileSelectorWindows(option:Option, initialDir:String, fileExtension:String)
 	{
 		#if sys
-		var process:sys.io.Process = null;
 		try
 		{
-			var filterStr:String = 'Dosya (*' + fileExtension + ')|*' + fileExtension + '|Tum Dosyalar (*.*)|*.*';
-			var script:String = '[void][System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms")\n' +
-				'$$f = new-object System.Windows.Forms.OpenFileDialog\n' +
-				'$$f.InitialDirectory = "' + initialDir + '"\n' +
-				(fileExtension != '' ? '$$f.Filter = "' + filterStr + '"\n' : '') +
-				'$$f.ShowDialog((New-Object System.Windows.Forms.Form -Property @{TopMost = $$true }))\n' +
-				'Write-Host $$f.FileName';
-			process = new sys.io.Process('powershell', ['-NoProfile', '-Command', script]);
+			var psPath:String = null;
+			var candidates:Array<String> = [
+				'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+				'C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe',
+				'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
+				'C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe'
+			];
+			for (c in candidates)
+			{
+				if (sys.FileSystem.exists(c)) { psPath = c; break; }
+			}
+			if (psPath == null)
+			{
+				CoolUtil.showPopUp(
+					Language.getPhrase('base_options_ps_not_found', 'PowerShell not found!\nPlease enter the path manually.'),
+					Language.getPhrase('base_options_error', 'ERROR'));
+
+				return;
+			}
+			var filterStr:String = fileExtension != ''
+				? 'Video (*' + fileExtension + ')|*' + fileExtension + '|Tum Dosyalar (*.*)|*.*'
+				: 'Tum Dosyalar (*.*)|*.*';
+
+			var script:String =
+				'[void][System.Reflection.Assembly]::LoadWithPartialName(\'System.windows.forms\');' +
+				'$$f = New-Object System.Windows.Forms.OpenFileDialog;' +
+				'$$f.Title = \'Video Dosyasi Sec\';' +
+				(fileExtension != '' ? '$$f.Filter = \'' + filterStr + '\';' : '') +
+				'$$form = New-Object System.Windows.Forms.Form;' +
+				'$$form.TopMost = $$true;' +
+				'if ($$f.ShowDialog($$form) -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $$f.FileName } else { Write-Output \'\' }';
+
+			var process = new sys.io.Process(psPath, ['-NoProfile', '-NonInteractive', '-Command', script]);
 			var result:String = process.stdout.readAll().toString().trim();
-			
-			if(result != '' && result != '0')
+			var exitCode:Int = process.exitCode();
+			process.close();
+
+			if (result != null && result.length > 0 && result != '0')
 			{
 				option.setValue(result);
-				if(option.type == FILE)
+				for (fs in fileSelectorGroup)
 				{
-					var fileSelector:FileSelector = null;
-					for(fs in fileSelectorGroup)
+					if (fs.optionID == curSelected)
 					{
-						if(fs.optionID == curSelected)
-						{
-							fileSelector = fs;
-							break;
-						}
+						fs.selectedPath = result;
+						break;
 					}
-					if(fileSelector != null)
-						fileSelector.selectedPath = result;
 				}
 				option.change();
 				FlxG.sound.play(Paths.sound('confirmMenu'));
@@ -1008,10 +1063,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 			}
 		}
-		catch(e:Dynamic)
+		catch (e:Dynamic)
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			trace('Dosya secici acilamadi: $e');
 		}
 		#end
 	}
