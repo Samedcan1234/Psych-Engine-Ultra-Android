@@ -3347,7 +3347,7 @@ class PlayState extends MusicBeatState
 			case 'UNL':
 				logoPath += 'UNL';
 			case 'ULTRA':
-				logoPath += 'ULTRA':
+				logoPath += 'ULTRA';
 			default:
 				logoPath += 'ULTRA';
 		}

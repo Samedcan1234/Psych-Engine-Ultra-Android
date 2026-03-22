@@ -28,7 +28,7 @@ class PEUSettingsState extends BaseOptionsMenu
 			Language.getPhrase('peu_logo_style_desc', 'Select the logo displayed on the watermark.'),
 			'peuwatermarklogo',
 			STRING,
-			['V1', 'V2', 'V2U', 'V2UP', 'V3', 'ONLINE', 'UNL']
+			['V1', 'V2', 'V2U', 'V2UP', 'V3', 'ONLINE', 'UNL', 'ULTRA']
 		);
 		option.dependsOn = 'peuwatermark';
 		addOption(option);

@@ -24,7 +24,7 @@ import states.TitleState;
 	public var menuTheme:String = 'V3';
 	public var peuwatermark:Bool = true;
 	public var peuloadingscreen:Bool = true;
-	public var peuwatermarklogo:String = 'ONLINE';
+	public var peuwatermarklogo:String = 'ULTRA';
 	public var peuloadingscreenimage:String = 'ONLINE';
 	public var disableIntroVideo:Bool = false;
 	public var familyGame:Bool = true;
